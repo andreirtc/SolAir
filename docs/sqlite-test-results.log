@@ -1,0 +1,49 @@
+
+> solair-platform@1.0.0 test
+> tsx --test tests/*.test.ts
+
+✔ Unauthenticated private endpoints reject access (704.7177ms)
+✔ Incorrect credentials fail (65.7666ms)
+✔ Drivers see only their assigned vehicle (18.4633ms)
+✔ Operators cannot read another TODA telemetry or location (23.6944ms)
+✔ Drivers cannot access unrelated vehicle histories or messages (15.6586ms)
+✔ Engineering endpoints are role restricted on server (36.839ms)
+✔ Real hardware and demonstration telemetry are isolated (29.4599ms)
+✔ Missing electrical fields are null, never inferred from specifications (1.9528ms)
+✔ Out-of-range and uncalibrated electrical data are rejected (3.0343ms)
+✔ Coordinates require a valid fresh GPS fix (1.0606ms)
+✔ Simulation cannot claim hardware provenance (0.2991ms)
+✔ Serial parser handles fragmented lines and rejects malformed messages without crashing (0.6338ms)
+✔ Serial oversized input is bounded (0.2434ms)
+✔ Energy integration uses timestamps and excludes gaps and null readings (0.2021ms)
+✔ Freshness distinguishes never connected, online and stale (0.1265ms)
+✔ USB bench persists genuine-format MPU, switch and event frames (64.6883ms)
+✔ Duplicate telemetry is idempotent and earlier sequences reject replay (15.8576ms)
+✔ Ingest requires device credentials or authorized bench identity (36.1594ms)
+✔ Wi-Fi credential provisioning and rotation are enforced (31.8446ms)
+✔ Driver SOS persists, operator acknowledgment and resolution persist (88.8741ms)
+✔ Messages persist across users and read acknowledgment is explicit (38.8809ms)
+✔ Bench results preserve engineer evidence without automatic PASS (56.4747ms)
+✔ Operators cannot elevate invite roles or assign foreign users (13.0878ms)
+✔ Invitation creates account once and enforces assigned role (116.6807ms)
+✔ Audit trail is admin-only and records sensitive actions (13.8689ms)
+✔ Foreign-key constraints prevent orphan records (1.0832ms)
+✔ Cross-origin mutation is rejected (19.9687ms)
+✔ Logout invalidates session (17.69ms)
+✔ Transaction rolls back dependent writes after failure (0.7297ms)
+✔ Vehicle registration stays scoped to an organization (36.863ms)
+✔ Invalid image uploads and unauthorized photo access reject (48.4379ms)
+✔ Sensor faults persist once per transition and remain isolated from demo (90.2414ms)
+✔ Configured identity provider rejects local password fallback (406.3469ms)
+✔ Provider identity is bound to a trusted database profile and private session (37.4203ms)
+✔ Supabase-backed invitation keeps the server-assigned role and does not mirror passwords (48.6957ms)
+✔ Password recovery revokes shared SOLAIR sessions without claiming email delivery (31.9256ms)
+✔ Supabase migration denies direct anonymous/authenticated table access (2366.9148ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5210.402

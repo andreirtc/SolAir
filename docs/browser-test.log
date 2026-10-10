@@ -1,0 +1,18 @@
+
+> solair-platform@1.0.0 test:browser
+> tsx tests/browser.ts
+
+Approved white BEMAC image loads
+Map refresh preserves operator zoom
+All operator pages navigate
+Late demo responses cannot overwrite hardware mode
+Real mode has unavailable values and no fabricated GPS
+Driver SOS/help persists, streams to operator and acknowledgment/resolution returns
+Messages persist after browser reload
+Engineering evidence persists; no automatic physical PASS
+Driver unauthorized API requests fail
+390px driver layout has no horizontal overflow
+Offline help is marked unsent and retried after reconnect
+PWA manifest, standalone mode, icons and service worker available
+Logout invalidates browser session
+No browser runtime errors

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+data/
+.env
+.env.*
+!.env.example
+!.env.local.example
+!.env.production.example
+.next/
+*.tsbuildinfo
+next-env.d.ts
+firmware/**/.pio/
+firmware/**/config.h
+test-results/
+.tools/
+
+firmware/**/solair_config.h

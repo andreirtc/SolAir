@@ -1,0 +1,4 @@
+
+> solair-platform@1.0.0 typecheck
+> tsc --noEmit
+

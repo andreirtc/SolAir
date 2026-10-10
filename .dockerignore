@@ -1,0 +1,14 @@
+node_modules
+.git
+.tools
+data
+.env
+docs/screenshots
+firmware/**/.pio
+firmware/**/config.h
+dist
+
+firmware/**/solair_config.h
+
+.next
+.env.*
