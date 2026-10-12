@@ -1,0 +1,930 @@
+[
+  {
+    "file": "START-HERE.md",
+    "sha256": "1B2ABC6115D0CB798F1165BFCADF2C3CF42EA49D1654678D4F3154C9B1E03D5F"
+  },
+  {
+    "file": "cpe\\figma-app\\.gitignore",
+    "sha256": "19A94CB66CE785D236BA133E55A7F3668A59F8EE5DE457F29BD5888D0C840DB7"
+  },
+  {
+    "file": "cpe\\figma-app\\AGENTS.md",
+    "sha256": "A01C51116C9AFC04360919FB367EB25E6D6E3D9A2008684B27A7DEFE5A09B9BC"
+  },
+  {
+    "file": "cpe\\figma-app\\ATTRIBUTIONS.md",
+    "sha256": "7EEF0ED2B6FB8A4D85C6217FBCBEBFDEDC8E4AC286D55920EA8DE35167BAA89F"
+  },
+  {
+    "file": "cpe\\figma-app\\default_shadcn_theme.css",
+    "sha256": "54729CDF634FADD501E3C92429EBFABB3F80553157F35051338CBDA1337C1BDA"
+  },
+  {
+    "file": "cpe\\figma-app\\index.html",
+    "sha256": "57E280597DDB17C7222DAF3205BBB9ADABFC891BEB20FED96724C6946D621CD1"
+  },
+  {
+    "file": "cpe\\figma-app\\package-lock.json",
+    "sha256": "AEE34359A01D90B8BA8357242DD17C8EFF4A8743201574DC55E8AFDC7F1BE975"
+  },
+  {
+    "file": "cpe\\figma-app\\package.json",
+    "sha256": "2A5F95AA18C625B417C924BDB9D86B48F070330340D54775D3AD5B01953D51F8"
+  },
+  {
+    "file": "cpe\\figma-app\\pnpm-workspace.yaml",
+    "sha256": "11C9BA769C156F38B55880EC6E76FE59D8BFE38EBD728B286161E9E73A3DEF59"
+  },
+  {
+    "file": "cpe\\figma-app\\postcss.config.mjs",
+    "sha256": "3BD292996C6442CF7BB3A766E7D512D0AEF81D9DB108933D68D17C9CD715632C"
+  },
+  {
+    "file": "cpe\\figma-app\\README.md",
+    "sha256": "FF47AF44D077C85C75551816C95938CB6D73C3A85BE8CD5A90D37211BAD2BCB8"
+  },
+  {
+    "file": "cpe\\figma-app\\vite.config.ts",
+    "sha256": "3846B313F8EA7F308A86418A6EC2237923AEA38DFDA79A8607E37FB92400DDC2"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\auth.mjs",
+    "sha256": "7B026137326B08338FF9118D503AB8DB222E097BBA11269564E53A99ACE5664E"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\device-csv.mjs",
+    "sha256": "88301F1197C0D67B77308EAB2DEB1BF0FA3465ECA0059A22D73132CF8304E85C"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\device-receiver.mjs",
+    "sha256": "400595A8F0A8B6EA32DA64C12EFFB0FCAABC59802C6E8338B37DAEA3FBC69FCD"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\diagnostics.mjs",
+    "sha256": "F57D54185D2DA7CDF03C1A3E5DFC1CD3E84693FCD1DF41D7D8E4183CFAA2710B"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\hardware-server.mjs",
+    "sha256": "D7A50757C60B40532D40F01188A6227535FF2359ADE68F9881F53184D969620D"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\local-server.mjs",
+    "sha256": "00CE33ADE3AAB12CDAA0C636A8F00B30C0308E6A44667DA4D7031B1C9D5A79CF"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\server.mjs",
+    "sha256": "079B72BDDCD99B37B2C1B547382C8733D0179F39ECE608921CB74CF8B5268F9E"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\telemetry-csv.mjs",
+    "sha256": "DEE7C378DDDB7D2C3BA27E59C8BCA782B5F93C534307267AF0D60DAD9878D76D"
+  },
+  {
+    "file": "cpe\\figma-app\\backend\\telemetry-storage.mjs",
+    "sha256": "8CB36B4B7B84BF6C5A9A1F08C7D2B1CEFB9E4A4ED9D7D6E4535C5B042E0775D0"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\cpe-changes-ai-handoff.md",
+    "sha256": "DE948625980C04BE6D07D1B05D4349F604BE225D1AD49B234BD73E724D6C2CF3"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\cpe-lab-review-guide.md",
+    "sha256": "F74DEC24C7F0CA592EC5D4485EE1399962F2073C3517845116ACFF9FA5245B96"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\dev-local-investigation.md",
+    "sha256": "E60822DE0299E2FCC6C46263BA674E86D5BF841F3952334D4DFECB9C21E88802"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\device-diagnostics.md",
+    "sha256": "E504057CD717D80D0371195886D323A025FE4DB463719FBD9D00A22AF5F2F123"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\et01-cpe-handoff.md",
+    "sha256": "E9EEF2FB82868291691351E6EA241EB47D8249F5ABF9581D062BE5D798AC5407"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\et01-physical-evidence-template.md",
+    "sha256": "883252832C49CB21B21D572F272BF6DEC5E22BC46544EFDC18BC15211ACE6AF8"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\hardware-demo.md",
+    "sha256": "40F8918BC7A8B371EECC67B5F423BF2619B8F80E04031190F43B4896D7A59CB1"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\hardware-software-validation.md",
+    "sha256": "A838B4EEB14EE23E99E94217863CF9EADAD9BD547689AB0B58956B6DED030D75"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\local-authentication.md",
+    "sha256": "5745A2A1787E1FD93649EA9D438802D2781E582087FA16342440132F32B6D3E0"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\software-hardening.md",
+    "sha256": "D281CEC0D9A389ECEBC43E29B143EC4C4518761B448A063B91B2483D3821BF95"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\solair-progress-report-2026-10-10.md",
+    "sha256": "0C7658C52EF8EDAA5F8E4D2C36E4A8F620E470EFE9E82BFC0119F5291B1B895B"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\staged-bench-integration.md",
+    "sha256": "E29B561B5410E040ACEA6FEBF718D8FEB3CABE360655CDD933A340E318ACD94C"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\telemetry-contract.md",
+    "sha256": "E9AF933B7C081080E49A86F167DE9DC322F09E670F16931B213E9F0E1B86F9FC"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\telemetry-field-mapping.md",
+    "sha256": "5AA546257F1E45871B28E0CA85471CEAE521638F1B0370873CAC7C573C4ECAC1"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\telemetry-firmware-handoff.md",
+    "sha256": "65CEF87C2CA1498709EF8DCB675F8DEB6CF857724D020DCFFC74537CB230186F"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\telemetry-review-simulated-v1.json",
+    "sha256": "2A6D54D6AAECB7A9C7BDAF884F56495B2B4D1D18665B820EDB25EF071390268C"
+  },
+  {
+    "file": "cpe\\figma-app\\docs\\telemetry-timing-investigation.md",
+    "sha256": "BA873A2C1A3FD83ED109169A7EA67DAB9C6A60D1C5AD8B9194E82FDDD4BF2594"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\anti-tamper.ino",
+    "sha256": "1E4F795A4B838D5727AE5AEC1F49780DF188F72B8242A9D1B965024BDDC46C2F"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\config.h",
+    "sha256": "05F5385D92AC382D1B7C70E0BB6F1CE74E563187F4ABDA3086D1CD6DF847B1FA"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\durable-ack.h",
+    "sha256": "0419C3ACC343D6B70B7FE785FF11E21C4D1955BB491C7018E0F4D47D61C36058"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\durable-events.h",
+    "sha256": "A817449303EFA15CB5F18D8E9A44A4BD551B47E8A54BDBE827F763772EE4D36D"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\sender-clock.h",
+    "sha256": "6425FA491777438BFDD2601F1FF8D6A99EADEB486062F2947D0C88A379A4C069"
+  },
+  {
+    "file": "cpe\\figma-app\\firmware\\anti-tamper\\sketch.yaml",
+    "sha256": "E09D9D40BD0D0D5201D34F8B0A5F2DBAB01F5586AB72EF13ADA4623BD544F79B"
+  },
+  {
+    "file": "cpe\\figma-app\\guidelines\\Guidelines.md",
+    "sha256": "8A4A52A8FAC382F8B44D2F6B713E9643153BD1C732D34ED323D88CB290829257"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\auth-test-client.mjs",
+    "sha256": "E81867B0CEDCD1C12EEFD1CF2EE808A0E8E4A048ACF08B13505163A424837F16"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-auth.mjs",
+    "sha256": "422313C9BBC526837D5A765A56A661F1D4AAB084DA01F5E1800692E83CAFF61F"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-dev-local.mjs",
+    "sha256": "CBCB12C28B95C89E589C0B21EBB5422B7CB97091CFADA73BA23848CDCD8A165A"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-device-monitor.mjs",
+    "sha256": "3AFF174F938D508C793A222843E7BAA137E04FD6C5206075EA5A156B73921CD2"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-diagnostics.mjs",
+    "sha256": "24E13D391A69B28384B3A794BFDBB8A2655688CCF637A8789463230858EFD3EE"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-firmware-software.cpp",
+    "sha256": "9BFEEA4B818728AC8C09B4A3C14CF12151E9CD577E0F09A1DEB51E0F5CF79775"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-firmware-software.ps1",
+    "sha256": "F3497BE6ED504CFE6D5D4C8F0C4716F9A0D0AC58A69DC377E04CFA5828FCDDE0"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-hardware-integration.mjs",
+    "sha256": "3405ECEF772EC586D71E1EE95A04502718A282B698EE5B577F0632B39793AF3D"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-provisioning.ps1",
+    "sha256": "F139907C6FC0CEA8ABF5B265C73280B52F6772E8CE9DF6547D630687E6571F2A"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-software-hardening.mjs",
+    "sha256": "FAC159AFF9C6D83E9DE9AD124A902CE076960CD9909020EC0D83B2BEF3FF5D88"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-telemetry-backend.mjs",
+    "sha256": "CBCF2FEACBB580C9A09E0A13330942FE8491E020755405EE7FBFEF507EDF5EB8"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-telemetry-contract.mjs",
+    "sha256": "9CE6D9F00C85D60702399E27B61377EC465E45E7A48E111B25FA8492E9F38A02"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-telemetry-simulation.mjs",
+    "sha256": "73B2D697BB667F525313D9177EC033C0791D3333722DF4458FD2A80C48E6F8D3"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\check-telemetry-storage.mjs",
+    "sha256": "44D04C7239CF8F03378910625CF15225C3E964118AA9B98157AE73F6AF5DC75B"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\dev-local.mjs",
+    "sha256": "FB7A5C634BD4A18427860D227DD6C5377FC60A1674DEC3DAF621293F5677CFEB"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\diagnose-telemetry-timing.mjs",
+    "sha256": "62E521CEAE80A9C33EC395BF784E705286F4C929B646B02C20639012AF502669"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\operator-setup.mjs",
+    "sha256": "DBB8132D48033B55C290C155F6AF33AC5FF80C644C7D26CA9ED4EAC0DE8C6DDB"
+  },
+  {
+    "file": "cpe\\figma-app\\scripts\\provision-hardware.ps1",
+    "sha256": "81E37DEC82CA0AD5B3902296D1FB1183904002BB602BF536F488D6AC5A39C381"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\main.tsx",
+    "sha256": "742DD0E155A463ECA612AA674E475950CC58A369C09B467A09B16FFA821A8C9D"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\App.tsx",
+    "sha256": "A635A5EADC83A0806B9E0087BDAB5D4EB4EF380BA9086C5571F7A12FD3C4DA02"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\auth.tsx",
+    "sha256": "E80AA07AA3A7BA882796A88D70BB6B3278510DD772524C6FAD2DC9A678198910"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\AlertsScreen.tsx",
+    "sha256": "15927004642DDB81A8278AA3EF04AD3DA45C46FAEDC86B8294E3708D5606B471"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\DashboardScreen.tsx",
+    "sha256": "6B8ADC4B68EB7D9911DB39B4DCB192289376BEDFFE0AB3D019772C53B3736BDE"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\DeviceDiagnostics.tsx",
+    "sha256": "329BEB664D59829177F6B0766B742F813B423D38DB88D8B06186E106CCF6F6EE"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\DeviceOverview.tsx",
+    "sha256": "5E01C7E01B7710FDFD4719A818B424830490898F483EC421870849A6F7B1D95D"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\EnergyMetricsScreen.tsx",
+    "sha256": "59356B7A9F978F98FBC8A6B9C95AF9667C76B21272EE49F698AD34EB388C9483"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ExpandedMapView.tsx",
+    "sha256": "E67F65BF5DC226407551F0E1367FD4C299F36082E51F59314A1077302394A1E3"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\IntrusionModal.tsx",
+    "sha256": "0A1D2F3FAFDD4DD9B2AFAA09BB383E2FF58088CA65CFE2B06421EFB432882A8D"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\LoginScreen.tsx",
+    "sha256": "68D3EB0B063128DB2B891F4557AC57CBE1CF8CFD34B36A3C0A3FD7EDE4D7D386"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\OnboardingScreen.tsx",
+    "sha256": "C143B06F0F744204B87BE05A66B6BDD7AC62B79AFCA4B127DBC51DCCEE0C78B0"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\PairingScreen.tsx",
+    "sha256": "D885391699F02237851CE528F01D71AE2651CEC168D9614E17D9CD310BEDE6EB"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\RealEventHistory.tsx",
+    "sha256": "71C4AB5EA862E1087333B5DF7BDD9B4809315D977D13344CAD3A7E1442CCAD83"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\SecurityScreen.tsx",
+    "sha256": "7FC538D0F912269DD01CAD12ED5396F07727BEA1817F2E121AAE302DA9CCCC68"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\SMSAlertView.tsx",
+    "sha256": "A4FA093DB1F20373D70C59931515CD2A64A801C5A9E5610F615BDED8D636A811"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\TelemetryHistory.tsx",
+    "sha256": "3996EEB24CBD8BB4592596CA76FFA5CD2E4D95A85D7F2E45F4C4968CCA4D47AE"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\figma\\ImageWithFallback.tsx",
+    "sha256": "79CAAF9D1736698C090823383F7B18A9496E9C1309A40F925C8AEB37E496BD8E"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\accordion.tsx",
+    "sha256": "0FF6FADD3560C21AA67911D817F89D206188FD07BD57244BA59A117BD4FF9CB4"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\alert-dialog.tsx",
+    "sha256": "16F0BF95DE446A8579CBA6E75557FD83EB4AA0DBBC77EE936FBB59451E9390E9"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\alert.tsx",
+    "sha256": "19835C5F03B78E8915B5E8900A0681DDFB83E3BCC0C9930E62F31C01E4DFB129"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\aspect-ratio.tsx",
+    "sha256": "7706745E217BEBBC2D7BDF6697E9C6D484061146AE771755C9B6F240762C7217"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\avatar.tsx",
+    "sha256": "D40B1CBABE71C094C6BCF089AC5702EC77623DBC75C770CA9F86530E03D6FEA1"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\badge.tsx",
+    "sha256": "8329A0B50F818665F1ACA05AB93C16B103178B463F2949234EE4416BBC7D3FE2"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\breadcrumb.tsx",
+    "sha256": "C9FCF4DF692C80C06CCC38C32F7045D1F389197C503EDAC32941CDE64BADA62E"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\button.tsx",
+    "sha256": "A3F96150FDF0C929EEC3759673CC34B2CF5538FC088B25A54C00E0A3ED1C3F60"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\calendar.tsx",
+    "sha256": "280BA2B6416BB46259762FBB0068C61E93F186242516A10C2F319D484B09485D"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\card.tsx",
+    "sha256": "AFC99CFA090791E394E68766095A4A86F5F6140521546B32D4B298061D72473F"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\carousel.tsx",
+    "sha256": "5FFDDE6336F0EE479C11255F3B951B230A1771F0080323F4DD0DEF03D677F50C"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\chart.tsx",
+    "sha256": "E3E14AC980CE857EDDA5414CEAF8D7E504B5BE37A4D99C28FF67C4C2535F51FF"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\checkbox.tsx",
+    "sha256": "894EB30992723A15E3AE75C46A3BF8808A526F5B3BFF2C61C78F4D3E8D521CB8"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\collapsible.tsx",
+    "sha256": "B763764EBCED561C04E2E6ADA9DC53375BB90B9F4BCB91B0F3D5DE7381AAF0CB"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\command.tsx",
+    "sha256": "17AE21889928AEB0C042911153B7F0715BF537B190DA31F16FC5798B9439AA2F"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\context-menu.tsx",
+    "sha256": "E17A7028F18669DDD104E0F40FBB0110EBAB0CFC89AD6910A43D2DC8539E7C22"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\dialog.tsx",
+    "sha256": "F4ADC0065A7F795B5D99B8AFE095A443D2D03B523CF5F958BC36EE7FBE0D3E45"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\drawer.tsx",
+    "sha256": "5A99D073185E0EF6D984436547DCE1F99C333DDE7C1D7F33A2155DCE05216514"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\dropdown-menu.tsx",
+    "sha256": "798B5337DC147D88C65DE01F7221E0BFA04272968A1FCE6ACC1EC0BEF7D9DDB9"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\form.tsx",
+    "sha256": "B181A640358BD91B827F7E3BA610036F24A976994D4D88B480471A167770A508"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\hover-card.tsx",
+    "sha256": "6EC1EF98AEF3898EF3F8EB35E52C10ADD150D76CD041132D2520FE3016ECFE60"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\input-otp.tsx",
+    "sha256": "B15B03F71841B176BAA6E0294A0790EEA1FFE9264C55003FBBC9039D8457057B"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\input.tsx",
+    "sha256": "CB82FFCD1A9ACCDF9B07EDC8E976F43AD1C9CF91968FFD7639DF5DF14B7AD407"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\label.tsx",
+    "sha256": "5ED157F039340CEDAA59A888931DB608667827170AE9538513A50CCF2CA65A9F"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\menubar.tsx",
+    "sha256": "1F0173397DAC560A4748782BB595C956155A9360755667BEE3D18C4A0F1179B1"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\navigation-menu.tsx",
+    "sha256": "DF9F6E0C1D3FB1B265F8561EF00C98412F24A360A00CB7935B7C6F9A0D7513E6"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\pagination.tsx",
+    "sha256": "10BAD2279EA5120ADE645A1A834ED74F2471CDE0FE7F3E9457FCB4918B7D0BC3"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\popover.tsx",
+    "sha256": "F14E16BEBCFB1B605F6336D52153E43B76456C419930FAEA216D0CE2E3B1D3B7"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\progress.tsx",
+    "sha256": "956CF4B485BCF57684CAAC10DF2AA2A72387D0736D8F4CD1315C49EBD2DA4615"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\radio-group.tsx",
+    "sha256": "ECAEEBB62D064893C23E7242B796FF5834E2B430676B3EECB1B3D4BC413283C8"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\resizable.tsx",
+    "sha256": "7930ED39D1095DE95193BB72EF046B8198647E1114D9A437AA1CD04C0975C5A8"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\scroll-area.tsx",
+    "sha256": "5BD9BB1D6909467B431283E96D2A9C83003BCA1AA043D149DCFED8E81DE51986"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\select.tsx",
+    "sha256": "6AAF2111952394FBB8C64A505AF02D08DA28CC25726D61A991DAEBE400772480"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\separator.tsx",
+    "sha256": "54CC34FC3EF7E445948C5BCCF7307EFBB2C8F9E63DB0FC68DD3FA8EE54DC9812"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\sheet.tsx",
+    "sha256": "8E1E064F92E2463BC7B8BB227A7C4D68D7464837C02D48FF75A87585D864C54C"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\sidebar.tsx",
+    "sha256": "24E197A06698AC0606E99B3AB9E7C31E9544E759EB929D22F37EA15391CAE1C1"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\skeleton.tsx",
+    "sha256": "7FD5D7F3EA479C3C1AE7BE79BDBAF84C87647333768F70D396CD84580535D485"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\slider.tsx",
+    "sha256": "19DD9D8B758F41FA61967D1A0540EA34ED989727258D23EEF9A50CDEBCAB805B"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\sonner.tsx",
+    "sha256": "C5853F16CC11CB69E0115BAB13EEABE7BE5DAD16FAFD77B35CDFE4DBC64F0256"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\switch.tsx",
+    "sha256": "D4C744131C6161300510909AAFE2C2CB6D819F2C7A8C2AEB75D4317004C7EFF7"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\table.tsx",
+    "sha256": "E4EC7D3BE042EFD0FA363A57DD0E649A7831B86F975D4EC5192EBBFDD66E0F95"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\tabs.tsx",
+    "sha256": "933B8F421BD84B21A22E3FD11CD62FBF4FD8B6FB7252F42EA706B9CD29255051"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\textarea.tsx",
+    "sha256": "6C3127C28BA1DDA0428BA286A9E291C52AD95BFC8ACD10518B262B71E470F3E7"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\toggle-group.tsx",
+    "sha256": "43E56C5487ED93A2E0D418DCF944A646C716B8C8C55D050FCDA1D5CD1248CCE6"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\toggle.tsx",
+    "sha256": "31F91BCA26BED6BC884E3DBEBE095046D4CF925B9D7676094721AC287D0B2135"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\tooltip.tsx",
+    "sha256": "2F3A8720FB4B75C6911450BE73D0407E2A84BB5EA1DED28CCDBF955BE62A0155"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\use-mobile.ts",
+    "sha256": "738D8E4520EDECA7CAA2CA56A4923839E30BE14A00FC32B5A770F5D5B451A63E"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\components\\ui\\utils.ts",
+    "sha256": "D1F1E0D62CB8D8D1E04C26E14DE842D8A151F75812D81B046C65B5D1FE8E4B27"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\app\\hooks\\useSimulatedTelemetry.ts",
+    "sha256": "0D12F746E669D2DD85DB49DD36BE07C46E485422E9B3F86A25F33B0B0748FCDF"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\imports\\6383990d-0308-4d3d-85d1-96f1f5145c7b.jpg",
+    "sha256": "7782854B9C2B35E567F75B2B9B2CF852BF10EBF42CBB609E1C3E921337DE2C1E"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\imports\\Icon.png",
+    "sha256": "5B114DBDD450CCDF80CAC4F95E114DB3E3D12CA698F73DEC3FB2F09FC057D9B7"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\imports\\SolAir.png",
+    "sha256": "C2E3AB13D628F211824E9861D2ECAD85B29E39BA897C9A6E30F0ADC5F625BFD0"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\demo-mode.css",
+    "sha256": "D697863712DE94D2561430C9A099AAD87D05272F5C2948ECBF54B17FED2ED1CA"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\fonts.css",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\globals.css",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\index.css",
+    "sha256": "9CF0C73C5A7251C9E1F087665C7936FB39A0EE7641CAE20CD4B18955A32ED099"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\tailwind.css",
+    "sha256": "C7DDDB734B0C9E3CFAA6698CD725F018B8A5E41F847AE42FD9B0269D44EE9FF4"
+  },
+  {
+    "file": "cpe\\figma-app\\src\\styles\\theme.css",
+    "sha256": "77E7283F7455F940A9BED88FB48E1BC4AFFE2BAF316FCCBC50AD14E4CCC46C70"
+  },
+  {
+    "file": "cpe\\firmware\\.gitignore",
+    "sha256": "16F96741C442FA5B947F88D1BCD361DF31D979EEB44D2DCC1149F8E1106A35DF"
+  },
+  {
+    "file": "cpe\\firmware\\arduino-cli.yaml",
+    "sha256": "CA51EA222538890913C52422C236D50FEE0DD527127702824B6037DE0E2848E6"
+  },
+  {
+    "file": "cpe\\firmware\\build-mpu6050.ps1",
+    "sha256": "8DB2D3E2E9DC727CB8A99C440B2531960ABB34CA62F8C8D90EC7CEDBE5973BFB"
+  },
+  {
+    "file": "cpe\\firmware\\BUILD-RESULT.md",
+    "sha256": "052A5676CB87A30B8DD28D580EFF439EB009A6B1B91633BDFD4EDF8AEAE047CE"
+  },
+  {
+    "file": "cpe\\firmware\\build.ps1",
+    "sha256": "F2BE7B4E5A096C84A908FC817E50F9256189A455B840E034C9A63E1A2FA6ADC9"
+  },
+  {
+    "file": "cpe\\firmware\\MPU6050-BUILD-RESULT.md",
+    "sha256": "137FE4A5105D33B29F2235AF9F1173EA43FD0AAE8B55C28349BD0F4E7DB31C45"
+  },
+  {
+    "file": "cpe\\firmware\\MPU6050-HANDOFF.md",
+    "sha256": "E8B4358EECBEDC470768EE6B809F8EF329F1F69CC0524286E2D863609FCF6847"
+  },
+  {
+    "file": "cpe\\firmware\\README.md",
+    "sha256": "3805B9DDBCFCF7289E0C7A3646201569200F53489C96E8AA2B0BF6A660250173"
+  },
+  {
+    "file": "cpe\\firmware\\mpu6050-diagnostic\\diagnostic-config.h",
+    "sha256": "234BA075D27B19BBE1806B68EEDC0E58AF86408B71B163829B2990F772E3AF0A"
+  },
+  {
+    "file": "cpe\\firmware\\mpu6050-diagnostic\\mpu6050-diagnostic.ino",
+    "sha256": "8DD48CDCB94EA5BCB2EDFC018538B7B00DB3D1733D0C9CB01EE6D2EED148A287"
+  },
+  {
+    "file": "cpe\\firmware\\mpu6050-diagnostic\\sketch.yaml",
+    "sha256": "73E0C72FBE02BCE847F3804882BF4A3C620DD7044F949F31615095C0C5CADB55"
+  },
+  {
+    "file": "cpe\\firmware\\serial-test\\serial-test.ino",
+    "sha256": "C9562D1069BA584342A91D230DA52328653AD24B3D4383435DBFCCC065097F71"
+  },
+  {
+    "file": "cpe\\firmware\\serial-test\\sketch.yaml",
+    "sha256": "165650B38C212A4D2ACB18ADEF05C1F6038EB55D3C3A0BC4A06C4654E3C9FF04"
+  },
+  {
+    "file": "next-platform\\solair-platform\\.dockerignore",
+    "sha256": "9D1CDF30E10BC6A70551B025BA00A06CDEE6194785A99AB793A27A93399BDEA8"
+  },
+  {
+    "file": "next-platform\\solair-platform\\.gitattributes",
+    "sha256": "0DED296E877D1B2A383EC19FEEE9B1536073A064A02E90A23F4A62D84BDEF214"
+  },
+  {
+    "file": "next-platform\\solair-platform\\.gitignore",
+    "sha256": "A311544290785082C4A8CEF550526B24B456576409394EC2E4B0C0F17378E5A2"
+  },
+  {
+    "file": "next-platform\\solair-platform\\Dockerfile",
+    "sha256": "C0B1507F5BF38EF7EDD73B30FE7F63901A29E40151BD649BC747D97A44FBF9D4"
+  },
+  {
+    "file": "next-platform\\solair-platform\\eslint.config.js",
+    "sha256": "BACEE904084128EE4D2DEB20CB66D18A22E997415494EEEB463D41E2B3D5D6DD"
+  },
+  {
+    "file": "next-platform\\solair-platform\\next-env.d.ts",
+    "sha256": "1B59D4C6B83807DB275D43F3CF2CC8E9323F465FAB764EEA091CC5BECD5BAD37"
+  },
+  {
+    "file": "next-platform\\solair-platform\\next.config.mjs",
+    "sha256": "E4F628D97A703C2652CAEF6E450D78CCC9E8F1C743C3BA07A882CB4F15059301"
+  },
+  {
+    "file": "next-platform\\solair-platform\\package-lock.json",
+    "sha256": "2AC05B83D7D1DC8F6B4ECAF441635BBAB2B3AC4291E343D9944C84252ED8263B"
+  },
+  {
+    "file": "next-platform\\solair-platform\\package.json",
+    "sha256": "315805F2D4547B50A896AE3BBE2EAB595195DFCE3752F4FB01D86A5D305E5AD5"
+  },
+  {
+    "file": "next-platform\\solair-platform\\railway.json",
+    "sha256": "ED4D0FE1F979AD134DA36886219777656A6029BA1EB5FE3AD24F0B24ED727670"
+  },
+  {
+    "file": "next-platform\\solair-platform\\README.md",
+    "sha256": "275904CA31AA6341FC28B12267E444210F80AFA1A698AE665A934A2150F1AE47"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tsconfig.json",
+    "sha256": "4D94675A792CDB8561E8430CD2A506ADACC2E9CEF82E64E0DF8A2DCE7BFC10CD"
+  },
+  {
+    "file": "next-platform\\solair-platform\\app\\ClientApp.tsx",
+    "sha256": "25787ECED764A3DE81356D6B2825F5763C31A8CC1F39A7BA384EDCBBC24FC74D"
+  },
+  {
+    "file": "next-platform\\solair-platform\\app\\layout.tsx",
+    "sha256": "58F8E34D3A4376874361C94E6BA4E587CC5FD8F52D275AD950FCE0B60A13B1DF"
+  },
+  {
+    "file": "next-platform\\solair-platform\\app\\[[...path]]\\page.tsx",
+    "sha256": "F5D42E3AFE76FBA8692686DBFE35637AA7CCBC045FFCA50A770C671F92A2686E"
+  },
+  {
+    "file": "next-platform\\solair-platform\\assets\\vehicles\\bemac-reference.jpg",
+    "sha256": "653F30618C64B81E4B215301C8F3DA529E1900A029202B8CAA623C9B1CF76A2D"
+  },
+  {
+    "file": "next-platform\\solair-platform\\assets\\vehicles\\README.md",
+    "sha256": "214A729A45819586688B43FC25B25B359F49D788A54D8DFE3249DCF73C8FF58C"
+  },
+  {
+    "file": "next-platform\\solair-platform\\backend\\migrations\\001_core.sql",
+    "sha256": "CDE24F7B42BCEAEEA2E4B41FDA67EF0A9C6DE7B92A30FF01688F8F04D275DE5B"
+  },
+  {
+    "file": "next-platform\\solair-platform\\backend\\migrations\\002_supabase.sql",
+    "sha256": "485F311BD8E005F4BA74AFD6F2EB0CFD0B7B319A14620A3FBFF35E359DCE2AA7"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\ARCHITECTURE.md",
+    "sha256": "8346ECA9B26065A4A3250CF4308147CCC389E8021F89B35CDC75BA4DC4230BB3"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\browser-results.json",
+    "sha256": "088604AABB8ADF7709C0290DCAF4F76D0987744670E92F4987D897931EB99418"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\DEPLOYMENT.md",
+    "sha256": "ED6F9F4C3A09C92040DCDBDBFFE69C326CC2AB4AC888097F24A591C76CC666BE"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\HARDWARE.md",
+    "sha256": "F207B655BAFC332683F7F628EC1427D5F3325E42B34A01F108EBB3ABC70C8220"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\pwa-results.json",
+    "sha256": "266F034949A9970067B29A743CC28CCDBCB3CE5177277B4CFDAF0532A6DC6AC9"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\RAILWAY_SUPABASE.md",
+    "sha256": "3AD767BF59A70A554D00EAC5750E77279FAC8043497BDB7903642BBB8ADAF42B"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\RESUME.md",
+    "sha256": "79539E9249250143D144C8B7D797415FE143CB8AAFBED534F7251C33C2E8467A"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\TELEMETRY.md",
+    "sha256": "32A969F34B8D82A804811F0D66548EFDCD6BB11BE4A382E1EBBCD86E938ED2FD"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\VERIFICATION.md",
+    "sha256": "9C004F8BC3DFC6A302D7D1381262D209D637E296CCD1C8D5E662233D34FC95CB"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\screenshots\\cpe-lab.png",
+    "sha256": "674B5D4F6159BB7592F3B2BB9240C8C6CF095D55778B4A6BD015F0087FEA51D5"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\screenshots\\driver-real-mode.png",
+    "sha256": "45FCCF7B12EDA513EC68A1EA5AD4A239998CDC58984B4A0EB647E21FE291D0B5"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\screenshots\\driver.png",
+    "sha256": "1C9292C949712F03E7E7E4825E25C1C3CC583DEF6964CCAB4FFF6CB0F335AB92"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\screenshots\\offline-shell.png",
+    "sha256": "F68BBC2D7213EF110FB356D064B1B7FF9F121FB2FAF30BF47730F471D8680C69"
+  },
+  {
+    "file": "next-platform\\solair-platform\\docs\\screenshots\\operator.png",
+    "sha256": "D6E2432BFDAC88C0D4BDD87E44CA8210C316A380DC56EDD96700932F687CE229"
+  },
+  {
+    "file": "next-platform\\solair-platform\\firmware\\esp32-solair\\platformio.ini",
+    "sha256": "B28E6B944EC57037A4079D205440EED1AB1C2A60BDDA0498BC8EFCFD3EF318F1"
+  },
+  {
+    "file": "next-platform\\solair-platform\\firmware\\esp32-solair\\src\\config.example.h",
+    "sha256": "58C3488C2F27E5F12DB75F96D5A96B432C0067B02E7A7694CDDF3ABA67ADCEBE"
+  },
+  {
+    "file": "next-platform\\solair-platform\\firmware\\esp32-solair\\src\\main.cpp",
+    "sha256": "0C382BC53BF6D427DE6E1470E89800181BFC403FD55B972592B687C751B99AC9"
+  },
+  {
+    "file": "next-platform\\solair-platform\\firmware\\esp32-solair\\src\\sensors.h",
+    "sha256": "7A47CFA120B8DCF1AC2A7FAC9B5B14DFAA943A5C7C6FF2F56E7CAE8D16933FB4"
+  },
+  {
+    "file": "next-platform\\solair-platform\\packages\\forecast\\index.ts",
+    "sha256": "B05CD90C86C69A6A52DB3CED375F86E2BAC1459C6984833F6A85372192993A87"
+  },
+  {
+    "file": "next-platform\\solair-platform\\packages\\telemetry-contract\\index.ts",
+    "sha256": "DF352C9EF9A3122C977143ADBC216605659B6AE9BB64B3113EA350CA7EB17DF3"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\bemac-white.png",
+    "sha256": "C859AFEA54764616CBC8B7A767D4DD3AAD2AFC6826E096CFD8173AD254AF978B"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\icon-192.png",
+    "sha256": "9EF7AB1834D4B932AAAD805232D3CB5F8F14A1B13ED75E4C5D94CF39A026DDAE"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\icon-512.png",
+    "sha256": "AA009041BF1A619472F10D9B2A78B5FA2F0E820566CED360490A6E046B410EE0"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\icon.svg",
+    "sha256": "47AAE37327BBE550A1F4372FB0707DC22C7A6906F23797435D26DBF06DA1441F"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\manifest.webmanifest",
+    "sha256": "4FFA9D8DEF4F2F90E3721CF84DCE71C40D12446461F4E7AB99A1E81EB42C3DEC"
+  },
+  {
+    "file": "next-platform\\solair-platform\\public\\sw.js",
+    "sha256": "021E0B52A7C75AA76AB5EBAD50DF563DE08AE4CE40DEE6E79797343526A7C9E5"
+  },
+  {
+    "file": "next-platform\\solair-platform\\scripts\\finalize-build.mjs",
+    "sha256": "B4B064D96BD3A467AFAB35D9372A253BBA4A4BC87869CD7FF9D3E4BD1C664BEF"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\app.ts",
+    "sha256": "63B9B7AB2DB562EA4C4445646EA9DC45F3CC4D9806BAFA3069CB3D5A2A6A0CEC"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\auth.ts",
+    "sha256": "03AD21D56C1862CD9AACE6FE4DB0DE77294EC1FA09FC0F676C6D9B3D3114B2FF"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\bootstrap.ts",
+    "sha256": "ECABDA8B03428D503CE5D6BA2812DCBFC84C486AFBD8D309A82B40505D6B6503"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\db.ts",
+    "sha256": "7374F7BD434217483ADCFCD820AC626FB4D5E8082D9992DC11F7E54AF2879E59"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\env.ts",
+    "sha256": "23C238CE8A83CFBF201636EDFDC07D945541D9291B634E4ED96910D763380BBD"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\health.ts",
+    "sha256": "D5DABF68283016689EB25F4C44EA8D901CE4E093CB9FE6F7EE3734C6F27BDC56"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\identity.ts",
+    "sha256": "532342766C253F78498C54C17B02B9E216ACC164D4B3959E7C8DB1D26262C4A8"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\index.ts",
+    "sha256": "7B3C8D2D4675D31585A5C3D3A8B39CC0EF40C86FE91131D2AACE4B6B2720E315"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\migrate.ts",
+    "sha256": "7311856824BDC2B90918D6DEF03595BC8ADFBE8D0E0A453CB3AF2B054C9CDEEA"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\retention.ts",
+    "sha256": "7952EFBE10DCB9F0AF0675AE9CDF88B121310F5719882C367E3BFA22A6B6F70E"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\seed.ts",
+    "sha256": "3E0A8C69851642F66C159BFADB1A54C94B29FB1A5A11261DAC9ED709889C7421"
+  },
+  {
+    "file": "next-platform\\solair-platform\\server\\supabase-realtime.ts",
+    "sha256": "3F79B239DA965A834E6E4237D509BAE60C6E103D11C32F9E840CE1EDB84C2A5E"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\api.ts",
+    "sha256": "DE2EBF6E78EFC3B456E1985ACD7248B04432AA20FFCA128CEB2CC51B5F18682E"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\bench-guides.ts",
+    "sha256": "56323FD78767BBF6243348EB91068F7B18182D08107C4FEE73980CB6CB538949"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\FleetMap.tsx",
+    "sha256": "8A0A93875826DF69B3EDF25D0A19C71EA587C102A70A47BFDF68FC66316F1056"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\Lab.tsx",
+    "sha256": "35D24BB5D62109B5B2F0F18B790904FD8D2D19EB9B57C707F7D014775A79D8FB"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\main.tsx",
+    "sha256": "E1E2B11134CCD3FEDF3627AB1FF5010777707DFF54643E866BAF946CBC0560C8"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\PasswordRecovery.tsx",
+    "sha256": "0E2219148D692878E9C477AC556F3B7F63DBF0A3533CDD508E7667F3C1B999C4"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\Serial.ts",
+    "sha256": "C4F9035E5FBDD50129CE3B5E1AB2AA9A80829FD1CDC85E0BFCCA5941091BB41A"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\style.css",
+    "sha256": "026F2C226E0754A23E79173D69CFC04DF31DF58EEB3F6841F7352E792214D50F"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\types.ts",
+    "sha256": "73D06C4E8C8C7E7500A1FBE706AB465223C831C0CD91F7FFD37551DF2A86EE8E"
+  },
+  {
+    "file": "next-platform\\solair-platform\\src\\VehicleVisualization.tsx",
+    "sha256": "23C5A4419BA93608EECAECE5AD7B7E16CE4E5A56D1D9B9A82D88ED77B4F3D161"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\browser.ts",
+    "sha256": "9DA64C145CB591A610509CF03D10752CE6AA1F9D6D8F728260FEB9ACBABBAFA9"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\cleanup-fixtures.ts",
+    "sha256": "D7D7FBC6109AF63346FB057535890C3A2C4D1DCD8D504E531A58ACAAF145972F"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\core.test.ts",
+    "sha256": "380C01DE7CBB76CB17184E6A619D46C8F5B43EADECC1DFD1804E2DFA603DA660"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\postgres-store.ts",
+    "sha256": "59B6E114DA81A79EBD023CB761B0923D4A85468EF82554BCA21DF2F8B5B3A153"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\preview.ts",
+    "sha256": "A5CB2ED62D9A0E1C700ED415422465EE1AFBD293B018016D2B17FE7C8AF4E23F"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\providers.test.ts",
+    "sha256": "4DD1C17AFAFA38CB883C4D291A8D6BEC2F7373E9D519B07F7A2EA2E18D2CEE1A"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\pwa-debug.ts",
+    "sha256": "BEAEDECD510FB7B71E15155591FEE945CD6CEE5CD6CD650B21618D668D933469"
+  },
+  {
+    "file": "next-platform\\solair-platform\\tests\\pwa.ts",
+    "sha256": "1A32A1C22984C887A858B5ED969EE78A7455DD76132396E537F3C599847D3AAC"
+  },
+  {
+    "file": "review-evidence\\browser-desktop.png",
+    "sha256": "8BC7F5B047DC07ADEC785F646A83E8AA83A47A5A18B9AD0456EC4C00FB16C4CA"
+  },
+  {
+    "file": "review-evidence\\browser-mobile.png",
+    "sha256": "CA7852383E5D8DD9AFF5D6AABA0B6DD4786FEAB13BACB2CE316490C30A248C54"
+  },
+  {
+    "file": "review-evidence\\browser-results.json",
+    "sha256": "4BFF50A1C8A6611E829E1228CB26548F81EFFA2D8C263629B4DD9E2BB0240CD9"
+  },
+  {
+    "file": "review-evidence\\fixture-export.csv",
+    "sha256": "2C4C9623FDF14115E54B34404A4BD3DD728682C388D45157A5E611E4DA6BF0CB"
+  }
+]

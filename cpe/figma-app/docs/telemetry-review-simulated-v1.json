@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "source": "simulated",
+  "deviceId": "ET-01",
+  "sessionId": "0479ebcc-69cd-44ee-a282-6341ebbeafe3",
+  "sequence": 242,
+  "sampledAtUtc": "2026-10-08T06:10:36.935Z",
+  "batteryVoltageV": 53.2,
+  "batterySocPercent": 78,
+  "timeToEmptySeconds": null,
+  "solarPowerW": 374,
+  "windPowerW": 135,
+  "latitudeDeg": 14.6549,
+  "longitudeDeg": 120.9668,
+  "gpsFixValid": true,
+  "securityState": "ARMED",
+  "speedKmh": 24,
+  "electromagneticBrakeActive": null
+}

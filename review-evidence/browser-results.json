@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-11T08:33:18.520Z",
+  "environment": "Isolated built frontend, temporary SQLite/auth/device state, TEST FIXTURE only; no physical hardware",
+  "results": [
+    "Anonymous diagnostics rejected",
+    "Actual browser login and fixture source display",
+    "Receiver enabled without readings stays NEVER CONNECTED",
+    "Real-mode synthetic diagnostic controls absent",
+    "SSE displays accepted fixture vectors/switches without inventing physical proof",
+    "Fault keeps last good vectors explicitly OUTDATED",
+    "Persisted fixture event appears in authenticated browser history",
+    "Browser v2 CSV download works in isolated fixture database",
+    "Four dashboard tabs navigate",
+    "390px horizontal overflow: false",
+    "Reload retains fixture session and stored event",
+    "Browser logout revokes API session",
+    "No browser runtime errors"
+  ],
+  "errors": []
+}

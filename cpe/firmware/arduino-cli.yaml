@@ -1,0 +1,9 @@
+board_manager:
+  additional_urls:
+    - https://espressif.github.io/arduino-esp32/package_esp32_index.json
+directories:
+  data: C:/Users/Anyang/SolAir/firmware/.arduino/data
+  downloads: C:/Users/Anyang/SolAir/firmware/.arduino/downloads
+  user: C:/Users/Anyang/SolAir/firmware/.arduino/user
+build_cache:
+  path: C:/Users/Anyang/SolAir/firmware/.arduino/cache

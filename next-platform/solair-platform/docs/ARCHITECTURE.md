@@ -1,0 +1,22 @@
+# Architecture and boundaries
+
+One Next.js/React PWA and its custom Express API serve driver, TODA operator, engineer and platform administrator. API authorization filters each request using the authenticated profile's organization and, for drivers, vehicle assignment. Engineering routes require engineer/admin; operator account updates cannot elevate roles. Sensitive mutations write audit logs. Sessions are hashed random tokens. Hosted passwords are managed by Supabase Auth; local development uses salted scrypt. Device tokens are independently hashed and vehicle-bound. Locations are private.
+
+PostgreSQL is the intended central relational store. SQLite supplies one local development store with the same queries/constraints, never an independent per-user database. The backend adapts `?` parameters to PostgreSQL `$n`. Relational foreign keys, mode constraints, unique replay keys and indexes are applied from tracked SQL. Persistence includes organizations/profiles/roles, invitations/sessions, vehicles/assignments, devices/firmware reference, telemetry, source energy measurements, GPS, security alerts, help requests, vehicle conversations/messages, bench sessions/results, calibrations, vehicle images and audit records. A conversation is the authorized vehicle-scoped message thread; a security event is also the persistent acknowledgment item. Sensor health and firmware are stored with telemetry rather than redundant unverified records.
+
+USB receives genuine serial JSON in an engineer browser, validates it with the shared schema and forwards it to the same receiver used by credentialed Wi-Fi. The raw received payload is retained. The server computes power and discontinuity-aware energy, preserves GPS only with a valid fresh fix, deduplicates security events and emits organization-scoped SSE invalidations. Clients then fetch their authorized records. The offline monitor persists lost-connectivity alerts only for devices that previously reported hardware frames; a never-connected device does not become a fabricated alert.
+
+The firmware calibrates a rule-based MPU baseline, debounces microswitches, controls a bench alarm locally, and queues frames while a separate FreeRTOS task performs Wi-Fi/TLS retry. No machine-learning accuracy is claimed. The alarm's GPIO state and physical siren verification remain separate. There is no remote traction, propulsion, brake, battery-contactor or charging control.
+
+## Extensibility
+
+- `VehicleVisualization` accepts a per-vehicle local asset or authorized uploaded PNG/JPEG/WebP. Default is the owner-approved white BEMAC reference-based render. Future vehicle models can extend vehicle metadata and labels.
+- Add independent current/voltage transducers by extending the versioned contract and sensor drivers. Assign each sensor to its physical measurement side; do not reuse PV current as battery current.
+- Wind data is supported by telemetry/source-energy storage but remains unavailable until commissioning. Add a verified wind adapter without changing roles or communications.
+- GPS and LTE are modular. The initial LTE AT diagnostic is not packet transport; implement verified SIM/PDP/TLS support only after carrier-board electrical validation.
+- `packages/forecast` requires a validated model/version/report. Its default is unavailable. Future SOC/remaining-runtime predictions need measured battery behavior, calibrated pack instrumentation and holdout validation (including MAPE where appropriate).
+- Supabase migration enables RLS and revokes direct anonymous/authenticated table access. Server-side Supabase Postgres Changes publishes operational invalidations to authorized SSE clients; private credential tables are not published. Larger deployments still need a distributed rate limiter, more pagination, and configured SMTP/push providers.
+
+## Production limits to address before wide deployment
+
+Railway + Supabase is the deployment target. Identity is proved by Supabase at sign-in, then private eight-hour sessions are stored in shared PostgreSQL. Server-side realtime relays authorized invalidations across replicas; rate limiting remains per process, so start with one replica. Supabase connectivity has not been exercised without accounts. Device retry storage is bounded. Backup, SMTP/push, TLS and separate-device commissioning remain configuration/verification tasks. Calibration provenance identifies who reported a value, not its physical accuracy. This research platform is not a certified vehicle safety system.

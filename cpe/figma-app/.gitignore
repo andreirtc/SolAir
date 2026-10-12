@@ -1,0 +1,17 @@
+node_modules/
+dist/
+/data/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+firmware/build/
+firmware/**/secrets.h
+.env
+.env.*
+*.pem
+*.key
+*.log
+Microsoft/

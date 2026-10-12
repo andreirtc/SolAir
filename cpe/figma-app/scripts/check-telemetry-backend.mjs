@@ -1,0 +1,94 @@
+import { createTestOperator, testLogin } from './auth-test-client.mjs';
+﻿import assert from 'node:assert/strict';
+import { createBackend, writeSseFrame } from '../backend/server.mjs';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { demoTelemetry } from '../src/app/data/demoTelemetry.ts';
+import { createSimulatedMessage, getSampleStatus } from '../src/app/data/telemetrySimulation.ts';
+import { applyBackendState, emptyBackendState } from '../src/app/data/backendTelemetry.ts';
+let clock = 0;
+let writes = 0;
+let disconnected = false;
+const slowClient = { destroyed: false, write() { writes++; return false; } };
+writeSseFrame(slowClient, 'state', res => { res.destroyed = true; disconnected = true; });
+writeSseFrame(slowClient, 'next', () => {});
+assert.equal(disconnected, true); assert.equal(writes, 1);
+let id = 0;
+const timers = new Map();
+const schedule = (fn, delay) => { timers.set(++id, { fn, delay, next: clock + delay }); return id; };
+const cancel = key => timers.delete(key);
+const advance = duration => {
+  const end = clock + duration;
+  while (true) {
+    const due = [...timers.values()].filter(t => t.next <= end).sort((a,b) => a.next-b.next)[0];
+    if (!due) break;
+    clock = due.next; due.next += due.delay; due.fn();
+  }
+  clock = end;
+};
+const allowedHosts = [];
+const directory = mkdtempSync(join(tmpdir(), 'solair-backend-'));
+const databasePath = join(directory, 'test.sqlite');
+const authDatabasePath = join(directory, 'auth.sqlite');
+const credentials = await createTestOperator(authDatabasePath);
+const backend = createBackend({ localDevelopment: true, authDatabasePath, databasePath, allowedHosts, now: () => clock, schedule, cancel });
+const server = backend.app.listen(0, '127.0.0.1');
+await new Promise(resolve => server.once('listening', resolve));
+const url = `http://127.0.0.1:${server.address().port}`;
+allowedHosts.push(`127.0.0.1:${server.address().port}`);
+const headers = await testLogin(url, credentials);
+const get = async path => (await fetch(url + path, { headers })).json();
+const control = action => fetch(url + '/api/simulator/' + action, { method: 'POST', headers: { ...headers, Origin: 'http://127.0.0.1:5173' } });
+try {
+  assert.equal((await get('/api/health')).ok, true);
+  assert.equal((await get('/api/telemetry/latest')).message, null);
+  advance(2999); assert.equal(backend.snapshot().count, 0);
+  advance(1); assert.equal((await get('/api/telemetry/latest')).count, 1);
+  const accepted = backend.snapshot();
+  for (const message of [{}, accepted.message, { ...accepted.message, sequence: 0 }]) {
+    const rejected = backend.accept(message);
+    assert.ok(rejected.validationError); assert.equal(rejected.message, accepted.message);
+    assert.equal(rejected.count, accepted.count); assert.equal(rejected.receivedAt, accepted.receivedAt);
+  }
+  assert.equal((await fetch(url + '/api/simulator/pause', { method: 'POST', headers })).status, 403);
+  assert.equal((await fetch(url + '/api/simulator/pause', { method: 'POST', headers: { ...headers, Origin: 'https://foreign.example' } })).status, 403);
+  await control('pause');
+  const abort = new AbortController();
+  const stream = await fetch(url + '/api/telemetry/stream', { headers, signal: abort.signal });
+  const reader = stream.body.getReader();
+  const frame = new TextDecoder().decode((await reader.read()).value);
+  const cached = JSON.parse(frame.match(/data: (.+)/)[1]);
+  let browser = applyBackendState(emptyBackendState(), cached);
+  advance(10000); assert.equal(getSampleStatus(browser.receivedAt, clock), 'STALE');
+  advance(20000); assert.equal(getSampleStatus(browser.receivedAt, clock), 'DISCONNECTED');
+  assert.equal(backend.clientCount(), 1);
+  browser = applyBackendState(browser, cached);
+  assert.equal(browser.receivedAt, accepted.receivedAt); assert.equal(browser.count, 1);
+  abort.abort(); await reader.cancel().catch(() => {});
+  for (let n=0; n<20 && backend.clientCount(); n++) await new Promise(resolve => setTimeout(resolve, 10));
+  assert.equal(backend.clientCount(), 0);
+  const reconnectAbort = new AbortController();
+  const reconnected = await fetch(url + '/api/telemetry/stream', { headers, signal: reconnectAbort.signal });
+  const reconnectReader = reconnected.body.getReader();
+  const reconnectFrame = new TextDecoder().decode((await reconnectReader.read()).value);
+  browser = applyBackendState(browser, JSON.parse(reconnectFrame.match(/data: (.+)/)[1]));
+  assert.equal(browser.count, 1); assert.equal(browser.receivedAt, accepted.receivedAt);
+  assert.equal(getSampleStatus(browser.receivedAt, clock), 'DISCONNECTED');
+  reconnectAbort.abort(); await reconnectReader.cancel().catch(() => {});
+  await control('resume'); advance(2999); assert.equal(backend.snapshot().count, 1);
+  advance(1); assert.equal(backend.snapshot().count, 2); assert.equal(backend.snapshot().validationError, null);
+  assert.equal(applyBackendState(browser, backend.snapshot()).count, 2);
+  // Durable ordering has no former in-memory session cap.
+  for (let n=0; n<127; n++) backend.accept(createSimulatedMessage(demoTelemetry, 0, `isolated-${n}`, clock));
+  const before = backend.snapshot();
+  assert.equal(backend.accept(createSimulatedMessage(demoTelemetry, 0, 'overflow', clock)).count, before.count + 1);
+  const saved = backend.snapshot();
+  backend.close(); assert.equal(timers.size, 0);
+  const restarted = createBackend({ authDatabasePath, databasePath, now: () => clock, schedule, cancel, startPaused: true });
+  assert.equal(restarted.snapshot().count, saved.count); assert.deepEqual(restarted.snapshot().message, saved.message);
+  assert.notEqual(restarted.snapshot().backendId, before.backendId);
+  assert.equal(applyBackendState(browser, restarted.snapshot()).receivedAt, saved.receivedAt);
+  restarted.close(); assert.equal(timers.size, 0);
+  console.log('Passed backend: HTTP/SSE, rejection, origins, pause/resume, cleanup, durable sessions and restart restore (temporary SQLite/fake clock).');
+} finally { backend.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); rmSync(directory, { recursive: true }); }

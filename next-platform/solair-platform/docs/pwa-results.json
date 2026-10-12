@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-10T16:52:42.074Z",
+  "environment": "local production-build QA, not hosted deployment",
+  "results": [
+    "Secure localhost session signs in",
+    "Production defaults to hardware mode",
+    "Manifest standalone/mobile/icons present",
+    "Service worker controls page",
+    "Chromium reports no PWA installability errors",
+    "Hashed scripts and local fonts precached",
+    "No API/location/message responses cached",
+    "Cold offline shell renders",
+    "390px production layout has no horizontal overflow",
+    "No runtime errors"
+  ],
+  "cachedAssets": 49,
+  "errors": []
+}

@@ -1,0 +1,184 @@
+[
+  {
+    "sketch": "00_esp32_boot_and_status_led",
+    "source": "firmware\\solair-cpe\\tests\\00_esp32_boot_and_status_led\\00_esp32_boot_and_status_led.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "01_i2c_mpu6050",
+    "source": "firmware\\solair-cpe\\tests\\01_i2c_mpu6050\\01_i2c_mpu6050.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "02_tamper_switches",
+    "source": "firmware\\solair-cpe\\tests\\02_tamper_switches\\02_tamper_switches.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "03_mosfet_logic_led_first",
+    "source": "firmware\\solair-cpe\\tests\\03_mosfet_logic_led_first\\03_mosfet_logic_led_first.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "04_12v_alarm_fused",
+    "source": "firmware\\solair-cpe\\tests\\04_12v_alarm_fused\\04_12v_alarm_fused.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "05_ads1115",
+    "source": "firmware\\solair-cpe\\tests\\05_ads1115\\05_ads1115.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "05a_ads_register_crosscheck",
+    "source": "firmware\\solair-cpe\\tests\\05a_ads_register_crosscheck\\05a_ads_register_crosscheck.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "06_acs758",
+    "source": "firmware\\solair-cpe\\tests\\06_acs758\\06_acs758.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "07_gps_neo6m",
+    "source": "firmware\\solair-cpe\\tests\\07_gps_neo6m\\07_gps_neo6m.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "08b_a7670e_esp_uart",
+    "source": "firmware\\solair-cpe\\tests\\08b_a7670e_esp_uart\\08b_a7670e_esp_uart.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "09b_pzem_esp32_max3485",
+    "source": "firmware\\solair-cpe\\tests\\09b_pzem_esp32_max3485\\09b_pzem_esp32_max3485.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "10_wifi_authenticated_ingest",
+    "source": "firmware\\solair-cpe\\tests\\10_wifi_authenticated_ingest\\10_wifi_authenticated_ingest.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "11_combined_all_sensors_soak",
+    "source": "firmware\\solair-cpe\\tests\\11_combined_all_sensors_soak\\11_combined_all_sensors_soak.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  },
+  {
+    "sketch": "solair_cpe",
+    "source": "firmware\\solair-cpe\\solair_cpe.ino",
+    "headers_sha256": {
+      "pins.h": "e3b75e4b7e16ce1eb7dd3cdf9526f97d7d78acd668093554e9db8d8909a0ec53",
+      "protocol.h": "cbd8e811d905263511dab6542f9be7ae3873d7e68a6bc077e40ceb71a01ef5a9",
+      "imu6500.h": "4d61bd97a2e024b400928aa206c3861177048864d2ea03a484b7fa6c4620d76d",
+      "modules.h": "73122d9e9bfe2096c02fb5ee4ed85e9ebab670f366263affa65e3dffd05d9703",
+      "diagnostic.h": "8bd1d15f613867053837e17f04be8667051c90cea808f9df41437f15ebcd43f1",
+      "engine.h": "84f47dcd74b409b34c9419a86f8573bc5ad457f0c6c99af2b28fad5c8b66724d",
+      "config.example.h": "aeec27b69d3ceae9294f5ba889dd4297e5f198e15400cd3c22fd052b837f5c7c"
+    }
+  }
+]

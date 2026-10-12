@@ -1,0 +1,187 @@
+Processing integrated (platform: espressif32@6.10.0; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+Converting solair_cpe.ino
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 43 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- ArduinoJson @ 7.3.1
+|-- Adafruit MPU6050 @ 2.2.6
+|-- Adafruit ADS1X15 @ 2.5.0
+|-- TinyGPSPlus @ 1.1.0
+|-- EspSoftwareSerial @ 8.2.0
+|-- HTTPClient @ 2.0.0
+|-- Preferences @ 2.0.0
+|-- WiFi @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- Wire @ 2.0.0
+|-- Adafruit BusIO @ 1.17.4
+|-- Adafruit Unified Sensor @ 1.1.15
+|-- ghostl @ 1.0.1
+|-- SPI @ 2.0.0
+Building in release mode
+Compiling .pio\build\integrated\src\src\main.cpp.o
+Linking .pio\build\integrated\firmware.elf
+Retrieving maximum program size .pio\build\integrated\firmware.elf
+Checking size .pio\build\integrated\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  14.3% (used 46928 bytes from 327680 bytes)
+Flash: [======    ]  62.3% (used 816365 bytes from 1310720 bytes)
+Building .pio\build\integrated\firmware.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 27 ELF sections
+Successfully created esp32 image.
+========================= [SUCCESS] Took 21.54 seconds =========================
+
+Processing compile_all_only (platform: espressif32@6.10.0; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+Converting solair_cpe.ino
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 43 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- ArduinoJson @ 7.3.1
+|-- Adafruit MPU6050 @ 2.2.6
+|-- Adafruit ADS1X15 @ 2.5.0
+|-- TinyGPSPlus @ 1.1.0
+|-- EspSoftwareSerial @ 8.2.0
+|-- HTTPClient @ 2.0.0
+|-- Preferences @ 2.0.0
+|-- WiFi @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- Wire @ 2.0.0
+|-- Adafruit BusIO @ 1.17.4
+|-- Adafruit Unified Sensor @ 1.1.15
+|-- ghostl @ 1.0.1
+|-- SPI @ 2.0.0
+Building in release mode
+Compiling .pio\build\compile_all_only\src\src\main.cpp.o
+Linking .pio\build\compile_all_only\firmware.elf
+Retrieving maximum program size .pio\build\compile_all_only\firmware.elf
+Checking size .pio\build\compile_all_only\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  14.4% (used 47120 bytes from 327680 bytes)
+Flash: [======    ]  63.5% (used 831765 bytes from 1310720 bytes)
+Building .pio\build\compile_all_only\firmware.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 27 ELF sections
+Successfully created esp32 image.
+========================= [SUCCESS] Took 23.48 seconds =========================
+
+Processing 09b_pzem_esp32_max3485 (platform: espressif32@6.10.0; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+Converting solair_cpe.ino
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 43 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- ArduinoJson @ 7.3.1
+|-- Adafruit MPU6050 @ 2.2.6
+|-- Adafruit ADS1X15 @ 2.5.0
+|-- TinyGPSPlus @ 1.1.0
+|-- EspSoftwareSerial @ 8.2.0
+|-- Wire @ 2.0.0
+|-- Adafruit BusIO @ 1.17.4
+|-- Adafruit Unified Sensor @ 1.1.15
+|-- ghostl @ 1.0.1
+|-- SPI @ 2.0.0
+Building in release mode
+Compiling .pio\build\09b_pzem_esp32_max3485\src\tests\09b_pzem_esp32_max3485\entry.cpp.o
+Linking .pio\build\09b_pzem_esp32_max3485\firmware.elf
+Retrieving maximum program size .pio\build\09b_pzem_esp32_max3485\firmware.elf
+Checking size .pio\build\09b_pzem_esp32_max3485\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]   7.1% (used 23344 bytes from 327680 bytes)
+Flash: [==        ]  23.3% (used 305417 bytes from 1310720 bytes)
+Building .pio\build\09b_pzem_esp32_max3485\firmware.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+========================= [SUCCESS] Took 16.98 seconds =========================
+
+Processing 11_combined_all_sensors_soak (platform: espressif32@6.10.0; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+Converting solair_cpe.ino
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 43 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- ArduinoJson @ 7.3.1
+|-- Adafruit MPU6050 @ 2.2.6
+|-- Adafruit ADS1X15 @ 2.5.0
+|-- TinyGPSPlus @ 1.1.0
+|-- EspSoftwareSerial @ 8.2.0
+|-- HTTPClient @ 2.0.0
+|-- Preferences @ 2.0.0
+|-- WiFi @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- Wire @ 2.0.0
+|-- Adafruit BusIO @ 1.17.4
+|-- Adafruit Unified Sensor @ 1.1.15
+|-- ghostl @ 1.0.1
+|-- SPI @ 2.0.0
+Building in release mode
+Compiling .pio\build\11_combined_all_sensors_soak\src\tests\11_combined_all_sensors_soak\entry.cpp.o
+Linking .pio\build\11_combined_all_sensors_soak\firmware.elf
+Retrieving maximum program size .pio\build\11_combined_all_sensors_soak\firmware.elf
+Checking size .pio\build\11_combined_all_sensors_soak\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  14.3% (used 46928 bytes from 327680 bytes)
+Flash: [======    ]  62.3% (used 816365 bytes from 1310720 bytes)
+Building .pio\build\11_combined_all_sensors_soak\firmware.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 27 ELF sections
+Successfully created esp32 image.
+========================= [SUCCESS] Took 20.69 seconds =========================
+
+Environment                   Status    Duration
+----------------------------  --------  ------------
+integrated                    SUCCESS   00:00:21.539
+compile_all_only              SUCCESS   00:00:23.477
+09b_pzem_esp32_max3485        SUCCESS   00:00:16.976
+11_combined_all_sensors_soak  SUCCESS   00:00:20.690
+========================= 4 succeeded in 00:01:22.682 =========================

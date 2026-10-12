@@ -1,0 +1,9 @@
+profiles:
+  serial_test:
+    fqbn: esp32:esp32:esp32:FlashSize=4M,PartitionScheme=default,UploadSpeed=115200
+    platforms:
+      - platform: esp32:esp32 (2.0.17)
+        platform_index_url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+    port_config:
+      baudrate: 115200
+default_profile: serial_test
