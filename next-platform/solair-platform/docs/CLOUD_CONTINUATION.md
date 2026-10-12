@@ -4,7 +4,7 @@ This is a durable project/conversation handoff, not an exact export of every cha
 
 ## Project and scope
 
-Repository selected by the user: https://github.com/andreirtc/SolAir . It was observed public with size0/default branch main during preparation. No remote upload or cloud environment creation is implied by this document. Check current repository state before continuing; do not force-push.
+Repository selected by the user: https://github.com/andreirtc/SolAir . On 12 October 2026 the user explicitly authorized public publication. Initial source commit 361b714 was successfully pushed to main. The cloud environment still needs to be created in the user's account. Check current repository state before continuing; do not force-push. Follow [school cloud setup](CLOUD_SETUP_FOR_SCHOOL.md).
 
 Local transfer root: C:/Users/Admin/Videos/SolAir. The authoritative application is next-platform/solair-platform. The whole source layout is preserved, including older cpe/ reference material, START-HERE.md and the full all-module directive. Extend the existing premium application; no new architecture, separate test website or downgrade to the older app.
 
