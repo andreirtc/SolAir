@@ -1,4 +1,25 @@
-# SOLAIR resume checkpoint — 11 October 2026
+# SOLAIR resume checkpoint — 18 October 2026
+
+Current project: `C:\Users\Anyang\Videos\SolAir\solair-platform`. Preserve the existing demo on its current branch. The user has requested a GitHub backup of the current system before any future feature implementation.
+
+## Current additions
+
+- Malabon-centered fleet map, explicit Show vehicles/recenter controls, and an empty-fleet reference map. OpenStreetMap uses the canonical tile URL and an origin-preserving referrer policy to address blocked tiles.
+- Sidebar Log out directly below Settings, without a permanent border. Mobile navigation overlays the bottom bar correctly.
+- Clickable account avatar: Profile, Help and support, Report a problem and Log out. Reports persist as scoped administrator audit entries.
+- Light/Dark/System appearance, browser persistence and same-origin tab synchronization.
+- Idempotent server logout, session event-stream closure, cross-tab UI sign-out and honest logout-failure handling.
+- Bell dropdown showing recorded security/alerts, daily positive harvested energy, system activity, assistance and received messages. Role/TODA/assignment and demo/hardware separation are enforced. Read markers are browser-local and do not acknowledge incidents.
+
+Latest checks: 47 isolated automated tests passed; production build, type checking and lint passed. Focused account and notification browser checks passed on desktop/phone, including live updates, mode isolation and logout. Browser map images were mocked during automated UI checks. Physical sensors, actual SMS and hosted connectivity remain unverified. See [system review](SYSTEM_REVIEW_2026-10-18.md), [account/appearance guide](ACCOUNT_AND_APPEARANCE.md) and [notifications guide](NOTIFICATIONS.md).
+
+## Proposed future work — not approved for implementation
+
+The user composed a prompt for signup, driver/operator/admin workflows, verified phone numbers and alarm-triggered SMS. No SMS provider, modem SMS transport, paid service or public signup has been implemented. Review the current CPE/data-integrity findings before extending these workflows.
+
+After future implementation approval, create a dedicated feature branch; do not implement the signup/SMS changes on the preserved demo branch. Never commit secrets, `.env` files, private databases or ignored firmware provisioning. Do not merge a future feature branch without user approval.
+
+## Earlier implementation checkpoint — 11 October 2026
 
 Fresh project: C:\Users\Anyang\Videos\SolAir\solair-platform. The previous pause has been resumed. No older SOLAIR project was touched. Preserve the user-approved public/bemac-white.png; the entrance correction is at the vehicle rear.
 

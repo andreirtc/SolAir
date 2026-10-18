@@ -48,6 +48,8 @@ docs/                        Hardware, architecture, deployment and test records
 ## Guides and evidence
 
 - [Connect and test the ESP32](docs/HARDWARE.md)
+- [Account menu, logout, support and light/dark appearance](docs/ACCOUNT_AND_APPEARANCE.md)
+- [Notification dropdown and recorded activity sources](docs/NOTIFICATIONS.md)
 - [Railway + Supabase setup and exact environment names](docs/RAILWAY_SUPABASE.md)
 - [Telemetry contract and data integrity](docs/TELEMETRY.md)
 - [Architecture and security decisions](docs/ARCHITECTURE.md)
