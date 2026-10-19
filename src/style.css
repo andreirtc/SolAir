@@ -234,13 +234,17 @@ form button.primary {
 .sidebar nav button {
   width: 100%;
   justify-content: flex-start;
-  border: 0;
+  text-align: left;
+  border: 1px solid transparent;
   background: transparent;
   color: #94a7b9;
   font-size: 12px;
   padding: 13px 12px;
   margin-bottom: 5px;
   font-weight: 500;
+}
+.sidebar nav button > svg {
+  flex-shrink: 0;
 }
 .sidebar nav button.active {
   background: #183e48;
@@ -1289,9 +1293,13 @@ code {
 }
 .driver-overview {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   gap: 22px;
   margin-bottom: 22px;
+}
+.driver-overview > .device-status {
+  margin-bottom: 0;
+  min-width: 0;
 }
 .driver-electrical {
   margin: 0;
@@ -1862,3 +1870,66 @@ code {
   .driver-app .driver-electrical { padding: 17px; }
   .driver-app .driver-electrical .electrical-grid strong { font-size: 32px; }
 }
+
+/* Account directory: bounded pages rather than a form for every registrant. */
+.people-directory .directory-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.people-directory .directory-filters label{flex:1;min-width:160px}
+.person-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:18px 0;border-bottom:1px solid var(--border,#53677a)}
+.person-card>div{min-width:0;flex:1}.person-card p,.person-card small{overflow-wrap:anywhere}.person-editor{flex-basis:100%;width:100%}
+.people-directory details{margin-top:24px}.people-directory summary{cursor:pointer;font-weight:700}
+@media(max-width:600px){.directory-filters{flex-direction:column;align-items:stretch!important}.directory-filters label{width:100%}.person-card>div{flex-basis:100%}}
+
+.registration-details dl{display:grid;grid-template-columns:minmax(110px,1fr) 2fr;gap:10px 16px}.registration-details dt{font-weight:600}.registration-details dd{margin:0;overflow-wrap:anywhere}.registration-details article,.activity-record,.operator-information{padding:18px 0;border-top:1px solid var(--border,#53677a)}.activity-record p,.activity-record small{overflow-wrap:anywhere}.vehicle-placeholder{padding:48px;text-align:center}.vehicle-placeholder strong{font-size:32px}
+.registration-details form > small{display:block;line-height:1.6}
+.registration-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:480px;margin-top:14px}
+.registration-actions > button{min-height:44px;min-width:0;white-space:normal;text-align:center;padding:10px 12px;font-size:13px}
+@media(max-width:600px){.registration-details dl{grid-template-columns:1fr}.registration-details dd{margin-bottom:10px}}
+
+.toda-menu{position:relative;flex-shrink:0;margin:33px 0 26px;z-index:30}
+.sidebar .toda-menu .organization{margin:0;width:100%;background:transparent;text-align:left;justify-content:flex-start;font-weight:400}
+.toda-trigger-label{flex:1;min-width:0;overflow-wrap:anywhere}.toda-menu .org-avatar{flex-shrink:0}.toda-menu svg{flex-shrink:0;transition:transform .15s}.toda-menu svg.expanded{transform:rotate(180deg)}
+.toda-dropdown{position:absolute;left:0;top:calc(100% + 8px);width:100%;padding:16px;border:1px solid #3c5269;border-radius:10px;background:#16283e;color:#e4edf4;box-shadow:0 12px 28px #0005;max-height:45dvh;overflow-y:auto;font-size:12px;overflow-wrap:anywhere}
+.toda-dropdown strong,.toda-vehicle span{display:block}.toda-detail-label{display:block;color:#a1b8cc;font-size:10px;margin:0 0 6px}.toda-detail-label:not(:first-child){margin-top:16px}.toda-dropdown p{color:#c0d0de;font-size:12px;margin:6px 0}.toda-vehicle+.toda-vehicle{margin-top:12px}.toda-vehicle span{color:#b5c8d8;font-size:11px;margin-top:4px}
+@media(max-width:600px){.toda-menu{margin:22px 0 18px}}
+
+/* Everyday workflows: preserve reading uncertainty and keep controls usable on phones. */
+.setup-checklist,.device-status,.evidence-downloads{margin-bottom:20px}
+.setup-tasks{list-style:none;margin:16px 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.setup-tasks li{padding:12px;border:1px solid var(--line);border-radius:8px;min-width:0}
+.setup-tasks strong,.setup-tasks span{display:block;overflow-wrap:anywhere}
+.setup-tasks span{margin-top:6px;color:var(--muted);font-size:12px}
+.setup-tasks .complete strong{color:var(--accent-text)}
+.registration-summary{margin:0 0 20px}.registration-summary summary,.device-status summary,.incident-record summary{cursor:pointer;padding:8px 0;font-weight:600}
+.registration-summary .panel{margin-top:12px}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.status-grid article{padding:14px;background:var(--surface-soft);border:1px solid var(--line);border-radius:10px;min-width:0;overflow-wrap:anywhere}
+.status-grid h4{margin:0 0 10px;color:var(--muted)}.status-grid p{font-size:12px}.status-grid strong{font-size:17px}
+.sensor-status-list{list-style:none;padding:0}.sensor-status-list li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sensor-status-list span{font-size:12px;color:var(--muted)}
+.incident-record{overflow-wrap:anywhere}.incident-note{border-left:3px solid var(--line);padding:10px 14px;margin:12px 0}.incident-note small{display:block;margin-top:6px}.incident-note p{white-space:pre-wrap}
+.incident-history form{margin-top:16px}.incident-history label{display:block}.incident-history textarea{width:100%;min-height:90px}.incident-history .button-row,.evidence-downloads .button-row{flex-wrap:wrap}
+.person-readiness{font-weight:600}.device-status .panel-heading,.setup-checklist .panel-heading{flex-wrap:wrap;gap:10px}
+@media(max-width:650px){.setup-tasks,.status-grid{grid-template-columns:1fr}.device-status,.setup-checklist,.evidence-downloads{padding:18px}.setup-checklist .panel-heading h3,.device-status .panel-heading h3{margin-bottom:0}}
+
+@media(min-width:360px) and (max-width:650px){.device-status .status-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.status-grid article{padding:10px}.status-grid strong{font-size:15px}.status-grid button{padding:8px;font-size:11px}}
+
+.mobile-auth-brand{display:none}
+.login-form .auth-entry-action{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;margin:12px 0 0;padding:12px 16px;font-size:14px;box-sizing:border-box}
+.mobile-intro{height:100vh;height:100dvh;width:100%;padding:max(28px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom));overflow:hidden;display:flex;flex-direction:column;background:radial-gradient(ellipse at 80% 60%,#2c4a60,#101e32 78%);color:#fff}
+.mobile-intro>.brand{font-size:25px;flex-shrink:0}.mobile-intro .brand i{font-size:6px}
+.intro-message{margin-top:clamp(28px,9vh,80px);flex-shrink:0;position:relative;z-index:1}
+.intro-message .eyebrow{color:#73cdc3;font-size:8px;letter-spacing:1.8px}
+.intro-message h1{font-family:Manrope,Arial,sans-serif;font-size:clamp(32px,10vw,46px);line-height:1.15;letter-spacing:-1.5px;margin:18px 0 0}
+.mobile-intro .vehicle-visual{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;margin:0}
+.mobile-intro .vehicle-visual img{width:100%;height:100%;object-fit:contain;max-height:42dvh;transform:scale(1.12);transform-origin:center}
+.mobile-intro .vehicle-visual figcaption{display:none}.mobile-intro>small{color:#8caabd;font-size:8px;flex-shrink:0}
+@media(max-width:650px){
+ .login.login-entry{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;width:100%;overflow-x:hidden}
+ .login.login-entry>.login-art{display:none}
+ .login-entry .login-form{max-width:430px;padding:32px 24px;margin:auto;width:100%;min-width:0}
+ .mobile-auth-brand{display:flex;justify-content:center;margin-bottom:28px;transform:translateY(-16px)}.login-entry .login-form:has(.auth-heading) .mobile-auth-brand{transform:translateY(-40px)}.mobile-auth-brand .brand{color:var(--text);font-size:25px}.mobile-auth-brand .brand i{color:var(--muted)}
+ .login-entry .auth-heading,.login-entry .auth-subtitle{text-align:center;transform:translateY(-24px)}
+ .login-entry .login-form input,.login-entry .login-form select{font-size:16px}
+ .login-entry .login-form .auth-entry-action{min-height:48px}
+}
+@media(max-height:600px){.intro-message{margin-top:24px}.intro-message h1{font-size:30px;margin-top:12px}.mobile-intro .vehicle-visual img{max-height:35dvh}}

@@ -35,6 +35,7 @@ try {
   for (const width of [1440, 390]) {
     const page = await browser.newPage({ viewport: { width, height: 1050 } });
     let emptyFleet = false;
+    let gpsAge = 60000;
     let hardwareFix: { latitude: number; longitude: number; measured_at: string } | null = null;
     const tileReferrers: (string | null)[] = [];
     // Do not repeatedly request public community tiles during automated checks.
@@ -48,9 +49,9 @@ try {
       await route.fulfill({ json: emptyFleet ? [] : [{
         id: "ET-01", name: "Map test vehicle", model: "BEMAC 68VM",
         image_url: "/bemac-white.png", driver_name: "Map test driver",
-        driver_id: "driver", device_id: "SOL-ET-01", status: "Offline",
+        driver_id: "driver", device_id: "SOL-ET-01", status: "Online",
         nominal_voltage: 60, nominal_capacity: 100, solar_wh: null,
-        wind_wh: null, telemetry: null,
+        wind_wh: null, telemetry: !demo && hardwareFix ? { gps_fix: true, gps_fix_age_ms: gpsAge, received_at: new Date().toISOString(), sensor_health: {} } : null,
         gps: demo ? { latitude: 14.61, longitude: 121.03, measured_at: new Date().toISOString() } : hardwareFix,
       }] });
     });
@@ -99,6 +100,10 @@ try {
     hardwareFix = { latitude: 14.666, longitude: 120.96, measured_at: new Date().toISOString() };
     await page.getByRole("button", { name: "Refresh", exact: true }).click();
     await page.locator(".map-vehicle").waitFor();
+    await page.locator(".map-vehicle .offline").waitFor();
+    gpsAge = 0;
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await page.locator(".map-vehicle .online").waitFor();
     const firstFixPosition = await page.locator(".map-vehicle").getAttribute("style");
     hardwareFix = { ...hardwareFix, longitude: 120.962 };
     const gpsRefresh = page.waitForResponse((response) => response.url().includes("/api/fleet?mode=hardware"));

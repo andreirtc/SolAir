@@ -50,12 +50,13 @@ export default function FleetMap({
     for (const v of vehicles) {
       if (!v.gps) continue;
       const p: L.LatLngExpression = [v.gps.latitude, v.gps.longitude];
+      const freshFix=Boolean(v.telemetry?.gps_fix&&v.telemetry.gps_fix_age_ms!==null&&v.telemetry.gps_fix_age_ms+Math.max(0,Date.now()-Date.parse(v.telemetry.received_at))<=30000);
       const label = document.createElement("div");
-      label.textContent = `${v.id} · ${v.status} · ${mode === "demo" ? "SIMULATED · " : ""}${stamp(v.gps.measured_at)} · Last known`;
+      label.textContent = `${v.id} · ${v.driver_display_name||v.driver_name||v.name} · ${v.status} · ${mode === "demo" ? "SIMULATED · " : ""}${stamp(v.gps.measured_at)} · Last known`;
       const marker = L.marker(p, {
         icon: L.divIcon({
           className: "map-vehicle",
-          html: `<span class="${v.status === 'Online' ? 'online' : 'offline'}">${v.id}</span>`,
+          html: `<span class="${freshFix ? 'online' : 'offline'}">${v.id}</span>`,
           iconSize: [66, 30],
           iconAnchor: [33, 15],
         }),

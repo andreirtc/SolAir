@@ -257,7 +257,7 @@ test("USB bench persists genuine-format MPU, switch and event frames", async () 
 test("Duplicate telemetry is idempotent and earlier sequences reject replay", async () => {
   assert.equal(
     (
-      await req("/ingest", "engineer", "POST", frame(), {
+      await req("/ingest", "engineer", "POST", frame({event_id:"event-1",event_type:"lid",lid_state:"tampered",lid_raw:1,alarm_active:true}), {
         "X-Bench-Transport": "usb",
       })
     ).body.duplicate,

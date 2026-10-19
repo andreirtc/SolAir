@@ -1,4 +1,10 @@
+# Active local site: http://localhost:3000/
+
+The reviewed changes are now integrated in this checkout. Run `npm.cmd run start:combined`; port 3001 redirects to 3000. See [integration, preserved records and rollback guide](docs/PORT3000_INTEGRATION.md).
+
 # SOLAIR platform
+
+**Current CPE continuation (11 October 2026):** this is the authoritative centralized application. All-module v2 integration extends this app; the older `cpe/figma-app` is historical reference. Start with [CPE wiring/power guide](docs/CPE_BREADBOARD_WIRING_AND_TEST_GUIDE.md), [firmware targets and exact Windows commands](firmware/README.md), [consolidated physical acceptance](docs/COMPLETE_CPE_BENCH_AND_APP_ACCEPTANCE.md) and [current validation/limits](docs/CPE_VALIDATION.md). Existing BEMAC design, roles, databases and identity are retained. New firmware is `firmware/solair-cpe/solair_cpe.ino`; unknown electrical interfaces stay disabled until commissioning.
 
 Fresh implementation in `C:\Users\Anyang\Videos\SolAir\solair-platform`. No previous SOLAIR source, configuration or firmware was reused. The master instruction is implemented as an integrated application; outstanding hardware and hosting verification is explicitly documented.
 
@@ -48,8 +54,6 @@ docs/                        Hardware, architecture, deployment and test records
 ## Guides and evidence
 
 - [Connect and test the ESP32](docs/HARDWARE.md)
-- [Account menu, logout, support and light/dark appearance](docs/ACCOUNT_AND_APPEARANCE.md)
-- [Notification dropdown and recorded activity sources](docs/NOTIFICATIONS.md)
 - [Railway + Supabase setup and exact environment names](docs/RAILWAY_SUPABASE.md)
 - [Telemetry contract and data integrity](docs/TELEMETRY.md)
 - [Architecture and security decisions](docs/ARCHITECTURE.md)
@@ -74,3 +78,17 @@ npm run retention     # scheduled deletion of expired location-bearing telemetry
 `npm start` serves the production build. A persistent PostgreSQL database and reachable HTTPS domain are needed for a real centralized fleet. Configuration instructions are included; no hosted deployment, physical sensor result or LTE packet transport is claimed.
 
 The screenshot and software tests do not constitute thesis measurements. The guided physical tests remain NOT TESTED or BLOCKED until an engineer records real evidence. Wind generation, traction voltage/current sensing, SOC and validated runtime forecasting are unavailable until the hardware and models are commissioned.
+
+## Account, appearance, notifications and Malabon map integration
+
+Account controls include Profile, Help and support, persisted problem reports, and Log out immediately below Settings. Appearance supports Light, Dark and System. The notification bell opens an authorized activity dropdown, with hardware/demo separation. The fleet map opens on Malabon and retains the CPE GPS freshness checks.
+
+See [Account and appearance](docs/ACCOUNT_AND_APPEARANCE.md), [Notifications](docs/NOTIFICATIONS.md), and [integration validation report](docs/LOCAL_UI_INTEGRATION_2026-10-18.md). Current CPE continuation and firmware instructions above remain authoritative.
+
+## Operational accounts and alarm notifications
+
+The operational feature branch adds direct account signup, verified contact preferences, device commissioning, alarm incidents, a disabled-by-default SMS worker and research CSV exports. See [setup and exact environment variables](docs/OPERATIONAL_SETUP.md), [physical/SMS acceptance gates](docs/OPERATIONAL_ACCEPTANCE.md), and [implementation/validation report](docs/OPERATIONAL_IMPLEMENTATION_2026-10-18.md). The demo and historical CPE evidence remain preserved. Real SMS, cloud commissioning, uploads and physical outputs were not activated by software implementation.
+
+## Daily driver and operator workflows
+
+See [setup, incident handling and research evidence](docs/DAILY_WORKFLOWS.md). The local combined launcher keeps real SMS disabled. Physical hardware and handset delivery require separate acceptance.

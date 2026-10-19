@@ -2,6 +2,7 @@ import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
 import { Store } from "../server/db";
+import { PostgresTestStore } from "./postgres-store";
 import { seed } from "../server/seed";
 import { createApp } from "../server/app";
 import type { ActivityNotification } from "../packages/notifications";
@@ -12,7 +13,7 @@ async function feed(role = "", mode = "hardware") {
   return { status: response.status, data: await response.json() as ActivityNotification[] };
 }
 before(async () => {
-  db = new Store(":memory:"); await db.migrate(); await seed(db);
+  db = process.env.SOLAIR_TEST_POSTGRES === "1" ? new PostgresTestStore() : new Store(":memory:"); await db.migrate(); await seed(db);
   server = createServer(createApp(db));
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
@@ -62,4 +63,16 @@ test("Demonstration and hardware activity stay partitioned; system updates are e
   assert.ok(!demo.some((item) => item.id === "security:allowed-event"));
   const real = (await feed("driver")).data;
   assert.ok(real.every((item) => item.source === "hardware" || item.source === "system"));
+});
+
+test("CPE bench, MPPT output and recovered frames cannot be advertised as harvested PV or wind", async () => {
+  for (const [id, load, historical] of [["bench", "bench_resistor", 0], ["output", "vehicle_charging", 0], ["recovered", "bench_resistor", 1]] as const) {
+    await db.run("INSERT INTO telemetry VALUES (?,?,?,?,?,?,?,?)", [id, "SOL-ET-01", "hardware", "cpe-notifications", historical + (id === "bench" ? 1 : 3), "2026-10-18T00:02:00Z", "2026-10-18T00:02:00Z", "{}"]);
+    await db.run("INSERT INTO cpe_samples VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [id, "SOL-ET-01", "hardware", load, "2026-10-18T00:02:00Z", null, 12, 1, 12, 999, null, 0, 0, "{}", historical]);
+    await db.run("INSERT INTO energy_measurements VALUES (?,?,?,?,?,?,?,?)", [`cpe-${id}`, id, "SOL-ET-01", "hardware", "solar", 12, 999, "2026-10-18T00:02:00Z"]);
+  }
+  const energy = (await feed("driver")).data.filter((item) => item.category === "energy");
+  assert.equal(energy.length, 1);
+  assert.match(energy[0].body, /\+2\.50 Wh/);
+  assert.ok(!energy[0].body.includes("999"));
 });

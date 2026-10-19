@@ -2,6 +2,7 @@ import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
 import { Store } from "../server/db";
+import { PostgresTestStore } from "./postgres-store";
 import { seed } from "../server/seed";
 import { createApp } from "../server/app";
 let db: Store, server: Server, base: string;
@@ -14,7 +15,7 @@ async function request(path: string, cookie = "", body?: unknown) {
   });
 }
 before(async () => {
-  db = new Store(":memory:"); await db.migrate(); await seed(db);
+  db = process.env.SOLAIR_TEST_POSTGRES === "1" ? new PostgresTestStore() : new Store(":memory:"); await db.migrate(); await seed(db);
   server = createServer(createApp(db));
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;

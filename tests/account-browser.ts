@@ -14,7 +14,9 @@ async function theme(page: Page, value: string) {
 }
 async function menu(page: Page) {
   await page.getByRole("button", { name: "Open account menu", exact: true }).click();
-  return page.getByRole("dialog", { name: "Account options", exact: true });
+  const dialog = page.getByRole("dialog", { name: "Account options", exact: true });
+  await dialog.waitFor({ state: "visible" });
+  return dialog;
 }
 async function login(page: Page, role: string) {
   page.on("pageerror", (error) => errors.push(error.message));

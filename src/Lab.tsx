@@ -13,6 +13,9 @@ import { SerialBench } from "./Serial";
 import type { Vehicle } from "./types";
 import type { Telemetry } from "../packages/telemetry-contract";
 import { guides } from "./bench-guides";
+import CpeReadings from "./CpeReadings";
+import CpeHistory from "./CpeHistory";
+import CpeIngressErrors from "./CpeIngressErrors";
 const tests = [
   "ESP32 connectivity",
   "MPU6050 I²C detection",
@@ -26,6 +29,8 @@ const tests = [
   "Siren after safety verification",
   "End-to-end telemetry",
   "Offline and reconnection",
+  "PZEM USB / MAX3485 measurement",
+  "Combined all-sensors soak",
 ];
 export default function Lab({
   vehicle,
@@ -121,6 +126,8 @@ export default function Lab({
       }
       await api("/bench/results", "POST", {
         session_id: sid,
+        device_id: vehicle.device_id,
+        mode,
         test,
         result,
         measurements,
@@ -210,12 +217,14 @@ export default function Lab({
         <span>Heartbeat {stamp(vehicle.telemetry?.received_at)}</span>
       </div>
       <div className="lab-grid">
+        <section className="panel"><h3>Sensor sample age</h3><p>Independent of device contact and GPS-fix age. These ages were reported at acquisition, not proof of current connectivity.</p>{t&&Object.entries(t.sensor_age_ms||{}).length?<ul>{Object.entries(t.sensor_age_ms||{}).map(([sensor,age])=><li key={sensor}>{sensor}: {age} ms at frame capture</li>)}</ul>:<p>Sensor ages unavailable in this firmware frame.</p>}</section>
+      <CpeReadings t={t} />
         <section className="panel">
           <div className="panel-heading">
             <h3>
               <Activity size={18} /> Motion & enclosure
             </h3>
-            <span className="badge">MPU6050</span>
+            <span className="badge">{t?.sensor_health.mpu6500_compatible && t.sensor_health.mpu6500_compatible !== "absent" ? "MPU6500-compatible" : "IMU"}</span>
           </div>
           <div className="axis-readings">
             {["X", "Y", "Z"].map((a, i) => (
@@ -252,8 +261,8 @@ export default function Lab({
             </strong>
           </div>
           <div className="button-row">
-            <button onClick={() => command("calibrate_motion")}>
-              Calibrate baseline
+            <button disabled={t?.schema_version===2} onClick={() => command("calibrate_motion")}>
+              {t?.schema_version===2?"Motion calibration: recorded firmware coefficients":"Calibrate baseline"}
             </button>
             <button onClick={() => command(t?.armed ? "disarm" : "arm")}>
               {t?.armed ? "Disarm bench" : "Arm bench"}
@@ -268,11 +277,13 @@ export default function Lab({
           </div>
           {[
             "mpu6050",
+            "mpu6500_compatible",
             "switches",
             "ads1115",
             "acs758",
             "gps",
             "lte",
+            "pzem017",
             "wind",
           ].map((s) => (
             <div className="switch-row" key={s}>
@@ -364,7 +375,10 @@ export default function Lab({
               <Wifi size={18} /> Transport & safe output
             </h3>
           </div>
-          <p>USB and Wi-Fi use the same validated v1 telemetry contract.</p>
+          <p>USB and Wi-Fi use validated v1/v2 telemetry. Remote commands are not connected; bench controls require USB.</p>
+          <a className="button" href={`/api/cpe-export/${vehicle.id}?mode=${mode}`}>Export CPE CSV (up to 5,000 rows)</a>
+          <details><summary>Last payload / device provenance</summary><pre>{JSON.stringify(t,null,2)||"No accepted payload"}</pre></details>
+          {mode==='hardware'&&<CpeIngressErrors vehicleId={vehicle.id} />}
           <code>
             POST /api/ingest
             <br />
@@ -420,12 +434,14 @@ export default function Lab({
         </section>
       </div>
       <section className="panel">
+        <CpeHistory vehicleId={vehicle.id} mode={mode} />
         <div className="panel-heading">
           <h3>Evidence & calibration records</h3>
           <button onClick={exportEvidence}>
             <Download size={16} />
             Export JSON
           </button>
+          <a className="button" href={`/api/bench-export/${encodeURIComponent(vehicle.device_id||'')}?mode=${mode}`}>Export evidence CSV</a>
         </div>
         <div className="button-row">
           <button

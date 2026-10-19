@@ -15,3 +15,11 @@ test-results/
 .tools/
 
 firmware/**/solair_config.h
+firmware/**/compile_commands.json
+__pycache__/
+*.pyc
+
+# PlatformIO/Arduino transient conversion outputs
+firmware/**/*.ino.cpp
+
+!.env.operational.example

@@ -12,6 +12,8 @@ import { Store } from "./db";
 import { hash, token, passwordHash, verifyPassword, type User } from "./auth";
 import type {IdentityProvider} from './identity';
 import { notifications } from './notifications';
+import { operationalRoutes } from './operational-routes';
+import { operational, recordIncident } from './operations';
 import {
   telemetrySchema,
   power,
@@ -65,7 +67,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   };
   const auth = async (req: Request, res: Response, next: NextFunction) => {
     const [u] = await db.query(
-      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?",
+      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications,o.name AS organization_name FROM sessions s JOIN profiles p ON p.id=s.user_id JOIN organizations o ON o.id=p.org_id WHERE s.token_hash=? AND s.expires_at>?",
       [hash(req.cookies.session || ""), now()],
     );
     if (!u) return res.status(401).json({ error: "Sign in required" });
@@ -82,7 +84,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     req.query.mode === "demo" ? "demo" : "hardware";
   const vehicle = async (u: User, id: string) => {
     const [v] = await db.query(
-      "SELECT v.*,a.driver_id,p.name AS driver_name,d.id AS device_id FROM vehicles v LEFT JOIN assignments a ON a.vehicle_id=v.id LEFT JOIN profiles p ON p.id=a.driver_id LEFT JOIN devices d ON d.vehicle_id=v.id WHERE v.id=? AND v.org_id=?",
+      "SELECT v.*,a.driver_id,p.name AS driver_name,r.display_name AS driver_display_name,d.id AS device_id FROM vehicles v LEFT JOIN assignments a ON a.vehicle_id=v.id LEFT JOIN profiles p ON p.id=a.driver_id LEFT JOIN profile_registration r ON r.user_id=p.id LEFT JOIN devices d ON d.vehicle_id=v.id WHERE v.id=? AND v.org_id=?",
       [id, u.org_id],
     );
     return v && (u.role !== "driver" || v.driver_id === u.id) ? v : null;
@@ -96,6 +98,11 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       target,
       now(),
     ]);
+  app.use('/api', (req,res,next)=>{
+    if(operational() && req.query.mode==='demo')return res.status(403).json({error:'Demonstration data is unavailable in the operational environment'});
+    next();
+  });
+  operationalRoutes(app,db,auth,identity,notify);
   app.get("/api/health", (_req, res) =>
     res.json({
       status: "ok",
@@ -104,6 +111,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
           ? "production PostgreSQL"
           : "local production preview"
         : "local development",
+      operational: operational(),
       database: process.env.DATABASE_URL ? "PostgreSQL" : "SQLite",
       push_configured: false,
       auth_provider:identity?.name||'local',
@@ -118,14 +126,15 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const b = z
         .object({ email: z.email(), password: z.string().max(200) })
         .parse(req.body);
-      const [u] = await db.query("SELECT * FROM profiles WHERE email=?", [
-        b.email.toLowerCase(),
-      ]);
-      const identityId = u ? identity ? await identity.authenticate(b.email.toLowerCase(),b.password) : verifyPassword(b.password,u.password_hash) ? u.id : null : null;
+      const provedId=identity?await identity.authenticate(b.email.toLowerCase(),b.password):null;
+      const [u] = identity?await db.query('SELECT * FROM profiles WHERE id=?',[provedId||'']):await db.query("SELECT * FROM profiles WHERE email=?", [b.email.toLowerCase()]);
+      const identityId = identity?provedId:u&&verifyPassword(b.password,u.password_hash)?u.id:null;
       if (!u || identityId !== u.id)
         return res
           .status(401)
           .json({ error: "Email or password is incorrect" });
+      if(operational()&&(!identity?.emailVerified||!await identity.emailVerified(u.id)))return res.status(403).json({error:'Verify email ownership before operational access'});
+      if(identity&&u.email!==b.email.toLowerCase())await db.run('UPDATE profiles SET email=? WHERE id=?',[b.email.toLowerCase(),u.id]);
       const t = token();
       await db.run("INSERT INTO sessions VALUES (?,?,?)", [
         hash(t),
@@ -207,7 +216,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const v = await vehicle(u, id);
       if (!v) continue;
       const [t] = await db.query(
-        "SELECT * FROM telemetry WHERE device_id=? AND mode=? ORDER BY received_at DESC LIMIT 1",
+        "SELECT * FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) AND id NOT IN (SELECT telemetry_id FROM archived_frames) ORDER BY received_at DESC LIMIT 1",
         [v.device_id, mode(req)],
       );
       const [gps] = await db.query(
@@ -228,6 +237,9 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
             }
           : null,
         status: freshness(t?.received_at || null),
+        measurement_time_quality: t ? (JSON.parse(t.payload).device_timestamp ? 'device_utc' : 'receipt_only') : 'unavailable',
+        measurement_age_ms: t && JSON.parse(t.payload).device_timestamp ? Math.max(0,Date.now()-Date.parse(JSON.parse(t.payload).device_timestamp)) : null,
+        gps_age_ms: gps ? Math.max(0,Date.now()-Date.parse(gps.measured_at)) : null,
         gps: gps || null,
         solar_wh: e.solar_wh,
         wind_wh: e.wind_wh,
@@ -259,6 +271,19 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     );
     const energy=await db.query('SELECT e.* FROM energy_measurements e JOIN telemetry t ON t.id=e.telemetry_id WHERE t.device_id=? AND t.mode=? ORDER BY t.received_at DESC LIMIT 15000',[v.device_id,mode(req)]);
     res.json({ source_type: mode(req), exported_at: now(), records: rows, energy_measurements:energy, limit:5000 });
+  });
+  app.get("/api/cpe-export/:id", auth, async (req,res)=>{
+    const v=await vehicle((req as AuthRequest).user,String(req.params.id));
+    if(!v)return res.status(403).json({error:"Vehicle access denied"});
+    const rows=await db.query("SELECT * FROM cpe_samples WHERE device_id=? AND mode=? ORDER BY received_at DESC LIMIT 5000",[v.device_id,mode(req)]);
+    const keys=["telemetry_id","device_id","mode","load_mode","received_at","device_timestamp","pzem_voltage_v","pzem_current_a","pzem_power_w","pzem_energy_wh","acs_current_a","lte_registered","alarm_commanded","quality_json"];
+    const cell=(x:unknown)=>'"'+(typeof x==='number'?String(x):String(x??"").replace(/^[=+@-]/,"'$&")).replaceAll('"','""')+'"';
+    res.type("text/csv").set("Content-Disposition",`attachment; filename="solair-cpe-${mode(req)}.csv"`).set("X-Export-Limit","5000").send([keys.join(","),...rows.map(r=>keys.map(k=>cell(r[k])).join(","))].join("\r\n"));
+  });
+  app.get("/api/cpe-diagnostics/:id",auth,role('engineer','admin'),async(req,res)=>{
+    const v=await vehicle((req as AuthRequest).user,String(req.params.id));
+    if(!v)return res.status(403).json({error:'Vehicle access denied'});
+    res.json(await db.query("SELECT action,created_at FROM audit_logs WHERE org_id=? AND target=? AND action LIKE 'device_ingest_rejected:%' ORDER BY created_at DESC LIMIT 10",[(req as AuthRequest).user.org_id,v.device_id]));
   });
   app.get("/api/alerts", auth, async (req, res) => {
     const u = (req as AuthRequest).user;
@@ -446,24 +471,25 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       ]),
     ),
   );
-  app.post("/api/assign", auth, role("operator", "admin"), async (req, res) => {
-    const u = (req as AuthRequest).user;
-    const b = z
-      .object({ vehicle_id: z.string(), driver_id: z.string() })
-      .parse(req.body);
-    const [d] = await db.query(
-      "SELECT id FROM profiles WHERE id=? AND org_id=? AND role='driver'",
-      [b.driver_id, u.org_id],
-    );
-    if (!d || !(await vehicle(u, b.vehicle_id)))
-      return res.status(403).json({ error: "Invalid organization assignment" });
-    await db.run(
-      "INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id",
-      [b.vehicle_id, b.driver_id],
-    );
-    await audit(u, "vehicle_assigned", b.vehicle_id);
-    notify(u.org_id);
-    res.json({ ok: true });
+  app.post("/api/assign",auth,role("operator","admin"),async(req,res)=>{
+    const u=(req as AuthRequest).user;
+    const b=z.object({vehicle_id:z.string(),driver_id:z.string(),operator_id:z.string().optional()}).parse(req.body);
+    const [d]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role='driver'",[b.driver_id,u.org_id]);
+    if(!d||!await vehicle(u,b.vehicle_id))return res.status(403).json({error:'Invalid organization assignment'});
+    let operator:any=null;
+    if(b.operator_id){
+      [operator]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role IN ('operator','admin')",[b.operator_id,u.org_id]);
+      if(!operator||(u.role==='operator'&&operator.id!==u.id))return res.status(403).json({error:'Choose an authorized operator in this TODA; operators can select only themselves'});
+    }
+    await db.transaction(async tx=>{
+      await tx.run('INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id',[b.vehicle_id,b.driver_id]);
+      if(operator){
+        await tx.run('INSERT INTO vehicle_operators VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET operator_id=excluded.operator_id',[b.vehicle_id,operator.id]);
+        await tx.run('UPDATE device_operation SET commissioned=0 WHERE device_id IN (SELECT id FROM devices WHERE vehicle_id=?) AND (operator_id IS NULL OR operator_id<>?)',[b.vehicle_id,operator.id]);
+      }
+      const id=randomUUID();await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[id,u.org_id,u.id,'vehicle_assigned',b.vehicle_id,now()]);
+      await tx.run('INSERT INTO activity_details VALUES (?,?)',[id,`Assigned ${d.name} to ${b.vehicle_id}${operator?'; responsible operator: '+operator.name:'. Operator assignment unchanged.'}`]);
+    });notify(u.org_id);res.json({ok:true});
   });
   app.post("/api/invite", auth, role("operator", "admin"), async (req, res) => {
     const u = (req as AuthRequest).user;
@@ -510,8 +536,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         const registered=await db.transaction(async tx=>{
           const [i]=await tx.query('UPDATE invitations SET used=1 WHERE token_hash=? AND used=0 AND expires_at>? RETURNING *',[hash(b.token),now()]);
           if(!i)return false;
-          createdId=identity?await identity.createUser(i.email,b.password):randomUUID();
+          if(operational()&&!identity?.registerApplicant)throw new Error('Operational signup requires verified email registration');
+          createdId=identity?(operational()?await identity.registerApplicant!(i.email,b.password):await identity.createUser(i.email,b.password)):randomUUID();
           await tx.run('INSERT INTO profiles(id,org_id,email,name,role,password_hash) VALUES (?,?,?,?,?,?)',[createdId,i.org_id,i.email,b.name,i.role,identity?'supabase-managed':passwordHash(b.password)]);
+          await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),i.org_id,createdId,'account_registered',createdId,now()]);
           return true;
         });
         if(!registered)return res.status(400).json({error:'Invitation invalid or expired'});
@@ -537,12 +565,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         .object({
           id: z.string().regex(/^[A-Za-z0-9-]{1,40}$/),
           name: z.string().min(1).max(80),
+          brand:z.enum(["BEMAC","NWOW"]).default("BEMAC"),
         })
         .parse(req.body);
-      await db.run("INSERT INTO vehicles(id,org_id,name) VALUES (?,?,?)", [
+      await db.run("INSERT INTO vehicles(id,org_id,name,model) VALUES (?,?,?,?)", [
         b.id,
         u.org_id,
         b.name,
+        b.brand==='NWOW'?'NWOW':'BEMAC 68VM Passenger',
       ]);
       await audit(u, "vehicle_created", b.id);
       notify(u.org_id);
@@ -578,6 +608,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         b.role,
         p.id,
       ]);
+      if(!["operator","admin"].includes(b.role))await db.run("DELETE FROM vehicle_operators WHERE operator_id=?",[p.id]);
       await db.run("DELETE FROM sessions WHERE user_id=?", [p.id]);
       await audit(u, "account_updated", p.id);
       res.json({ ok: true });
@@ -719,6 +750,8 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const b = z
         .object({
           session_id: z.uuid(),
+          device_id: z.string().optional(),
+          mode: z.enum(["hardware","demo"]).optional(),
           test: z.string().min(1).max(100),
           result: z.enum(["PASS", "FAIL", "BLOCKED", "NOT TESTED"]),
           measurements: z.string().max(2000),
@@ -731,7 +764,9 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         "SELECT * FROM bench_sessions WHERE id=? AND engineer_id=?",
         [b.session_id, u.id],
       );
-      if (!s) return res.status(403).json({ error: "Session access denied" });
+      if(operational()&&(!b.device_id||!b.mode))return res.status(400).json({error:'Expected device and source are required in operational evidence'});
+      const [sessionDevice]=s?await db.query('SELECT vehicle_id FROM devices WHERE id=?',[s.device_id]):[];
+      if (!s || !sessionDevice || !await vehicle(u,sessionDevice.vehicle_id) || s.closed_at || (b.device_id && b.device_id!==s.device_id) || (b.mode && b.mode!==s.mode)) return res.status(403).json({ error: "Session/device/source context mismatch" });
       await db.run("INSERT INTO bench_results VALUES (?,?,?,?,?,?,?,?,?)", [
         randomUUID(),
         b.session_id,
@@ -822,13 +857,22 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     rateLimit({ windowMs: 60000, limit: 300 }),
     async (req, res) => {
       const parsed = telemetrySchema.safeParse(req.body);
-      if (!parsed.success)
+      if (!parsed.success) {
+        // Record only authenticated device errors, never raw payloads/tokens or spoofed device identities.
+        if(typeof req.body?.device_id==='string'){
+          const [device]=await db.query("SELECT d.token_hash,v.org_id FROM devices d JOIN vehicles v ON v.id=d.vehicle_id WHERE d.id=?",[req.body.device_id]);
+          if(device&&hash((req.headers.authorization||'').replace(/^Bearer /,''))===device.token_hash){
+            await db.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),device.org_id,null,'device_ingest_rejected: invalid telemetry schema',req.body.device_id,now()]);
+            notify(device.org_id);
+          }
+        }
         return res
           .status(400)
           .json({
             error: "Invalid telemetry",
             issues: parsed.error.issues.map((i) => i.message),
           });
+      }
       const t = parsed.data;
       const [d] = await db.query(
         "SELECT d.*,v.org_id FROM devices d JOIN vehicles v ON v.id=d.vehicle_id WHERE d.id=?",
@@ -858,34 +902,40 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         return res.status(401).json({ error: "Device authentication failed" });
       const execute = async () => {
         const duplicate = await db.query(
-          "SELECT id FROM telemetry WHERE device_id=? AND mode=? AND boot_id=? AND sequence=?",
+          "SELECT id,payload FROM telemetry WHERE device_id=? AND mode=? AND boot_id=? AND sequence=?",
           [t.device_id, t.source_type, t.boot_id, t.sequence],
         );
         if (duplicate.length) {
-          res.json({ accepted: true, duplicate: true });
+          const prior=JSON.parse(duplicate[0].payload);
+          // USB and Wi-Fi may forward the same acquisition frame; transport alone may differ.
+          if(JSON.stringify({...telemetrySchema.parse(prior),transport:t.transport})!==JSON.stringify(t)) {
+            res.status(409).json({error:"Conflicting payload for stored identity"}); return;
+          }
+          res.json({ accepted: true, duplicate: true, ack:{persisted:true,device_id:t.device_id,boot_id:t.boot_id,sequence:t.sequence} });
           return;
         }
         const [last] = await db.query(
           "SELECT sequence FROM telemetry WHERE device_id=? AND mode=? AND boot_id=? ORDER BY sequence DESC LIMIT 1",
           [t.device_id, t.source_type, t.boot_id],
         );
-        if (last && t.sequence < last.sequence) {
+        if (last && t.sequence < last.sequence && !t.cpe?.historical && !t.event_id) {
           res.status(409).json({ error: "Replayed sequence rejected" });
           return;
         }
         if (
-          t.device_timestamp &&
-          Date.parse(t.device_timestamp) > Date.now() + 60000
+          (t.device_timestamp && Date.parse(t.device_timestamp) > Date.now() + 60000) ||
+          (t.event_timestamp && Date.parse(t.event_timestamp) > Date.now() + 60000)
         ) {
           res.status(400).json({ error: "Future timestamp rejected" });
           return;
         }
+        const historical=!!t.cpe?.historical || !!(last && t.sequence<last.sequence && t.event_id);
         const received = now(),
           at = t.device_timestamp || received,
           id = randomUUID();
         await db.transaction(async (tx) => {
           const [prev] = await tx.query(
-            "SELECT measured_at,payload FROM telemetry WHERE device_id=? AND mode=? ORDER BY received_at DESC LIMIT 1",
+            "SELECT measured_at,payload FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) AND id NOT IN (SELECT telemetry_id FROM archived_frames) ORDER BY received_at DESC LIMIT 1",
             [t.device_id, t.source_type],
           );
           await tx.run("INSERT INTO telemetry VALUES (?,?,?,?,?,?,?,?)", [
@@ -898,7 +948,13 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
             at,
             JSON.stringify(t),
           ]);
+          if(historical) await tx.run('INSERT INTO archived_frames VALUES (?,?)',[id,'Delayed/recovered event; not a live sample']);
+          if(t.cpe) {
+            const c=t.cpe;
+            await tx.run("INSERT INTO cpe_samples VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",[id,t.device_id,t.source_type,c.load_mode,received,t.device_timestamp,c.pzem.voltage_v,c.pzem.current_a,c.pzem.power_w,c.pzem.energy_wh,c.acs.current_a,c.lte.registered?1:0,c.alarm.commanded?1:0,JSON.stringify(c),c.historical?1:0]);
+          }
           for (const source of ["solar", "wind"] as const) {
+            if(historical)continue;
             const p = power(t[`${source}_voltage_v`], t[`${source}_current_a`]);
             const pt = prev ? JSON.parse(prev.payload) : null;
             const wh = integrateWh(
@@ -918,7 +974,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
               [randomUUID(), id, t.device_id, t.source_type, source, p, wh, at],
             );
           }
-          if (t.gps_fix)
+          if (t.gps_fix && !historical)
             await tx.run("INSERT INTO gps_records VALUES (?,?,?,?,?,?,?)", [
               randomUUID(),
               id,
@@ -936,12 +992,13 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
                 t.device_id,
                 t.source_type,
                 t.event_type,
-                at,
+                t.event_timestamp!==undefined?(t.event_timestamp||received):at,
                 null,
               ],
             );
           const previousHealth = prev ? JSON.parse(prev.payload).sensor_health : {};
           for (const [sensor, status] of Object.entries(t.sensor_health)) {
+            if(historical)continue;
             if (status !== "fault" || previousHealth[sensor] === "fault") continue;
             await tx.run("INSERT INTO security_events VALUES (?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING", [
               `${t.device_id}:${t.boot_id}:${t.sequence}:fault:${sensor}`,
@@ -950,6 +1007,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
               at, null,
             ]);
           }
+          await recordIncident(tx,t,d,received,req.headers['x-bench-transport']==='usb');
           await tx.run("UPDATE devices SET firmware_version=? WHERE id=?", [
             t.firmware_version,
             t.device_id,
@@ -958,7 +1016,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         notify(d.org_id);
         res
           .status(201)
-          .json({ accepted: true, id, backend_received_at: received });
+          .json({ accepted: true, id, backend_received_at: received, ack:{persisted:true,device_id:t.device_id,boot_id:t.boot_id,sequence:t.sequence} });
       };
       const job = ingestChain.then(execute);
       ingestChain = job.catch(() => {});

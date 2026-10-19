@@ -15,6 +15,13 @@ await page.goto(base);
 await page.waitForFunction(() => !!navigator.serviceWorker.controller, {
   timeout: 45000,
 });
+const worker=context.serviceWorkers().find(w=>w.url().endsWith('/sw.js'));
+assert.ok(worker,'The application service worker must be running');
+await worker.evaluate(()=>{
+  const scope=globalThis as any;scope.solairUnhandledErrors=[];
+  scope.addEventListener('unhandledrejection',(event:any)=>scope.solairUnhandledErrors.push(String(event.reason)));
+  scope.addEventListener('error',(event:any)=>scope.solairUnhandledErrors.push(String(event.message)));
+});
 await page.getByLabel("Email address").fill("driver@solair.local");
 await page.getByLabel("Password", { exact: true }).fill("SolairDemo!2026");
 await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -26,6 +33,17 @@ const manifest = await page.request
   .get(base + "/manifest.webmanifest")
   .then((r) => r.json());
 assert.equal(manifest.display, "standalone");
+// Consume responses immediately while cache writes run in the worker.
+await page.evaluate(async()=>{
+  await Promise.all(Array.from({length:8},(_,i)=>fetch('/bemac-white.png?cache-race-fixture='+i).then(r=>r.arrayBuffer())));
+  await fetch('/_next/image?url=%2Fbemac-white.png&w=640&q=75').then(r=>r.arrayBuffer());
+});
+await page.waitForFunction(async()=>{
+  const name=(await caches.keys()).find(k=>k.startsWith('solair-shell-'));
+  const cache=await caches.open(name!);
+  return !!await cache.match('/bemac-white.png?cache-race-fixture=7')&&!!await cache.match('/_next/image?url=%2Fbemac-white.png&w=640&q=75');
+});
+assert.deepEqual(await worker.evaluate(()=>(globalThis as any).solairUnhandledErrors),[]);
 const cached = await page.evaluate(async () => {
   const name = (await caches.keys()).find(k => k.startsWith("solair-shell-"));
   const cache = await caches.open(name!);
@@ -67,6 +85,7 @@ const result = {
     "Cold offline shell renders",
     "390px production layout has no horizontal overflow",
     "No runtime errors",
+    "Immediate image response consumption and background cache writes produce no service-worker errors",
   ],
   cachedAssets: cached.length,
   errors,

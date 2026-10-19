@@ -35,7 +35,7 @@ export const guides: Record<string, string[]> = {
     "Record coordinates, satellite count and fix age; unplug the module and verify unavailable state.",
   ],
   "LTE AT verification": [
-    "Validate carrier-board supply, peak current capacity and UART levels before enabling GPIO16/17.",
+    "Validate carrier-board supply, peak current capacity and UART levels before enabling GPIO13/14. GPIO16/17 belong to RS485.",
     "Enable the diagnostic adapter and observe AT/OK detection.",
     "Check SIM/network/data separately using the module documentation. AT detection does not establish LTE ingestion.",
   ],
@@ -59,4 +59,6 @@ export const guides: Record<string, string[]> = {
     "Restore connectivity and check queued event IDs, deduplication and timestamps.",
     "Overflow is a bounded-buffer fault; document any loss instead of claiming unlimited retention.",
   ],
+  "PZEM USB / MAX3485 measurement": ["First use the laptop USB-RS485 read-only test on a supervised isolated resistor bench; confirm the manufacturer shunt diagram and external regulated 5 V communication supply.","Then RO→16, DI→17, DE+RE→23 on verified 3.3 V MAX3485; preserve isolation boundaries. Upload test 09b.","Compare meter voltage/current/power/Wh with independent instruments and inspect the same device in CPE Lab. bench_resistor is not vehicle charging."],
+  "Combined all-sensors soak": ["Pass individual tests first. Use final solair_cpe firmware and verified feature flags.","Keep UART0 USB, UART1 RS485, UART2 LTE, RX-only software UART GPS32. Record checksum errors, overflow, watchdog resets and alarm latency during concurrent traffic.","Disconnect each module/network, verify fault/unavailable state and recover without invented measurements. Record actual results and evidence; no automatic physical PASS."],
 };

@@ -18,7 +18,6 @@ import {
   Wind,
   Bell,
   LogOut,
-  ChevronDown,
   Radio,
   Download,
   Menu,
@@ -31,9 +30,18 @@ import { VehicleVisualization } from "./VehicleVisualization";
 import type { Vehicle, Profile } from "./types";
 import PasswordRecovery from './PasswordRecovery';
 import AccountMenu from './AccountMenu';
+import {SignUp,ContactPreferences,IncidentHistory,OperationAdmin} from './Operational';
+import People from './People';
+import Brand from './Brand';
+import MobileIntro from './MobileIntro';
+import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
+import TodaMenu from './TodaMenu';
+import {RegistrationDetails,ActivityLog} from './Registration';
 import Notifications from './Notifications';
 import { Appearance, ThemeProvider } from './Theme';
 import { HelpSupport, ProblemReport } from './Support';
+import CpeReadings from './CpeReadings';
+import CpeHistory from './CpeHistory';
 import { power, freshness } from "../packages/telemetry-contract";
 import "./style.css";
 import "@fontsource/dm-sans/latin-400.css";
@@ -54,20 +62,12 @@ const nav = [
   ["SOS & Assistance", LifeBuoy],
   ["Messages", MessageSquare],
   ["History & Reports", History],
+  ["People & assignments", UserRound],
+  ["Devices", Shield],
+  ["Organizations", Truck],
+  ["Activity log", History],
   ["Settings", Settings],
 ] as const;
-function Brand() {
-  return (
-    <div className="brand">
-      <span className="brand-symbol">
-        <Zap size={23} fill="currentColor" />
-      </span>
-      <span>
-        SOLAIR<i>CONNECTED MOBILITY</i>
-      </span>
-    </div>
-  );
-}
 class Boundary extends React.Component<
   { children: React.ReactNode },
   { error: boolean }
@@ -106,7 +106,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
       .catch(() => setHealth({ environment: "Offline app shell" }));
   }, []);
   return (
-    <main className="login">
+    <main className="login login-entry">
       <section className="login-art">
         <Brand />
         <span className="eyebrow">ENERGY. SECURITY. CONNECTION.</span>
@@ -123,10 +123,9 @@ function Login({ onLogin }: { onLogin: () => void }) {
         <VehicleVisualization />
         <small>White BEMAC 68VM · Reference-based visualization</small>
       </section>
-      <section className="login-form">
-        <span className="badge">{health?.environment || "Connecting"}</span>
-        <h2>{invite ? "Join your TODA" : "Welcome to SOLAIR"}</h2>
-        <p>Connected energy and fleet intelligence.</p>
+      <section className="login-form"><div className="mobile-auth-brand"><Brand/></div>
+        <h2 className="auth-heading">{invite ? "Join your TODA" : "Welcome to SOLAIR"}</h2>
+        <p className="auth-subtitle">Connected energy and fleet intelligence.</p>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -183,11 +182,12 @@ function Login({ onLogin }: { onLogin: () => void }) {
               {error}
             </p>
           )}
-          <button className="primary">
+          <button className="primary auth-entry-action">
             {invite ? "Create account" : "Sign in"}
             <ArrowRight size={17} />
           </button>
         </form>
+        {!invite&&<a className="button auth-entry-action" href="/signup">Sign up<ArrowRight size={17}/></a>}
         {health?.auth_provider==='supabase'&&!invite&&<button onClick={async()=>{try{const r=await api('/password/reset-request','POST',{email});setError(r.message);}catch(e){setError((e as Error).message);}}}>Forgot password?</button>}
       {health?.environment === "local development" && !invite && (
           <div className="demo-login">
@@ -300,6 +300,8 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
   const t = v.telemetry;
   return (
     <>
+      <CpeReadings t={t} />
+      <CpeHistory vehicleId={v.id} mode={mode} />
       <div className="metrics energy-metrics">
         <Metric
           label="Battery voltage"
@@ -428,8 +430,7 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
         <span className="badge">RESEARCH IN PROGRESS</span>
       </section>
       <p className="subtle">
-        {mode === "demo" ? "Simulated readings" : "Hardware readings"} · Last
-        sample {stamp(t?.received_at)} · Calibration{" "}
+        {mode === "demo" ? "Simulated readings" : "Hardware readings"} · Last contact {stamp(t?.received_at)} · Measurement {stamp(t?.device_timestamp)} · Calibration{" "}
         {t?.calibration_status || "unverified"} · Recorded solar value at
         illustrative tariff {money(12)} / kWh:{" "}
         {v.solar_wh === null ? "—" : money((v.solar_wh / 1000) * 12)}. Tariff is
@@ -439,18 +440,24 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
   );
 }
 function App() {
+  const [mobileLaunch] = useState(() => window.matchMedia('(max-width: 650px)').matches);
+  const [introDone,setIntroDone] = useState(false);
+  useEffect(()=>{
+    if(!mobileLaunch)return;
+    const timer=window.setTimeout(()=>setIntroDone(true),500);
+    return()=>window.clearTimeout(timer);
+  },[mobileLaunch]);
   const [user, setUser] = useState<Profile | null>(null),
     [loaded, setLoaded] = useState(false),
     [page, setPage] = useState("Overview"),
     [mode, setMode] = useState("demo"),
     [fleet, setFleet] = useState<Vehicle[]>([]),
-    [selected, setSelected] = useState("ET-01"),
+    [selected, setSelected] = useState(""),
     [alerts, setAlerts] = useState<any[]>([]),
     [help, setHelp] = useState<any[]>([]),
     [messages, setMessages] = useState<any[]>([]),
     [records, setRecords] = useState<any[]>([]),
     [users, setUsers] = useState<any[]>([]),
-    [audit, setAudit] = useState<any[]>([]),
     [orgs, setOrgs] = useState<any[]>([]),
     [organization, setOrganization] = useState("Your TODA"),
     [notice, setNotice] = useState(""),
@@ -473,9 +480,9 @@ function App() {
   const clearSession = useCallback(() => {
     requestKey.current = "";
     setUser(null); setFleet([]); setAlerts([]); setHelp([]); setMessages([]);
-    setRecords([]); setUsers([]); setAudit([]); setOrgs([]); setNotice("");
+    setRecords([]); setUsers([]); setOrgs([]); setNotice("");
     setOrganization("Your TODA"); setQueueCount(0); setDrawer(false);
-    setSelected("ET-01"); setOffset(0); setPage("Overview");
+    setSelected(""); setOffset(0); setPage("Overview");
   }, []);
   async function logout() {
     if (logoutPending.current) return;
@@ -508,7 +515,7 @@ function App() {
         setHelp([]);
         setNotice("");
         setUser(u);
-        api("/organization").then((o) => setOrganization(o.name));
+        setOrganization(u.organization_name||"Your TODA");
         setLoaded(true);
         setPage("Overview");
       })
@@ -533,25 +540,33 @@ function App() {
     if (!user) return;
     const key = `${user.id}:${user.org_id}:${mode}`;
     try {
-      const [f, a, h] = await Promise.all([
+      const [f, a, h, membership] = await Promise.all([
         api("/fleet" + suffix),
         api("/alerts" + suffix),
         api("/help" + suffix),
+        api("/me"),
       ]);
       if (requestKey.current !== key) return;
+      setOrganization(membership.organization_name||"Your TODA");
+      if(membership.org_id!==user.org_id||membership.role!==user.role)setUser(membership);
       setFleet(f);
+      setSelected(current => f.some((item:Vehicle)=>item.id===current)?current:(f[0]?.id||''));
       setAlerts(a);
       setHelp(h);
       setNotificationRevision((value) => value + 1);
       setOffline(false);
     } catch (e) {
       if (requestKey.current !== key) return;
+      if((e as {status?:number}).status===401){clearSession();toast("Your account access changed or your session expired. Sign in again to load your saved TODA.");return;}
       setOffline(true);
       toast((e as Error).message);
     }
-  }, [user, suffix, toast]);
+  }, [user, suffix, toast, clearSession]);
   useEffect(() => {
     void refresh();
+    const recheck=()=>void refresh();
+    window.addEventListener("focus",recheck);window.addEventListener("online",recheck);
+    return()=>{window.removeEventListener("focus",recheck);window.removeEventListener("online",recheck);};
   }, [refresh]);
   useEffect(() => {
     if (!user) return;
@@ -567,7 +582,7 @@ function App() {
     return () => { active = false; stream.close(); };
   }, [user, refresh, page, selected, suffix]);
   useEffect(() => {
-    if (!user) return;
+    if (!user || !selected) return;
     let active = true;
     const apply = (setter: (data: any) => void) => (data: any) => { if (active) setter(data); };
     if (page === "Messages")
@@ -578,14 +593,14 @@ function App() {
       api(`/history/${selected}${suffix}&offset=${offset}`)
         .then(apply(setRecords))
         .catch((e) => toast(e.message));
-    if (page === "Settings" && ["operator", "admin"].includes(user.role))
-      api("/users").then(apply(setUsers));
-    if (page === "Settings" && user.role === "admin") {
-      api("/audit").then(apply(setAudit));
-      api("/organizations").then(apply(setOrgs));
-    }
     return () => { active = false; };
   }, [page, selected, suffix, user, offset, toast]);
+  useEffect(()=>{
+    if(!user)return;let active=true;
+    if(page==='People & assignments'&&['operator','admin'].includes(user.role))void api('/users').then(rows=>{if(active)setUsers(rows);}).catch(e=>toast(e.message));
+    if(user.role==='admin'&&page==='Organizations')void api('/organizations').then(rows=>{if(active)setOrgs(rows);}).catch(e=>toast(e.message));
+    return()=>{active=false;};
+  },[page,user,toast]);
   const flushQueue = useCallback(async () => {
     if (!user) return;
     const key = `solair-unsent-${user.id}`,
@@ -633,8 +648,9 @@ function App() {
       toast((e as Error).message);
     }
   };
+  useEffect(()=>{setOffset(0);setMessages([]);setRecords([]);},[selected,mode]);
   const select = useCallback((id: string) => setSelected(id), []);
-  const baseVehicle = fleet.find((v) => v.id === selected) || fleet[0];
+  const baseVehicle = fleet.find((v) => v.id === selected);
   const v = baseVehicle
     ? {
         ...baseVehicle,
@@ -659,6 +675,7 @@ function App() {
           : "Offline",
   }));
   void tick;
+  if (mobileLaunch && (!introDone || !loaded)) return <MobileIntro/>;
   if (!loaded) return <div className="loading">Connecting to SOLAIR…</div>;
   if (!user) return <Login onLogin={login} />;
   const driverNav = [
@@ -674,17 +691,10 @@ function App() {
       {drawer && <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setDrawer(false)} />}
       <aside className={drawer ? "sidebar open" : "sidebar"}>
         <Brand />
-        <div className="organization">
-          <span className="org-avatar">MC</span>
-          <div>
-            {organization}
-            <small>{user.role.toUpperCase()} WORKSPACE</small>
-          </div>
-          <ChevronDown size={15} />
-        </div>
+        <TodaMenu key={`${user.id}:${user.org_id}`} user={user} organization={organization} selectedVehicle={v}/>
         <span className="nav-label">WORKSPACE</span>
         <nav>
-          {(driver ? driverNav : nav).map(([p, Icon]) => (
+          {(driver ? driverNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||['admin','operator'].includes(user.role)).map(([p, Icon]) => (
             <button
               key={p}
               className={page === p ? "active" : ""}
@@ -698,7 +708,7 @@ function App() {
                       "Live Fleet Map": "Location",
                       Security: "Alerts",
                       "SOS & Assistance": "Help",
-                      Settings: "Profile",
+                      Settings: "Settings",
                     } as any
                   )[p] || p
                 : p}
@@ -781,6 +791,7 @@ function App() {
             aria-label="Data mode"
             value={mode}
             onChange={(e) => {
+              if(e.target.value===mode)return;
               setMode(e.target.value);
               setFleet([]);
               setAlerts([]);
@@ -790,7 +801,7 @@ function App() {
               setOffset(0);
             }}
           >
-            <option value="demo">Demonstration</option>
+            {!health?.operational&&<option value="demo">Demonstration</option>}
             <option value="hardware">Real hardware bench</option>
           </select>
         </div>
@@ -854,14 +865,16 @@ function App() {
           </div>
           {v?.telemetry && (
             <div className="measurement-banner">
-              {Date.now() - Date.parse(v.telemetry.measured_at) < 30000
+              {!v.telemetry.device_timestamp ? "MEASUREMENT TIME UNKNOWN" : Date.now() - Date.parse(v.telemetry.device_timestamp) < 30000
                 ? "RECENT READING"
                 : "STALE / HISTORICAL READING"}{" "}
-              · {stamp(v.telemetry.measured_at)} ·{" "}
+              · Last contact {stamp(v.telemetry.received_at)} · Device measurement {v.telemetry.device_timestamp?stamp(v.telemetry.device_timestamp):'UTC unavailable'} · GPS {v.telemetry.gps_fix?`reported fix age ${v.telemetry.gps_fix_age_ms} ms`:'no current fix'} ·{" "}
               {mode === "demo" ? "SIMULATED" : "REPORTED HARDWARE"}
             </div>
           )}
+          {driver&&page==='Overview'&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><details className="registration-summary"><summary>View my registration and assignments</summary><RegistrationDetails userId={user.id} compact/></details></>}
           {!v ? (
+            !["Settings","People & assignments","Devices","Organizations","Activity log"].includes(page) &&
             <section className={page === "Live Fleet Map" ? "panel full-map" : "panel empty"}>
               {page === "Live Fleet Map" ? (
                 <>
@@ -875,7 +888,7 @@ function App() {
                 <>
                   <Truck size={36} />
                   <h2>No assigned vehicle</h2>
-                  <p>Your TODA operator can assign an e-trike in Settings.</p>
+                  <p>Your account is ready. An administrator can link your TODA and your operator can assign a vehicle in People & assignments.</p>
                 </>
               )}
             </section>
@@ -929,34 +942,8 @@ function App() {
                       driver={driver}
                       onDetail={() => go("Vehicle details")}
                     />
-                    {driver ? (
-                      <section className="panel driver-electrical">
-                        <h3>Your battery, at a glance</h3>
-                        <div className="electrical-grid">
-                          <div>
-                            <span>Voltage</span>
-                            <strong>
-                              {value(v.telemetry?.battery_voltage_v)} <em>V</em>
-                            </strong>
-                          </div>
-                          <div>
-                            <span>Current</span>
-                            <strong>
-                              {value(v.telemetry?.battery_current_a)} <em>A</em>
-                            </strong>
-                          </div>
-                        </div>
-                        <p className="subtle">
-                          {v.telemetry?.battery_current_a == null
-                            ? "Battery current is not yet instrumented."
-                            : "Positive current = charging; negative = discharge."}
-                        </p>
-                        <button onClick={() => go("Energy")}>
-                          Explore energy
-                          <ArrowRight size={16} />
-                        </button>
-                      </section>
-                    ) : (
+                    {driver&&<DeviceStatus vehicle={v} mode={mode} go={go}/>}
+                    {!driver && (
                       <section className="panel overview-map">
                         <div className="panel-heading">
                           <h3>Fleet on the map</h3>
@@ -1215,6 +1202,7 @@ function App() {
                       icon={Bell}
                     />
                   </div>
+                  <NotificationReadiness key={`sms:${user.id}:${user.org_id}:${v.id}:${mode}`} vehicleId={v.id} revision={notificationRevision} mode={mode} go={go}/><IncidentHistory key={`${user.id}:${user.org_id}:${v.id}:${mode}`} vehicleId={v.id} user={user} refreshKey={tick+notificationRevision} mode={mode}/>
                   <section className="panel">
                     <div className="panel-heading">
                       <h3>Security incident timeline</h3>
@@ -1478,7 +1466,7 @@ function App() {
                 </section>
               )}
               {page === "History & Reports" && (
-                <section className="panel">
+                <><EvidenceDownloads vehicle={v} mode={mode} user={user}/><section className="panel"><a className="button" href={`/api/research-export/${encodeURIComponent(v.id)}?mode=${mode}`}>Export telemetry CSV (up to 5,000)</a>
                   <div className="panel-heading">
                     <h3>Telemetry archive · {v.id}</h3>
                     <a className="button" href={`/api/export/${v.id}${suffix}`}>
@@ -1541,11 +1529,12 @@ function App() {
                       Next
                     </button>
                   </div>
-                </section>
+                </section></>
               )}
               {page === "CPE Lab" && labAllowed && (
                 <Suspense fallback={<p>Loading engineering workspace…</p>}>
                   <Lab
+                    key={`${user.id}:${user.org_id}:${v.device_id}:${mode}`}
                     vehicle={v}
                     mode={mode}
                     refresh={refresh}
@@ -1555,8 +1544,7 @@ function App() {
               )}
             </>
           )}
-          {page === "Settings" && (
-            <div className="settings-grid">
+          {page === "Settings" && <div className="settings-grid">
               <section className="panel">
                 <Appearance />
                 <h3>Your SOLAIR profile</h3>
@@ -1599,42 +1587,16 @@ function App() {
                   Open TODA messages
                   <MessageSquare size={16} />
                 </button>
-                {labAllowed && v && (
-                  <label>
-                    Replace selected vehicle visualization
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        if (file.size > 3000000) {
-                          toast("Use an optimized image under 3 MB");
-                          return;
-                        }
-                        const reader = new FileReader();
-                        reader.onload = () =>
-                          void act(
-                            () =>
-                              api("/vehicle-image/" + v.id, "POST", {
-                                mime: file.type,
-                                base64: String(reader.result).split(",")[1],
-                              }),
-                            "Vehicle image updated",
-                          );
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                  </label>
-                )}
                 <p className="subtle">
-                  Location retention: run the documented cleanup job. Access is
-                  restricted to your assignments and TODA.
+                  Your account details and alert preferences are saved securely. Vehicle access is managed separately.
                 </p>
               </section>
-              {["operator", "admin"].includes(user.role) && (
+              <RegistrationDetails userId={user.id}/>
+              <ContactPreferences />
+          </div>}
+          {page === "People & assignments" && ["admin","operator"].includes(user.role) && <div className="settings-grid"><People user={user} refreshKey={notificationRevision} onChange={async()=>{setUsers(await api('/users'));await refresh();}}/>
                 <section className="panel">
-                  <h3>People & vehicle assignments</h3>
+                  <h3>Vehicle assignments and invitations</h3>
                   {v && (
                     <form
                       onSubmit={(e) => {
@@ -1645,6 +1607,7 @@ function App() {
                             api("/assign", "POST", {
                               vehicle_id: f.get("vehicle"),
                               driver_id: f.get("driver"),
+                              operator_id:f.get("operator")||undefined,
                             }),
                           "Assignment saved",
                         );
@@ -1670,49 +1633,10 @@ function App() {
                             ))}
                         </select>
                       </label>
+                      <label>Responsible operator<select name="operator" aria-label="Responsible operator"><option value="">Keep existing / not assigned</option>{users.filter(p=>['operator','admin'].includes(p.role)&&(user.role==='admin'||p.id===user.id)).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
                       <button>Assign vehicle</button>
                     </form>
                   )}
-                  <h3>Driver accounts</h3>
-                  {users
-                    .filter(
-                      (p) =>
-                        p.id !== user.id &&
-                        (user.role === "admin" || p.role === "driver"),
-                    )
-                    .map((p) => (
-                      <div className="switch-row" key={p.id}>
-                        <span>
-                          {p.name} · {p.role}
-                        </span>
-                        <button
-                          onClick={async () => {
-                            const name = window.prompt(
-                              "Account display name",
-                              p.name,
-                            );
-                            if (!name) return;
-                            const role =
-                              user.role === "admin"
-                                ? window.prompt(
-                                    "Role: driver, operator, engineer, admin",
-                                    p.role,
-                                  )
-                                : "driver";
-                            if (!role) return;
-                            await act(async () => {
-                              await api("/users/" + p.id, "PATCH", {
-                                name,
-                                role,
-                              });
-                              setUsers(await api("/users"));
-                            }, "Account updated; existing sessions revoked");
-                          }}
-                        >
-                          Edit account
-                        </button>
-                      </div>
-                    ))}
                   <h3>Register a vehicle</h3>
                   <form
                     onSubmit={(e) => {
@@ -1723,11 +1647,13 @@ function App() {
                           api("/vehicles", "POST", {
                             id: f.get("id"),
                             name: f.get("name"),
+                            brand:f.get("brand"),
                           }),
                         "Vehicle registered",
                       );
                     }}
                   >
+                    <label>Vehicle type<select name="brand" aria-label="Registered vehicle type"><option value="BEMAC">BEMAC</option><option value="NWOW">NWOW</option></select></label>
                     <label>
                       Vehicle ID
                       <input
@@ -1787,12 +1713,41 @@ function App() {
                       Create invitation
                     </button>
                   </form>
-                </section>
-              )}
-              {user.role === "admin" && (
+                </section>          </div>}
+          {page === "Devices" && labAllowed && <div className="settings-grid">{user.role==='admin'&&<OperationAdmin deviceId={v?.device_id||null}/>}<section className="panel"><h3>Vehicle appearance</h3>
+                {labAllowed && v && (
+                  <label>
+                    Replace selected vehicle visualization
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 3000000) {
+                          toast("Use an optimized image under 3 MB");
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = () =>
+                          void act(
+                            () =>
+                              api("/vehicle-image/" + v.id, "POST", {
+                                mime: file.type,
+                                base64: String(reader.result).split(",")[1],
+                              }),
+                            "Vehicle image updated",
+                          );
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </label>
+                )}
+          </section></div>}
+          {page === "Organizations" && user.role==='admin' && <div className="settings-grid">
                 <section className="panel">
                   <h3>Organizations</h3>
-                  {orgs.map((o) => (
+                  {orgs.filter(o=>!o.id.startsWith('unassigned-')).map((o) => (
                     <div className="switch-row" key={o.id}>
                       <span>{o.name}</span>
                       <button
@@ -1830,16 +1785,8 @@ function App() {
                     />
                     <button>Create organization</button>
                   </form>
-                  <h3>Audit trail</h3>
-                  {audit.map((a) => (
-                    <p className="subtle" key={a.id}>
-                      {stamp(a.created_at)} · {a.action} · {a.target}
-                    </p>
-                  ))}
-                </section>
-              )}
-            </div>
-          )}
+                </section>          </div>}
+          {page === "Activity log" && user.role==='admin' && <ActivityLog/>}
           {page === "Help and support" && <HelpSupport go={go} />}
           {page === "Report a problem" && <ProblemReport page={reportPage} mode={mode} vehicleId={v?.id} />}
           <footer>
@@ -1871,7 +1818,7 @@ function App() {
                       Energy: "Energy",
                       Security: "Alerts",
                       "SOS & Assistance": "Help",
-                      Settings: "Profile",
+                      Settings: "Settings",
                     } as any
                   )[p]
                 }
@@ -2014,4 +1961,4 @@ function EnergyHistory({ v, mode }: { v: Vehicle; mode: string }) {
     </section>
   );
 }
-export default function SolairApp(){return <ThemeProvider><Boundary>{location.pathname==='/reset-password'?<PasswordRecovery/>:<App/>}</Boundary></ThemeProvider>;}
+export default function SolairApp(){return <ThemeProvider><Boundary>{location.pathname==='/reset-password'?<PasswordRecovery/>:location.pathname==='/signup'?<SignUp/>:<App/>}</Boundary></ThemeProvider>;}
