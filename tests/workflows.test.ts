@@ -51,11 +51,33 @@ test('Setup reports saved membership, every assigned vehicle and operator withou
   assert.equal((await request('/fleet?mode=hardware','new')).body.length,0);assert.equal((await db.query('SELECT id FROM sms_jobs')).length,0);
 });
 
-test('People needing assignments are filterable and operator results stay within their TODA',async()=>{
+test('People needing assignments are filterable by administrators; operators cannot read the directory',async()=>{
   const missing=(await request('/people?status=needs_assignment','admin')).body;assert.ok(missing.items.some((p:any)=>p.email==='setup-fixture@example.com'));assert.ok(!missing.items.some((p:any)=>p.id==='driver'));
-  const scoped=(await request('/people?status=needs_assignment','operator')).body;assert.equal(scoped.total,0);
-  const person=(await request('/people?q=Miguel','operator')).body.items[0];assert.equal(person.vehicles[0].operator_name,'Andrea Reyes');assert.equal(person.contact_ready,false);assert.equal('phone_e164' in person,false);
+  assert.equal((await request('/people?status=needs_assignment','operator')).status,403);
+  const person=(await request('/people?q=Miguel','admin')).body.items[0];assert.equal(person.vehicles[0].operator_name,'Andrea Reyes');assert.equal(person.contact_ready,false);assert.equal('phone_e164' in person,false);
   assert.equal((await request('/people?status=needs_assignment','driver')).status,403);
+});
+
+test('Administrator overview covers all TODAs without exposing secrets and rejects every other role',async()=>{
+ assert.equal((await request('/admin/overview')).status,401);
+ for(const role of ['driver','operator','engineer','outsider'])assert.equal((await request('/admin/overview',role)).status,403);
+ const response=await request('/admin/overview','admin');assert.equal(response.status,200);
+ const data=response.body;assert.equal(data.organizations,2);assert.ok(data.unassigned>=1);assert.ok(data.needs_assignment>=1);assert.equal(data.devices,8);assert.equal(data.readiness_pending,8);
+ assert.deepEqual(Object.keys(data).sort(),['accounts','devices','needs_assignment','operator_requests','organizations','readiness_pending','unassigned']);
+ for(const value of Object.values(data))assert.equal(typeof value,'number');
+});
+
+test('Operators cannot administer even their own TODA; forbidden requests leave assignments and records unchanged',async()=>{
+ const before=await db.query('SELECT * FROM assignments ORDER BY vehicle_id');
+ const cases:[string,any,string][]=[['/assign',{vehicle_id:'ET-01',driver_id:'driver',operator_id:'operator'},'POST'],['/invite',{email:'forbidden@example.com',role:'driver'},'POST'],['/vehicles',{id:'FORBIDDEN',name:'Forbidden'},'POST'],['/users/driver',{name:'Forbidden',role:'driver'},'PATCH'],['/admin/people/driver',{name:'Forbidden',role:'driver',org_id:'manila',expected_org_id:'manila'},'PATCH'],['/devices/provision',{vehicle_id:'ET-01'},'POST'],['/device-operation/SOL-ET-01',{commissioned:false,operator_id:'operator',evidence:'Forbidden change'},'POST'],['/organizations',{name:'Forbidden'},'POST'],['/admin/workspace',{org_id:'other'},'POST']];
+ for(const [path,body,method] of cases)assert.equal((await request(path,'operator',body,method)).status,403,path);
+ for(const path of ['/people','/users','/organizations','/admin/activity','/device-operation/SOL-ET-01'])assert.equal((await request(path,'operator')).status,403,path);
+ assert.deepEqual(await db.query('SELECT * FROM assignments ORDER BY vehicle_id'),before);
+ assert.equal((await db.query("SELECT id FROM vehicles WHERE id='FORBIDDEN'")).length,0);
+ assert.equal((await db.query("SELECT id FROM invitations WHERE email='forbidden@example.com'")).length,0);
+ assert.equal((await request('/fleet?mode=demo','operator')).status,200);
+ assert.equal((await request('/history/OTHER-01','operator')).status,403);
+ assert.equal((await request('/profile','operator',{name:'Andrea Reyes',notifications:true},'PATCH')).status,200);
 });
 
 test('SMS readiness is scoped, read-only and never claims delivery from saved configuration',async()=>{

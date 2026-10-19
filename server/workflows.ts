@@ -36,7 +36,7 @@ export function workflowRoutes(app:Express,db:Store,auth:RequestHandler) {
     ];
     if(profile.requested_role==='operator'&&u.role!=='operator'&&u.role!=='admin')tasks.push({id:'operator-access',label:'Operator access',complete:false,action:'An administrator must confirm operator access. Signup cannot grant fleet permissions.',page:'Settings',required:true});
     if(u.role==='driver'){
-      tasks.push({id:'vehicle',label:'Assigned vehicle',complete:vehicles.length>0,action:vehicles.length?vehicles.map(v=>`${v.id} · ${v.model}`).join(', '):'Your administrator or TODA operator must assign your vehicle.',page:'Settings',required:true});
+      tasks.push({id:'vehicle',label:'Assigned vehicle',complete:vehicles.length>0,action:vehicles.length?vehicles.map(v=>`${v.id} · ${v.model}`).join(', '):'Your administrator must assign your vehicle.',page:'Settings',required:true});
       tasks.push({id:'operator',label:'Responsible operator',complete:vehicles.length>0&&vehicles.every(v=>!!v.operator_name),action:vehicles.length&&vehicles.every(v=>!!v.operator_name)?'An operator is assigned to each of your vehicles.':'Your TODA must assign an operator to your vehicle.',page:'Settings',required:true});
     }
     tasks.push({id:'mobile',label:'Alert contact saved',complete:!!contact?.phone_e164,action:'Manage your mobile number in Contact and SMS preferences.',page:'Settings',required:false});

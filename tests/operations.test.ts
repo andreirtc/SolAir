@@ -54,14 +54,14 @@ test('Legacy access requests remain admin-only and cannot choose public privileg
  const [created]=await db.query('SELECT * FROM profiles WHERE email=?',[body.email]);assert.equal(created.role,'driver');
  const [contact]=await db.query('SELECT * FROM contact_preferences WHERE user_id=?',[created.id]);assert.equal(contact.phone_verified_at,null);assert.equal(contact.email_verified_at,null);
 });
-test('People directory paginates all accounts for admin, scopes operators and links new users securely',async()=>{
+test('People directory paginates all accounts for admin, rejects operators and links new users securely',async()=>{
  const [person]=await db.query('SELECT * FROM profiles WHERE email=?',['fixture-registered@example.com']);
  for(let n=0;n<27;n++)await db.run('INSERT INTO profiles(id,org_id,email,name,role,password_hash) VALUES (?,?,?,?,?,?)',['directory-'+n,'other','directory'+n+'@example.com','Directory fixture '+n,'driver','not-a-login']);
  assert.equal((await request('/people')).status,401);
  assert.equal((await request('/people','registered')).status,403);
  const first=(await request('/people?q=Directory&status=driver','admin')).body;assert.equal(first.total,27);assert.equal(first.items.length,25);
  assert.equal((await request('/people?q=Directory&page=2','admin')).body.items.length,2);
- assert.equal((await request('/people?q=Directory','operator')).body.total,0);
+ assert.equal((await request('/people?q=Directory','operator')).status,403);
  const unassigned=(await request('/people?q=fixture-registered&status=unassigned','admin')).body;assert.equal(unassigned.total,1);assert.equal(unassigned.items[0].id,person.id);
  const body={name:person.name,role:'driver',org_id:'manila',expected_org_id:person.org_id};
  assert.equal((await request('/admin/people/'+person.id,'operator',body,'PATCH')).status,403);
@@ -108,7 +108,7 @@ test('Operator business information and explicit vehicle operators stay authoriz
  assert.equal((await request('/assign','admin',{vehicle_id:'ET-01',driver_id:'driver',operator_id:'operator'})).status,200);
  assert.equal((await db.query('SELECT commissioned FROM device_operation WHERE device_id=?',['SOL-ET-01']))[0].commissioned,0);
  const vehicle=(await request('/registration','driver')).body.vehicles[0];assert.equal(vehicle.operator_name,'Andrea Reyes');assert.equal(vehicle.business_name,info.business_name);assert.equal(vehicle.public_phone,'+639171234567');
- assert.equal((await request('/vehicles','operator',{id:'NW-TEST',name:'TEST FIXTURE NWOW',brand:'NWOW'})).status,201);
+ assert.equal((await request('/vehicles','admin',{id:'NW-TEST',name:'TEST FIXTURE NWOW',brand:'NWOW'})).status,201);
  assert.equal((await db.query('SELECT model FROM vehicles WHERE id=?',['NW-TEST']))[0].model,'NWOW');
 });
 test('Admin activity includes cross-workspace registrations, assignment snapshots and filterable sign-ins',async()=>{

@@ -419,7 +419,7 @@ test("Operators cannot elevate invite roles or assign foreign users", async () =
   );
 });
 test("Invitation creates account once and enforces assigned role", async () => {
-  const i = await req("/invite", "operator", "POST", {
+  const i = await req("/invite", "admin", "POST", {
     email: "new@test.com",
     role: "driver",
   });
@@ -498,7 +498,7 @@ test("Transaction rolls back dependent writes after failure", async () => {
 test("Vehicle registration stays scoped to an organization", async () => {
   assert.equal(
     (
-      await req("/vehicles", "operator", "POST", {
+      await req("/vehicles", "admin", "POST", {
         id: "ET-09",
         name: "Test BEMAC",
       })

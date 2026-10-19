@@ -464,14 +464,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     ]);
     res.json({ ok: true });
   });
-  app.get("/api/users", auth, role("operator", "admin"), async (req, res) =>
+  app.get("/api/users", auth, role("admin"), async (req, res) =>
     res.json(
       await db.query("SELECT id,name,email,role FROM profiles WHERE org_id=?", [
         (req as AuthRequest).user.org_id,
       ]),
     ),
   );
-  app.post("/api/assign",auth,role("operator","admin"),async(req,res)=>{
+  app.post("/api/assign",auth,role("admin"),async(req,res)=>{
     const u=(req as AuthRequest).user;
     const b=z.object({vehicle_id:z.string(),driver_id:z.string(),operator_id:z.string().optional()}).parse(req.body);
     const [d]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role='driver'",[b.driver_id,u.org_id]);
@@ -479,7 +479,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     let operator:any=null;
     if(b.operator_id){
       [operator]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role IN ('operator','admin')",[b.operator_id,u.org_id]);
-      if(!operator||(u.role==='operator'&&operator.id!==u.id))return res.status(403).json({error:'Choose an authorized operator in this TODA; operators can select only themselves'});
+      if(!operator)return res.status(403).json({error:'Choose an authorized operator in this TODA'});
     }
     await db.transaction(async tx=>{
       await tx.run('INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id',[b.vehicle_id,b.driver_id]);
@@ -491,7 +491,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       await tx.run('INSERT INTO activity_details VALUES (?,?)',[id,`Assigned ${d.name} to ${b.vehicle_id}${operator?'; responsible operator: '+operator.name:'. Operator assignment unchanged.'}`]);
     });notify(u.org_id);res.json({ok:true});
   });
-  app.post("/api/invite", auth, role("operator", "admin"), async (req, res) => {
+  app.post("/api/invite", auth, role("admin"), async (req, res) => {
     const u = (req as AuthRequest).user;
     const b = z
       .object({
@@ -558,7 +558,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   app.post(
     "/api/vehicles",
     auth,
-    role("operator", "admin"),
+    role("admin"),
     async (req, res) => {
       const u = (req as AuthRequest).user;
       const b = z
@@ -582,7 +582,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   app.patch(
     "/api/users/:id",
     auth,
-    role("operator", "admin"),
+    role("admin"),
     async (req, res) => {
       const u = (req as AuthRequest).user;
       const b = z

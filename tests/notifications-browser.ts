@@ -53,8 +53,11 @@ try{
  assert.equal(await dialog.getByRole('button',{name:'Mark all read',exact:true}).isDisabled(),true);
  results.push('Log out immediately follows Settings; bell opens a dropdown without navigation; category filters, detail navigation and persistent read markers pass');
  await page.keyboard.press('Escape');
- const created=await page.evaluate(async()=>fetch('/api/vehicles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:`NOTIFY-${Date.now()}`,name:'Disposable notification test vehicle'})}).then(r=>r.status));
- assert.equal(created,201);
+ const adminContext=await browser.newContext();
+ try{
+  const signedIn=await adminContext.request.post(base!+'/api/login',{data:{email:'admin@solair.local',password:'SolairDemo!2026'}});assert.equal(signedIn.status(),200);
+  const created=await adminContext.request.post(base!+'/api/vehicles',{data:{id:`NOTIFY-${Date.now()}`,name:'Disposable notification test vehicle'}});assert.equal(created.status(),201);
+ }finally{await adminContext.close();}
  await page.locator('.notification-count').waitFor();
  dialog=await open(page);await dialog.getByText('Vehicle registered',{exact:true}).first().waitFor();
  results.push('Recorded system changes arrive through live updates; marking read does not acknowledge security incidents');

@@ -5,7 +5,7 @@ Use the combined local site at **http://localhost:3000/**. Start instructions an
 ## What to do in the app
 
 1. **Administrator:** open **People & assignments**. Search the new account. Save its correct TODA and approved access. Use **Drivers needing a vehicle / operator** to find unfinished assignments. The directory now shows saved vehicle IDs, models, responsible operators and whether the alert contact is verified with consent. Private phone numbers are not listed.
-2. **Administrator/operator:** in the user's TODA workspace, use **Vehicle assignments and invitations** on the same page to assign the correct registered vehicle and responsible operator. Administrators can open a different TODA through **Organizations**. A vehicle's ID/model comes from its registered record, not public signup.
+2. **Administrator:** in the user's TODA workspace, use **Vehicle assignments and invitations** on the same page to assign the correct registered vehicle and responsible operator. Administrators can open a different TODA through **Organizations**. A vehicle's ID/model comes from its registered record, not public signup.
 3. **Driver:** sign in again after an administrator changes membership. **My vehicle → Account setup** shows the remaining steps. Completed assignment checklists collapse. Optional contact verification is separate. **Settings** keeps registration, appearance and contact preferences.
 4. **Driver:** use **Your vehicle status** for connection, battery, GPS and security. Expand **Sensor status and reading ages** for details. A recent server contact does not make every sensor current. Unknown UTC time stays unknown. Old security reports are not presented as current armed/disarmed confirmation. Battery voltage is not a remaining-range estimate.
 5. **Driver/operator:** open **Alerts/Security → SMS alert readiness** to see unmet notification requirements. This check sends nothing. In Settings, verification buttons are unavailable when the verification service is disabled. Saving preferences does not verify ownership or send a text.
@@ -30,7 +30,7 @@ Research CSV preserves IDs, source, raw payload, calibration/load labels, event 
 | Role | Access enforced by the backend |
 |---|---|
 | Driver | Own settings and setup; assigned vehicles, incidents and research readings. Cannot acknowledge, write notes, resolve incidents or export engineering bench results. |
-| Operator | People/vehicles and incident handling within their TODA; no other TODA, public privilege escalation or engineering commissioning approval. |
+| Operator | Fleet monitoring and incident/assistance responses within their TODA; no account directory, invitations, vehicle registration, assignments, organization management or device administration. |
 | Engineer | Existing authorized engineering access and incident handling in their TODA; no account administration or administrator-only SMS commissioning approval. |
 | Administrator | Account/TODA administration; incident handling and device readiness in the active authorized workspace. |
 

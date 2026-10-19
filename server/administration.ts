@@ -7,7 +7,20 @@ import {registrationRoutes} from './registration';
 
 export function administrationRoutes(app:Express,db:Store,auth:RequestHandler,notify:(org:string)=>void){
  registrationRoutes(app,db,auth);
- const managers:RequestHandler=(req:any,res,next)=>['admin','operator'].includes(req.user.role)?next():void res.sendStatus(403);
+ const managers:RequestHandler=(req:any,res,next)=>req.user.role==='admin'?next():void res.sendStatus(403);
+ app.get('/api/admin/overview',auth,managers,async(_req,res)=>{
+  const queries={
+   organizations:"SELECT COUNT(*) AS total FROM organizations WHERE id NOT LIKE 'unassigned-%'",
+   accounts:'SELECT COUNT(*) AS total FROM profiles',
+   unassigned:"SELECT COUNT(*) AS total FROM profiles WHERE org_id LIKE 'unassigned-%'",
+   operator_requests:"SELECT COUNT(*) AS total FROM registration_preferences r JOIN profiles p ON p.id=r.user_id WHERE r.requested_role='operator' AND p.role NOT IN ('operator','admin')",
+   needs_assignment:"SELECT COUNT(*) AS total FROM profiles p WHERE p.role='driver' AND (NOT EXISTS (SELECT 1 FROM assignments a JOIN vehicles v ON v.id=a.vehicle_id WHERE a.driver_id=p.id AND v.org_id=p.org_id) OR EXISTS (SELECT 1 FROM assignments a JOIN vehicles v ON v.id=a.vehicle_id LEFT JOIN vehicle_operators vo ON vo.vehicle_id=v.id LEFT JOIN profiles op ON op.id=vo.operator_id AND op.org_id=v.org_id AND op.role IN ('operator','admin') WHERE a.driver_id=p.id AND v.org_id=p.org_id AND op.id IS NULL))",
+   devices:'SELECT COUNT(*) AS total FROM devices',
+   readiness_pending:'SELECT COUNT(*) AS total FROM devices d LEFT JOIN device_operation o ON o.device_id=d.id WHERE o.commissioned IS NULL OR o.commissioned=0',
+  };
+  const counts=Object.fromEntries(await Promise.all(Object.entries(queries).map(async([key,sql])=>{const [row]=await db.query(sql);return [key,Number(row.total)];})));
+  res.json(counts);
+ });
  app.get('/api/people',auth,managers,async(req:any,res)=>{
   const u=req.user as User;
   const b=z.object({q:z.string().max(100).default(''),page:z.coerce.number().int().min(1).max(100000).default(1),status:z.enum(['all','unassigned','needs_assignment','driver','operator','engineer','admin']).default('all')}).parse(req.query);

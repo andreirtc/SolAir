@@ -46,6 +46,11 @@ try{
  await page.screenshot({path:output+'/registered-account.png',fullPage:true});results.push('New account can sign in, edit contact preferences and has no unauthorized fleet access');
  await page.locator('.sidebar nav').getByRole('button',{name:'Log out',exact:true}).click();
  await login('admin');
+ await page.getByRole('heading',{name:'Administration overview',exact:true}).waitFor();
+ await page.locator('.admin-summary-card').filter({hasText:'Registered accounts'}).getByText('6',{exact:true}).waitFor();
+ assert.equal(await page.getByRole('heading',{name:'Fleet overview',exact:true}).count(),0);
+ for(const width of [1440,390]){await page.setViewportSize({width,height:844});await page.screenshot({path:output+'/admin-home-'+width+'.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,JSON.stringify(await page.locator('main *').evaluateAll(elements=>elements.filter(el=>el.getBoundingClientRect().right>innerWidth+1).slice(0,12).map(el=>({tag:el.tagName,class:el.className,right:el.getBoundingClientRect().right})))));}
+ await page.setViewportSize({width:1440,height:1050});results.push('Admin home shows cross-TODA management counts and fits desktop/mobile');
  await page.locator('.sidebar nav').getByRole('button',{name:'Settings',exact:true}).click();
  assert.equal(await page.getByRole('heading',{name:'Registered accounts',exact:true}).count(),0);assert.equal(await page.getByRole('heading',{name:'Device readiness and alarm notifications',exact:true}).count(),0);
  await page.locator('.sidebar nav').getByRole('button',{name:'People & assignments',exact:true}).click();
@@ -100,7 +105,13 @@ try{
  await page.getByRole('button',{name:'Toggle menu',exact:true}).click();await page.locator('.sidebar nav').getByRole('button',{name:'Log out',exact:true}).click();
  await page.setViewportSize({width:1440,height:1050});await login('engineer');await page.locator('.sidebar nav').getByRole('button',{name:'CPE Lab',exact:false}).click();await page.getByRole('heading',{name:'From breadboard to road.'}).waitFor();
  await page.getByRole('link',{name:'Export evidence CSV',exact:true}).waitFor();results.push('Protected CPE Lab and new evidence export remain available');
- await page.locator('.sidebar nav').getByRole('button',{name:'Log out',exact:true}).click();await login('operator');await page.locator('.sidebar nav').getByRole('button',{name:'Settings',exact:true}).click();
+ await page.locator('.sidebar nav').getByRole('button',{name:'Log out',exact:true}).click();await login('operator');
+ await page.getByRole('heading',{name:'Fleet overview',exact:true}).waitFor();
+ for(const name of ['People & assignments','Devices','Organizations','Activity log','Admin overview'])assert.equal(await page.locator('.sidebar nav').getByRole('button',{name,exact:true}).count(),0);
+ assert.equal(await page.locator('.admin-home').count(),0);
+ for(const endpoint of ['/api/people','/api/users','/api/admin/overview'])assert.equal(await page.evaluate(async path=>(await fetch(path)).status,endpoint),403);
+ await page.screenshot({path:output+'/operator-home.png',fullPage:true});results.push('Operator retains fleet home with admin navigation and APIs unavailable');
+ await page.locator('.sidebar nav').getByRole('button',{name:'Settings',exact:true}).click();
  const operator=page.locator('.operator-information');await operator.getByLabel('Operator/business name',{exact:true}).fill('TEST FIXTURE Malabon Transport');await operator.getByLabel('Service area / route',{exact:true}).fill('Malabon test route');await operator.getByLabel('Shared contact number',{exact:true}).fill('09171234567');await operator.getByRole('button',{name:'Save operator information',exact:true}).click();await operator.getByRole('status').filter({hasText:'Operator information saved'}).waitFor();results.push('Operator Settings includes editable business, service area and shared contact without enabling SMS');
 
 

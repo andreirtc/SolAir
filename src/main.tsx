@@ -33,6 +33,7 @@ import AccountMenu from './AccountMenu';
 import {SignUp,ContactPreferences,IncidentHistory,OperationAdmin} from './Operational';
 import People from './People';
 import Brand from './Brand';
+import AdminHome from './AdminHome';
 import MobileIntro from './MobileIntro';
 import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
 import TodaMenu from './TodaMenu';
@@ -597,7 +598,7 @@ function App() {
   }, [page, selected, suffix, user, offset, toast]);
   useEffect(()=>{
     if(!user)return;let active=true;
-    if(page==='People & assignments'&&['operator','admin'].includes(user.role))void api('/users').then(rows=>{if(active)setUsers(rows);}).catch(e=>toast(e.message));
+    if(page==='People & assignments'&&user.role==='admin')void api('/users').then(rows=>{if(active)setUsers(rows);}).catch(e=>toast(e.message));
     if(user.role==='admin'&&page==='Organizations')void api('/organizations').then(rows=>{if(active)setOrgs(rows);}).catch(e=>toast(e.message));
     return()=>{active=false;};
   },[page,user,toast]);
@@ -658,6 +659,7 @@ function App() {
       }
     : undefined;
   const driver = user?.role === "driver";
+  const administrator = user?.role === "admin";
   const labAllowed = ["engineer", "admin"].includes(user?.role || "");
   const go = (p: string) => {
     if (p === "Report a problem") setReportPage(page);
@@ -686,6 +688,7 @@ function App() {
     ["SOS & Assistance", LifeBuoy],
     ["Settings", UserRound],
   ] as const;
+  const adminNav = [nav[0],nav[8],nav[10],nav[9],nav[11],...nav.slice(1,8),nav[12]];
   return (
     <div className={"app " + (driver ? "driver-app" : "")}>
       {drawer && <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setDrawer(false)} />}
@@ -694,7 +697,7 @@ function App() {
         <TodaMenu key={`${user.id}:${user.org_id}`} user={user} organization={organization} selectedVehicle={v}/>
         <span className="nav-label">WORKSPACE</span>
         <nav>
-          {(driver ? driverNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||['admin','operator'].includes(user.role)).map(([p, Icon]) => (
+          {(driver ? driverNav : administrator ? adminNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
             <button
               key={p}
               className={page === p ? "active" : ""}
@@ -711,7 +714,7 @@ function App() {
                       Settings: "Settings",
                     } as any
                   )[p] || p
-                : p}
+                : administrator && p === "Overview" ? "Admin overview" : p}
               {p === "SOS & Assistance" &&
                 help.filter((h) => h.status === "pending").length > 0 && (
                   <b>{help.filter((h) => h.status === "pending").length}</b>
@@ -832,21 +835,21 @@ function App() {
                 {driver && page === "Overview"
                   ? `Ready for the road, ${user.name.split(" ")[0]}.`
                   : page === "Overview"
-                    ? "Fleet overview"
+                    ? administrator ? "Administration overview" : "Fleet overview"
                     : page === "Live Fleet Map"
                       ? "Fleet location"
                       : page}
               </h1>
               <p>
                 {page === "Overview"
-                  ? "A clearer view of your energy, vehicles and people."
+                  ? administrator ? "Accounts, TODAs, assignments and device readiness." : "A clearer view of your energy, vehicles and people."
                   : page === "CPE Lab"
                     ? "Observe real hardware. Build reliable evidence."
                     : "Connected insights. Clear decisions."}
               </p>
             </div>
             <div className="heading-actions">
-              {fleet.length > 1 && (
+              {fleet.length > 1 && !(administrator && page === "Overview") && (
                 <select
                   aria-label="Selected vehicle"
                   value={v?.id || ""}
@@ -863,7 +866,7 @@ function App() {
               </button>
             </div>
           </div>
-          {v?.telemetry && (
+          {!(administrator && page === "Overview") && v?.telemetry && (
             <div className="measurement-banner">
               {!v.telemetry.device_timestamp ? "MEASUREMENT TIME UNKNOWN" : Date.now() - Date.parse(v.telemetry.device_timestamp) < 30000
                 ? "RECENT READING"
@@ -873,8 +876,9 @@ function App() {
             </div>
           )}
           {driver&&page==='Overview'&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><details className="registration-summary"><summary>View my registration and assignments</summary><RegistrationDetails userId={user.id} compact/></details></>}
+          {administrator && page === "Overview" && <AdminHome revision={notificationRevision} go={go}/>}
           {!v ? (
-            !["Settings","People & assignments","Devices","Organizations","Activity log"].includes(page) &&
+            !(administrator && page === "Overview") && !["Settings","People & assignments","Devices","Organizations","Activity log"].includes(page) &&
             <section className={page === "Live Fleet Map" ? "panel full-map" : "panel empty"}>
               {page === "Live Fleet Map" ? (
                 <>
@@ -888,13 +892,13 @@ function App() {
                 <>
                   <Truck size={36} />
                   <h2>No assigned vehicle</h2>
-                  <p>Your account is ready. An administrator can link your TODA and your operator can assign a vehicle in People & assignments.</p>
+                  <p>Your account is ready. Ask an administrator to link your TODA and assign your vehicle and responsible operator.</p>
                 </>
               )}
             </section>
           ) : (
             <>
-              {page === "Overview" && (
+              {page === "Overview" && !administrator && (
                 <>
                   {!driver && (
                     <div className="metrics fleet-metrics">
@@ -1594,7 +1598,7 @@ function App() {
               <RegistrationDetails userId={user.id}/>
               <ContactPreferences />
           </div>}
-          {page === "People & assignments" && ["admin","operator"].includes(user.role) && <div className="settings-grid"><People user={user} refreshKey={notificationRevision} onChange={async()=>{setUsers(await api('/users'));await refresh();}}/>
+          {page === "People & assignments" && user.role==='admin' && <div className="settings-grid"><People user={user} refreshKey={notificationRevision} onChange={async()=>{setUsers(await api('/users'));await refresh();}}/>
                 <section className="panel">
                   <h3>Vehicle assignments and invitations</h3>
                   {v && (
