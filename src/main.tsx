@@ -34,6 +34,8 @@ import {SignUp,ContactPreferences,IncidentHistory,OperationAdmin} from './Operat
 import People from './People';
 import Brand from './Brand';
 import AdminHome from './AdminHome';
+import WorkspaceGuide,{ReadingDetails} from './WorkspaceGuide';
+import SignInArtwork from './SignInArtwork';
 import MobileIntro from './MobileIntro';
 import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
 import TodaMenu from './TodaMenu';
@@ -45,13 +47,8 @@ import CpeReadings from './CpeReadings';
 import CpeHistory from './CpeHistory';
 import { power, freshness } from "../packages/telemetry-contract";
 import "./style.css";
-import "@fontsource/dm-sans/latin-400.css";
-import "@fontsource/dm-sans/latin-500.css";
-import "@fontsource/dm-sans/latin-600.css";
-import "@fontsource/dm-sans/latin-700.css";
-import "@fontsource/manrope/latin-400.css";
-import "@fontsource/manrope/latin-700.css";
-import "@fontsource/manrope/latin-800.css";
+import "./design-system.css";
+import "./sign-in.css";
 const FleetMap = lazy(() => import("./FleetMap"));
 const Lab = lazy(() => import("./Lab"));
 const nav = [
@@ -107,23 +104,8 @@ function Login({ onLogin }: { onLogin: () => void }) {
       .catch(() => setHealth({ environment: "Offline app shell" }));
   }, []);
   return (
-    <main className="login login-entry">
-      <section className="login-art">
-        <Brand />
-        <span className="eyebrow">ENERGY. SECURITY. CONNECTION.</span>
-        <h1>
-          A smarter journey
-          <br />
-          starts here.
-        </h1>
-        <p>
-          One platform for your e-trike,
-          <br />
-          your people and the road ahead.
-        </p>
-        <VehicleVisualization />
-        <small>White BEMAC 68VM · Reference-based visualization</small>
-      </section>
+    <main className="login login-entry login-signin">
+      <SignInArtwork/>
       <section className="login-form"><div className="mobile-auth-brand"><Brand/></div>
         <h2 className="auth-heading">{invite ? "Join your TODA" : "Welcome to SOLAIR"}</h2>
         <p className="auth-subtitle">Connected energy and fleet intelligence.</p>
@@ -207,8 +189,8 @@ function Login({ onLogin }: { onLogin: () => void }) {
           </div>
         )}
         <p className="subtle">
-          Account invitations are issued by your TODA. Password reset email
-          delivery requires provider setup.
+          New to SolAir? Create an account, then ask your administrator to link
+          your TODA and vehicle. Need help signing in? Contact your TODA.
         </p>
       </section>
     </main>
@@ -441,6 +423,7 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
   );
 }
 function App() {
+  const [navigationTarget,setNavigationTarget]=useState<{id:string}|null>(null);
   const [mobileLaunch] = useState(() => window.matchMedia('(max-width: 650px)').matches);
   const [introDone,setIntroDone] = useState(false);
   useEffect(()=>{
@@ -661,9 +644,15 @@ function App() {
   const driver = user?.role === "driver";
   const administrator = user?.role === "admin";
   const labAllowed = ["engineer", "admin"].includes(user?.role || "");
-  const go = (p: string) => {
+  useEffect(()=>{
+    if(!navigationTarget)return;
+    const destination=document.getElementById(navigationTarget.id);
+    if(destination){destination.focus({preventScroll:true});destination.scrollIntoView({block:'start',behavior:'auto'});}
+  },[page,navigationTarget]);
+  const go = (p: string, target?:string) => {
     if (p === "Report a problem") setReportPage(page);
     setPage(p);
+    setNavigationTarget(target?{id:target}:null);
     setDrawer(false);
   };
   const currentFleet = fleet.map((v) => ({
@@ -690,17 +679,19 @@ function App() {
   ] as const;
   const adminNav = [nav[0],nav[8],nav[10],nav[9],nav[11],...nav.slice(1,8),nav[12]];
   return (
-    <div className={"app " + (driver ? "driver-app" : "")}>
+    <div className={"app " + user.role + "-app"}>
+      <a className="skip-link" href="#workspace-content">Skip to main content</a>
       {drawer && <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setDrawer(false)} />}
       <aside className={drawer ? "sidebar open" : "sidebar"}>
         <Brand />
         <TodaMenu key={`${user.id}:${user.org_id}`} user={user} organization={organization} selectedVehicle={v}/>
         <span className="nav-label">WORKSPACE</span>
-        <nav>
+        <nav aria-label="Main navigation">
           {(driver ? driverNav : administrator ? adminNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
             <button
               key={p}
               className={page === p ? "active" : ""}
+              aria-current={page === p ? 'page' : undefined}
               onClick={() => go(p)}
             >
               <Icon size={18} />
@@ -730,6 +721,7 @@ function App() {
               <button
                 onClick={() => go("CPE Lab")}
                 className={page === "CPE Lab" ? "active" : ""}
+                aria-current={page === "CPE Lab" ? 'page' : undefined}
               >
                 <FlaskConical size={18} />
                 CPE Lab<span className="lab-tag">LAB</span>
@@ -821,7 +813,7 @@ function App() {
             <button onClick={flushQueue}>Retry delivery</button>
           </div>
         )}
-        <main>
+        <main id="workspace-content" tabIndex={-1}>
           <div className="page-heading">
             <div>
               <span className="eyebrow">
@@ -866,16 +858,17 @@ function App() {
               </button>
             </div>
           </div>
+          {page==='Overview'&&!administrator&&<WorkspaceGuide user={user} go={go}/>}
           {!(administrator && page === "Overview") && v?.telemetry && (
-            <div className="measurement-banner">
+            <ReadingDetails compact={driver}>
               {!v.telemetry.device_timestamp ? "MEASUREMENT TIME UNKNOWN" : Date.now() - Date.parse(v.telemetry.device_timestamp) < 30000
                 ? "RECENT READING"
                 : "STALE / HISTORICAL READING"}{" "}
               · Last contact {stamp(v.telemetry.received_at)} · Device measurement {v.telemetry.device_timestamp?stamp(v.telemetry.device_timestamp):'UTC unavailable'} · GPS {v.telemetry.gps_fix?`reported fix age ${v.telemetry.gps_fix_age_ms} ms`:'no current fix'} ·{" "}
               {mode === "demo" ? "SIMULATED" : "REPORTED HARDWARE"}
-            </div>
+            </ReadingDetails>
           )}
-          {driver&&page==='Overview'&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><details className="registration-summary"><summary>View my registration and assignments</summary><RegistrationDetails userId={user.id} compact/></details></>}
+          {driver&&page==='Overview'&&!v&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><RegistrationDetails userId={user.id} compact/></>}
           {administrator && page === "Overview" && <AdminHome revision={notificationRevision} go={go}/>}
           {!v ? (
             !(administrator && page === "Overview") && !["Settings","People & assignments","Devices","Organizations","Activity log"].includes(page) &&
@@ -973,6 +966,7 @@ function App() {
                       </section>
                     )}
                   </div>
+                  {driver&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><RegistrationDetails userId={user.id} compact/></>}
                   <div className="overview-bottom">
                     <section className="panel">
                       <div className="panel-heading">
@@ -1549,7 +1543,7 @@ function App() {
             </>
           )}
           {page === "Settings" && <div className="settings-grid">
-              <section className="panel">
+              <section className="panel setup-destination" id="profile-settings" tabIndex={-1} aria-label="Your SOLAIR profile">
                 <Appearance />
                 <h3>Your SOLAIR profile</h3>
                 <form
@@ -1805,10 +1799,11 @@ function App() {
         </main>
       </div>
       {driver && (
-        <nav className="bottom-nav">
+        <nav className="bottom-nav" aria-label="Driver navigation">
           {driverNav.map(([p, I]) => (
             <button
               className={page === p ? "active" : ""}
+              aria-current={page === p ? 'page' : undefined}
               key={p}
               onClick={() => go(p)}
             >

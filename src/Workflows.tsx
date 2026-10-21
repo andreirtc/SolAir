@@ -2,13 +2,25 @@ import {useEffect,useState} from 'react';
 import {api,stamp,value} from './api';
 import type {Profile,Vehicle} from './types';
 import {deviceHealth} from '../packages/device-health';
+import {Radio,Battery,MapPin,Shield,ArrowRight} from 'lucide-react';
 
-export function SetupChecklist({user,revision,go}:{user:Profile;revision:number;go:(page:string)=>void}) {
-  const [data,setData]=useState<any>(null),[error,setError]=useState('');
+type SetupTask={id:string;label:string;complete:boolean;action:string;required:boolean};
+function setupDestination(task:SetupTask){
+  if(['toda','vehicle','operator','operator-access'].includes(task.id))return task.complete
+    ?{page:'Settings',target:'registration-details',label:'View assignment details'}
+    :{page:'Help and support',target:'assignment-help',label:'See how to complete this step'};
+  if(task.id==='mobile')return {page:'Settings',target:'alert-contact',label:'Manage alert contact'};
+  if(task.id==='phone')return {page:'Settings',target:'verify-mobile',label:'Open mobile verification'};
+  if(task.id==='email')return {page:'Settings',target:'email-verification',label:'Review email verification'};
+  return {page:'Settings',target:'profile-settings',label:'View account profile'};
+}
+
+export function SetupChecklist({user,revision,go}:{user:Profile;revision:number;go:(page:string,target?:string)=>void}) {
+  const [data,setData]=useState<{assignment_complete:boolean;tasks:SetupTask[];sms_opted_in:boolean}|null>(null),[error,setError]=useState('');
   useEffect(()=>{let active=true;setData(null);setError('');void api('/setup-readiness').then(v=>{if(active)setData(v);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[user.id,user.org_id,revision]);
   return <section className="panel setup-checklist" aria-label="Account setup"><div className="panel-heading"><h3>{data?.assignment_complete?'Your account setup':'Finish your account setup'}</h3><button onClick={()=>go('Settings')}>Open settings</button></div>
     {error&&<p role="alert">Could not check setup: {error}. Refresh the page to try again.</p>}{!error&&!data&&<p>Checking your saved assignments…</p>}
-    {data&&<><p>{data.assignment_complete?'Your TODA, vehicle and operator are linked.':'Complete the steps below with your TODA. Creating an account does not assign a vehicle.'}</p><details open={!data.assignment_complete}><summary>{data.tasks.filter((t:any)=>t.required&&!t.complete).length} required setup step(s) remaining · View checklist</summary><ul className="setup-tasks">{data.tasks.map((task:any)=><li key={task.id} className={task.complete?'complete':'pending'}><strong>{task.complete?'✓':'○'} {task.label}{!task.required?' · Optional alerts':''}</strong><span>{task.complete&&['account','mobile','email','phone'].includes(task.id)?'Complete':task.action}</span></li>)}</ul></details><small>{data.sms_opted_in?'SMS also needs a commissioned device and configured service.':'SMS alerts are optional. You can enable them in Settings after contact verification.'} Device testing is separate.</small></>}
+    {data&&<><p>{data.assignment_complete?'Your TODA, vehicle and operator are linked.':'Complete the steps below with your TODA. Creating an account does not assign a vehicle.'}</p><details open={!data.assignment_complete}><summary>{data.tasks.filter(t=>t.required&&!t.complete).length} required setup step(s) remaining · View checklist</summary><ul className="setup-tasks">{data.tasks.map(task=>{const destination=setupDestination(task);return <li key={task.id} className={task.complete?'complete':'pending'}><button type="button" className="setup-task-action" onClick={()=>go(destination.page,destination.target)}><strong>{task.complete?'✓':'○'} {task.label}{!task.required?' · Optional alerts':''}</strong><span>{task.complete&&['account','mobile','email','phone'].includes(task.id)?'Complete':task.action}</span><span className="setup-task-link">{destination.label}<ArrowRight size={16} aria-hidden="true"/></span></button></li>;})}</ul></details><small>{data.sms_opted_in?'SMS also needs a commissioned device and configured service.':'SMS alerts are optional. You can enable them in Settings after contact verification.'} Device testing is separate.</small></>}
   </section>;
 }
 
@@ -25,10 +37,10 @@ export function DeviceStatus({vehicle,mode,go}:{vehicle:Vehicle;mode:string;go:(
   const t=vehicle.telemetry,h=deviceHealth(t),gps=vehicle.gps;
   return <section className="panel device-status" aria-label="Vehicle status"><div className="panel-heading"><h3>Your vehicle status · {vehicle.id}</h3><span className="badge">{mode==='demo'?'Simulated readings':'Reported hardware'}</span></div>
     <div className="status-grid">
-      <article><h4>Device connection</h4><strong>{h.connection}</strong><p>{t?'Last contact: '+stamp(t.received_at):'Waiting for the device.'}</p></article>
-      <article><h4>Battery</h4><strong>{h.battery==='fresh'?`${value(t?.battery_voltage_v)} V`:h.battery==='unavailable'?'Not available':h.battery==='uncalibrated'?'Calibration needed':h.battery==='stale'?'Old reading':'Time unknown'}</strong><p>{h.battery==='fresh'?'Measured voltage, not remaining range.':'No recent, verified battery reading.'}</p><button onClick={()=>go('Energy')}>View energy</button></article>
-      <article><h4>Location</h4><strong>{h.gps==='fresh'?'Recent GPS fix':h.gps==='stale'?'GPS fix is old':h.gps==='unknown'?'GPS time unknown':'No current GPS fix'}</strong><p>Fix age: {age(h.gps_age_ms)}{gps?`. Last saved position: ${stamp(gps.measured_at)}.`:'. No saved position.'}</p><button onClick={()=>go('Live Fleet Map')}>View location</button></article>
-      <article><h4>Security</h4><strong>{h.security!=='fresh'?'State unknown':t?.alarm_active?'Alarm activation reported':t?.armed?'Reported armed':'Reported disarmed'}</strong><p>{h.security!=='fresh'?'Waiting for a recent device report.':'Reported state; siren sound unconfirmed.'}</p><button onClick={()=>go('Security')}>View alerts</button></article>
+      <article><h4><Radio size={18} aria-hidden="true"/>Device connection</h4><strong>{h.connection}</strong><p>{t?'Last contact: '+stamp(t.received_at):'Waiting for the device.'}</p>{h.connection!=='Recent contact'&&<p>Check the device power and connection with your TODA. An old reading does not confirm the vehicle is safe.</p>}</article>
+      <article><h4><Battery size={18} aria-hidden="true"/>Battery</h4><strong>{h.battery==='fresh'?`${value(t?.battery_voltage_v)} V`:h.battery==='unavailable'?'Not available':h.battery==='uncalibrated'?'Calibration needed':h.battery==='stale'?'Old reading':'Time unknown'}</strong><p>{h.battery==='fresh'?'Measured voltage, not remaining range.':'No recent, verified battery reading.'}</p><button onClick={()=>go('Energy')}>View energy</button></article>
+      <article><h4><MapPin size={18} aria-hidden="true"/>Location</h4><strong>{h.gps==='fresh'?'Recent GPS fix':h.gps==='stale'?'GPS fix is old':h.gps==='unknown'?'GPS time unknown':'No current GPS fix'}</strong><p>Fix age: {age(h.gps_age_ms)}{gps?`. Last saved position: ${stamp(gps.measured_at)}.`:'. No saved position.'}</p><button onClick={()=>go('Live Fleet Map')}>View location</button></article>
+      <article><h4><Shield size={18} aria-hidden="true"/>Security</h4><strong>{h.security!=='fresh'?'State unknown':t?.alarm_active?'Alarm activation reported':t?.armed?'Reported armed':'Reported disarmed'}</strong><p>{h.security!=='fresh'?'Waiting for a recent device report.':'Reported state; siren sound unconfirmed.'}</p><button onClick={()=>go('Security')}>View alerts</button></article>
     </div>
     <details><summary>Sensor status and reading ages</summary><p>A recent device contact does not make every sensor current. Ages use device capture time plus reported sensor age; missing or invalid UTC stays unknown.</p>{!h.sensors.length&&<p>No sensor health has been reported.</p>}<ul className="sensor-status-list">{h.sensors.map(s=><li key={s.key}><strong>{sensorNames[s.key]||s.key}</strong><span>{states[s.state]} · {age(s.age_ms)}</span></li>)}</ul></details>
     {(h.dropped_events||t?.sensor_health?.event_buffer==='fault')&&<p role="alert">The device reports lost or unbuffered events. Saved history may be incomplete. Ask the hardware team to inspect the queue.</p>}

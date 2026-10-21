@@ -1,6 +1,6 @@
 const CACHE='solair-shell-v1';
 const ASSETS=/* BUILD_ASSETS */[];
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/icon-192.png','/icon-512.png','/bemac-white.png','/manifest.webmanifest',...ASSETS]))));
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/icon-192.png','/icon-512.png','/bemac-white.png','/manifest.webmanifest','/fonts/outfit-latin.woff2','/fonts/work-sans-latin.woff2',...ASSETS]))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 function networkFirst(event,cacheable,imageFallback=false){
  let cacheWrite=Promise.resolve();
