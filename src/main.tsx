@@ -646,6 +646,7 @@ function App() {
     ["SOS & Assistance", LifeBuoy],
     ["Settings", UserRound],
   ] as const;
+  const driverSidebarNav=[...driverNav.slice(0,5),["History & Reports",History] as const,driverNav[5]];
   const adminNav = [nav[0],nav[8],nav[10],nav[9],nav[11],...nav.slice(1,8),nav[12]];
   return (
     <div className={"app " + user.role + "-app"}>
@@ -656,7 +657,7 @@ function App() {
         <TodaMenu key={`${user.id}:${user.org_id}`} user={user} organization={organization} selectedVehicle={v}/>
         <span className="nav-label">WORKSPACE</span>
         <nav aria-label="Main navigation">
-          {(driver ? driverNav : administrator ? adminNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
+          {(driver ? driverSidebarNav : administrator ? adminNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
             <button
               key={p}
               className={page === p ? "active" : ""}
