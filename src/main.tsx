@@ -40,10 +40,11 @@ import AdminHome from './AdminHome';
 import WorkspaceGuide,{ReadingDetails} from './WorkspaceGuide';
 import SignInArtwork from './SignInArtwork';
 import {EmptyState,workspaceDescription} from './WorkspaceFeedback';
-import {vehicleMapReference,hasMapPosition} from './map-reference';
+import {vehicleMapReference} from './map-reference';
 import MobileIntro from './MobileIntro';
 import DriverVehicleCard from './DriverVehicleCard';
 import EnergyHarvestSections from './EnergyHarvestSections';
+import LocationPage from './LocationPage';
 import {permittedPage,workspacePageKey} from './workspace-navigation';
 import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
 import TodaMenu from './TodaMenu';
@@ -1040,31 +1041,7 @@ function App() {
                 </>
               )}
               {page === "Live Fleet Map" && (
-                <section className="panel full-map">
-                  <div className="panel-heading">
-                    <h3>
-                      {mode === "demo"
-                        ? "Simulated fleet locations"
-                        : "Reported GPS locations"}
-                    </h3>
-                    <span className="badge">
-                      {fleet.filter(hasMapPosition).length} valid positions
-                    </span>
-                  </div>
-                  <Suspense fallback={<p>Loading map…</p>}>
-                    <FleetMap vehicles={fleet} select={select} mode={mode} selectedId={selected} />
-                  </Suspense>
-                  <p>
-                    {v.id}:{" "}
-                    {hasMapPosition(v)
-                      ? `${v.gps.latitude}, ${v.gps.longitude} · last known ${stamp(v.gps.measured_at)}`
-                      : "No valid GPS fix recorded"}
-                  </p>
-                  <button onClick={() => go("Vehicle details")}>
-                    Open selected vehicle
-                    <ArrowRight size={16} />
-                  </button>
-                </section>
+                <LocationPage vehicle={v} vehicles={fleet} select={select} mode={mode} onOpenVehicle={()=>go('Vehicle details')}/>
               )}
               {page === "Vehicles" && (
                 <VehicleTable

@@ -2,13 +2,14 @@
 @font-face{font-family:Outfit;src:url('/fonts/outfit-latin.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
 @font-face{font-family:'Work Sans';src:url('/fonts/work-sans-latin.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
 :root{
+ --font-body:'Work Sans',Arial,sans-serif;--font-display:Outfit,'Work Sans',Arial,sans-serif;
  --solar:#E69A18;--blue:#1959B5;--blue-hover:#12458F;--gold:#EFB142;
  --page:#FFFDF8;--surface:#FFFFFF;--surface-soft:#F6F7F9;--text:#202B3A;--muted:#626D79;--line:#DCE0E4;
  --pale-solar:#FFF2D8;--pale-blue:#EAF0FB;--success:#267153;--error:#A02F32;--purple:#7250A6;--pink:#A83D75;
  --navy:var(--text);--teal:var(--blue);--hover:var(--pale-blue);--accent-soft:var(--pale-blue);--accent-text:var(--blue);
  --warning-soft:var(--pale-solar);--warning-text:#775009;--success-soft:#EDF6F0;--error-soft:#FAEDEE;
  --shadow:0 4px 20px #202B3A05;--ring:var(--blue);--border:var(--line);--hero:#1959B5;--hero-text:#FFFDF8;
- font-family:'Work Sans',Arial,sans-serif;font-size:15px;color:var(--text);background:var(--page);
+ font-family:var(--font-body);font-size:15px;color:var(--text);background:var(--page);
 }
 :root[data-theme='dark']{
  --page:#12161D;--surface:#171E28;--surface-soft:#202A38;--text:#EEF1F6;--muted:#B2BDCC;--line:#394657;
@@ -16,8 +17,9 @@
  --success:#87CBA8;--error:#F1A5A8;--purple:#BD9BEE;--pink:#E7A0C6;--success-soft:#1E322B;--error-soft:#382428;
  --warning-soft:var(--pale-solar);--warning-text:#FFCF7B;--shadow:none;--hero:#1B3357;--hero-text:#EEF1F6;
 }
-body{background:var(--page);color:var(--text)}
-h1,h2,h3,h4,strong,.brand{font-family:Outfit,'Work Sans',sans-serif}
+body{font-family:var(--font-body);background:var(--page);color:var(--text)}
+button,input,select,textarea{font-family:var(--font-body)}
+h1,h2,h3,h4,h5,h6,strong,.brand{font-family:var(--font-display)}
 h1{font-size:clamp(28px,2.8vw,40px);font-weight:600;letter-spacing:-1.2px;line-height:1.15}
 h2{font-size:26px;font-weight:550;letter-spacing:-.6px}h3{font-size:18px;font-weight:550;letter-spacing:-.25px}
 p{font-size:14px;line-height:1.7;color:var(--muted)}small,.subtle{font-size:12px;line-height:1.6;color:var(--muted)}
@@ -42,7 +44,7 @@ details{border-radius:12px}summary{cursor:pointer;min-height:44px;padding:12px 0
 /* Original vector wordmark: sun flare, solar arc and wind strokes. */
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex-shrink:0;width:176px;max-width:100%;line-height:1;letter-spacing:0;color:var(--text)}
 .brand .solair-wordmark{display:block;width:100%;height:auto;overflow:visible;flex-shrink:0}
-.brand-caption{display:block;font:550 8px 'Work Sans',sans-serif;letter-spacing:1.25px;white-space:nowrap;margin:2px 0 0 12px;color:var(--muted)}
+.brand-caption{display:block;font:550 8px var(--font-body);letter-spacing:1.25px;white-space:nowrap;margin:2px 0 0 12px;color:var(--muted)}
 .logo-solar{color:var(--solar);fill:currentColor}.logo-air{fill:var(--blue)}.logo-wind{color:var(--blue);opacity:.48}
 /* Shared navigation: predictable positioning and visible text for all roles. */
 .sidebar{width:260px;background:var(--surface);color:var(--text);border-right:1px solid var(--line);padding:24px 18px 16px}
@@ -110,7 +112,7 @@ td button{font-size:12px}table strong{font-size:14px}
 .incident-icon,.energy-icon{background:var(--pale-solar);color:var(--warning-text)}
 .lab-connect{border-top:3px solid var(--purple)}.lab-info{font-size:12px}.lab-grid h4,.axis-readings span{font-size:13px}.axis-readings strong{font-size:25px}
 .solar-icon,.solar-text{color:var(--warning-text)}.wind-icon,.wind-text{color:var(--blue)}.tiny-bars i{background:var(--blue);opacity:.3}.tiny-bars i:last-child{opacity:1}
-.energy-snapshot strong{font-family:Outfit,sans-serif}.forecast{background:var(--pale-solar);color:var(--text);border-color:var(--line)}
+.energy-snapshot strong{font-family:var(--font-display)}.forecast{background:var(--pale-solar);color:var(--text);border-color:var(--line)}
 .help-wide,.safety{background:var(--pale-blue);border-color:var(--line);color:var(--text)}.help-wide p,.help-wide small,.safety p{color:var(--muted)}.help-wide h3,.safety h3{color:var(--text)}
 .bubble.own{background:var(--pale-blue);color:var(--text)}.energy-icon.solar,.solar-icon{background:var(--pale-solar);color:var(--warning-text)}.wind-icon{background:var(--pale-blue);color:var(--blue)}
 :root[data-theme='dark'] .lab-connect{background:var(--surface);border-color:var(--purple)}
@@ -122,11 +124,11 @@ td button{font-size:12px}table strong{font-size:14px}
 :root[data-theme='dark'] .error,:root[data-theme='dark'] .account-dropdown .account-logout{color:var(--error)}
 .map-wrap{border:1px solid var(--line);border-radius:12px;background:var(--pale-blue)}.map-vehicle span{background:#1959B5}.map-location-controls{color:#202B3A}.map-location-controls button{min-height:44px;font-size:12px}
 .map-footer{font-size:12px}.full-map .map-wrap{min-height:450px}
-/* BEMAC artwork is preserved; the surrounding surface is now SolAir blue. */
-.vehicle-hero{background:radial-gradient(ellipse at 74% 55%,#477BC0 0,transparent 65%),var(--hero);color:var(--hero-text);border-radius:18px;padding:28px;min-height:420px}
-.hero-top .eyebrow,.hero-copy>span{color:#E1EBFA;font-size:10px}.hero-chip{font-size:11px;color:#FFFDF8;background:#ffffff15;border-color:#ffffff38;padding:7px 10px}
-.hero-copy h2{font-size:34px;font-weight:500;color:#FFFDF8}.hero-copy p{font-size:12px;color:#E1EBFA}.hero-bottom>span{color:#FFF2D8;font-size:12px}.hero-bottom button{min-height:44px;color:#FFFDF8;border-color:#ffffff70;font-size:12px;background:#ffffff10}
-.hero-source{font-size:10px;color:#E1EBFA;line-height:1.6}.vehicle-hero .vehicle-visual{margin:12px 0 4px}
+/* Preserve the BEMAC artwork on a light, blue-tinted glass surface. */
+.vehicle-hero{background:radial-gradient(ellipse at 74% 55%,color-mix(in srgb,var(--blue) 10%,transparent) 0,transparent 65%),color-mix(in srgb,var(--blue) 18%,transparent);color:var(--text);border:1px solid color-mix(in srgb,var(--line) 65%,transparent);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);border-radius:18px;padding:28px;min-height:420px}
+.hero-top .eyebrow,.hero-copy>span{color:var(--blue);font-size:10px}.hero-chip{font-size:11px;color:var(--text);background:var(--glass-card);border-color:var(--line);padding:7px 10px}
+.hero-copy h2{font-size:34px;font-weight:500;color:var(--text)}.hero-copy p{font-size:12px;color:var(--muted)}.hero-bottom>span{color:var(--text);font-size:12px}.hero-bottom button{min-height:44px;color:var(--blue);border-color:var(--line);font-size:12px;background:var(--glass-card)}
+.hero-source{font-size:10px;color:var(--muted);line-height:1.6}.vehicle-hero .vehicle-visual{margin:12px 0 4px}
 /* Role-specific entry points. Same destinations, clearer next actions. */
 .workspace-guide{margin:0 0 28px}.guide-caption{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:14px}.guide-caption p{font-size:13px;margin:0}
 .quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -170,7 +172,7 @@ td button{font-size:12px}table strong{font-size:14px}
 .mobile-intro .vehicle-visual{isolation:isolate}
 .mobile-intro .vehicle-visual::before{content:'';position:absolute;z-index:0;left:50%;top:50%;transform:translate(-50%,-50%);width:115%;height:76%;max-width:460px;max-height:300px;background:radial-gradient(ellipse,#ffffff99 0%,#ffffff44 36%,#ffffff00 72%);filter:blur(18px);pointer-events:none}
 .mobile-intro .vehicle-visual img{position:relative;z-index:1}
-.mobile-intro .brand{width:210px}.mobile-intro .eyebrow{color:var(--blue)}.intro-message h1{color:var(--text);font-family:Outfit,sans-serif;font-weight:500;letter-spacing:-1.6px}.mobile-intro>small{color:var(--muted);font-size:10px}
+.mobile-intro .brand{width:210px}.mobile-intro .eyebrow{color:var(--blue)}.intro-message h1{color:var(--text);font-family:var(--font-display);font-weight:500;letter-spacing:-1.6px}.mobile-intro>small{color:var(--muted);font-size:10px}
 footer{font-size:11px;border-color:var(--line);color:var(--muted);line-height:1.6;gap:12px;flex-wrap:wrap}
 @media(max-width:1150px) and (min-width:901px){.sidebar{width:230px}.workspace{margin-left:230px}.workspace main{padding:28px 24px 0}.quick-actions{gap:10px}.quick-actions>button{padding:14px}.quick-action-arrow{display:none}.quick-actions strong{font-size:15px}.admin-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){

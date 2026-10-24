@@ -41,6 +41,23 @@ try{
   for(const width of [320,360,390,1440]){
    await page.setViewportSize({width,height:width===1440?1000:844});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}px ${colorScheme} overflow`);
+   for(const source of ['solar','wind']){
+    for(const progress of [-2,.5,2,-2]){
+     await page.evaluate(({source,progress})=>{
+      const section=document.querySelector(`#energy-${source}`)!,stage=section.querySelector('.harvest-artwork-stage')!,limit=parseFloat(getComputedStyle(section).getPropertyValue('--harvest-overlap'));
+      window.scrollTo({top:stage.getBoundingClientRect().top+scrollY-16+progress*limit,behavior:'instant'});
+     },{source,progress});
+     await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>resolve())));
+     const layout=await page.locator(`#energy-${source}`).evaluate(section=>{
+      const artwork=section.querySelector('.harvest-artwork')!.getBoundingClientRect(),image=section.querySelector('.harvest-artwork img')!.getBoundingClientRect(),cards=section.querySelector('.harvest-reading-grid')!.getBoundingClientRect();
+      return {overlap:artwork.bottom-cards.top,zoom:image.width/artwork.width,limit:parseFloat(getComputedStyle(section).getPropertyValue('--harvest-overlap'))};
+     });
+     const expected=Math.max(0,Math.min(1,progress))*layout.limit;
+     assert.ok(Math.abs(layout.overlap-expected)<2,`${source} overlap ${layout.overlap}, expected ${expected}, scroll ${progress} at ${width}px ${colorScheme}`);
+     assert.ok(layout.zoom>1.05,`${source} artwork is enlarged at ${width}px ${colorScheme}`);
+     if(width===390&&colorScheme==='light'&&(progress===.5||progress===2))await page.screenshot({path:`${output}/TEST-FIXTURE-${source}-scroll-${progress===2?'capped':'partial'}.png`});
+    }
+   }
    await page.locator('#energy-wind .harvest-artwork').scrollIntoViewIfNeeded();
    await page.locator('#energy-solar').screenshot({path:`${output}/TEST-FIXTURE-solar-${colorScheme}-${width}.png`});
    await page.locator('#energy-wind').screenshot({path:`${output}/TEST-FIXTURE-wind-${colorScheme}-${width}.png`});

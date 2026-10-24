@@ -10,17 +10,20 @@ export default function FleetMap({
   select,
   mode,
   selectedId,
+  focus,
 }: {
   vehicles: Vehicle[];
   select: (id: string) => void;
   mode: string;
   selectedId?:string;
+  focus?:{latitude:number;longitude:number;label:string};
 }) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerLayer = useRef<L.LayerGroup | null>(null);
   const [tileError, setTileError] = useState(false);
   const viewRef=useRef<{key:string;hasFix:boolean}|null>(null);
+  const focusedRef=useRef(false);
   const activeVehicle=vehicles.find(v=>v.id===selectedId)||vehicles[0];
   const reference=vehicleMapReference(activeVehicle);
   useEffect(() => {
@@ -79,6 +82,17 @@ export default function FleetMap({
     }
     viewRef.current={key,hasFix};
   }, [vehicles, mode, select, activeVehicle, reference]);
+  useEffect(()=>{
+    const map=mapRef.current;if(!map)return;
+    if(focus){
+      focusedRef.current=true;
+      const label=document.createElement('div');label.textContent=focus.label;
+      const marker=L.circleMarker([focus.latitude,focus.longitude],{radius:12,color:'#1959B5',weight:3,fillColor:'#EFB142',fillOpacity:.75}).addTo(map).bindPopup(label);
+      map.setView([focus.latitude,focus.longitude],16,{animate:false});marker.openPopup();
+      return()=>{marker.remove();};
+    }
+    if(focusedRef.current){focusedRef.current=false;if(activeVehicle&&hasMapPosition(activeVehicle))map.setView([activeVehicle.gps.latitude,activeVehicle.gps.longitude],14,{animate:false});else map.setView(reference.center,reference.zoom,{animate:false});}
+  },[focus,activeVehicle,reference]);
   function showVehicles() {
     const points = vehicles.flatMap((v): L.LatLngTuple[] =>
       hasMapPosition(v) ? [[v.gps.latitude, v.gps.longitude]] : [],
@@ -93,13 +107,13 @@ export default function FleetMap({
     <div className="map-wrap">
       <div ref={el} className="fleet-map" />
       <div className="map-location-controls">
-        <strong>{activeVehicle&&hasMapPosition(activeVehicle)?`${activeVehicle.id} · GPS location`:`${reference.city}, Philippines`}</strong>
+        <strong>{focus?'Recorded stay · GPS history':activeVehicle&&hasMapPosition(activeVehicle)?`${activeVehicle.id} · GPS location`:`${reference.city}, Philippines`}</strong>
         <div>
           <button type="button" onClick={() => mapRef.current?.setView(reference.center, reference.zoom,{animate:false})}>{reference.city} reference</button>
           <button type="button" onClick={showVehicles} disabled={!vehicles.some(hasMapPosition)}>Show vehicles</button>
         </div>
       </div>
-      {!vehicles.some(hasMapPosition) && (
+      {!focus&&!vehicles.some(hasMapPosition) && (
         <div className="map-empty">
           <strong>No valid GPS positions</strong>
           <span>
@@ -109,8 +123,7 @@ export default function FleetMap({
       )}
       <div className="map-note">
         {tileError && "Basemap unavailable · recorded GPS markers remain. "}
-        {mode === "demo" ? "SIMULATED LOCATIONS" : "LAST KNOWN GPS"} · Select a
-        vehicle marker
+        {focus?`${mode==='demo'?'SIMULATED · ':''}RECORDED POSSIBLE STAY · not live`:<>{mode === "demo" ? "SIMULATED LOCATIONS" : "LAST KNOWN GPS"} · Select a vehicle marker</>}
       </div>
     </div>
   );

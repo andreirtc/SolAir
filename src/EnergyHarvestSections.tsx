@@ -62,7 +62,7 @@ export default function EnergyHarvestSections({vehicle,mode}:{vehicle:Vehicle;mo
    <section className="harvest-source solar-source" id="energy-solar" aria-labelledby="solar-energy-heading" tabIndex={-1}>
     <header className="harvest-source-heading"><div><span className="eyebrow"><Sun size={15} aria-hidden="true"/>POWER FROM THE SUN</span><h2 id="solar-energy-heading">Solar energy</h2></div><span className="badge amber">400 W nominal array</span></header>
     <div className="harvest-total"><span>Recorded solar harvest</span><strong>{display(vehicle.solar_wh,2)} <em>Wh</em></strong><small>Recorded samples · gaps excluded</small></div>
-    <figure className="harvest-artwork"><Image src="/energy-solar-panels.webp" width={1000} height={667} sizes="(max-width:650px) 95vw, (max-width:1100px) 85vw, 600px" loading="eager" alt="Illustration of two tilted blue photovoltaic solar panels"/></figure>
+    <div className="harvest-artwork-stage"><figure className="harvest-artwork"><Image src="/energy-solar-panels.webp" width={1000} height={667} sizes="(max-width:650px) 95vw, (max-width:1100px) 85vw, 600px" loading="eager" alt="Illustration of two tilted blue photovoltaic solar panels"/></figure></div>
     <div className="harvest-reading-grid">
      <ReadingCard title="PV input voltage" value={field('solar_voltage_v')} unit="V" status={status} plots={[{kind:'solar_voltage_v',unit:'V'}]} {...common}/>
      <ReadingCard title="PV input current" value={field('solar_current_a')} unit="A" status={status} plots={[{kind:'solar_current_a',unit:'A',style:'bars'}]} {...common}/>
@@ -74,7 +74,7 @@ export default function EnergyHarvestSections({vehicle,mode}:{vehicle:Vehicle;mo
    <section className="harvest-source wind-source" id="energy-wind" aria-labelledby="wind-energy-heading" tabIndex={-1}>
     <header className="harvest-source-heading"><div><span className="eyebrow"><Wind size={15} aria-hidden="true"/>POWER FROM THE WIND</span><h2 id="wind-energy-heading">Wind energy</h2></div><span className="badge">Not commissioned</span></header>
     <div className="harvest-total"><span>Recorded wind yield</span><strong>{display(vehicle.wind_wh,2)} <em>Wh</em></strong><small>Vertical-axis wind turbine · VAWT</small></div>
-    <figure className="harvest-artwork wind-artwork"><Image src="/energy-vawt-cutout.webp" width={900} height={900} sizes="(max-width:650px) 80vw, 400px" loading="lazy" alt="White curved-blade vertical-axis wind turbine with a silver generator and white mounting pole"/></figure>
+    <div className="harvest-artwork-stage"><figure className="harvest-artwork wind-artwork"><Image src="/energy-vawt-cutout.webp" width={900} height={900} sizes="(max-width:650px) 80vw, 400px" loading="lazy" alt="White curved-blade vertical-axis wind turbine with a silver generator and white mounting pole"/></figure></div>
     <div className="harvest-reading-grid">
      <ReadingCard title="Output voltage" value={field('wind_voltage_v')} unit="V" status={status} plots={[{kind:'wind_voltage_v',unit:'V'}]} {...common}/>
      <ReadingCard title="Output current" value={field('wind_current_a')} unit="A" status={status} plots={[{kind:'wind_current_a',unit:'A',style:'bars'}]} {...common}/>

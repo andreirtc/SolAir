@@ -4,7 +4,9 @@ Updated 24 October 2026. Frontend only; no backend, authentication, permission, 
 
 ## Interface
 
-- Solar and vertical-axis wind sections have original generated product illustrations inspired by the supplied references. Public WebP assets preserve transparency and total 161,956 bytes. They are illustrations, not photographs of commissioned equipment.
+- Solar uses the generated panel illustration; wind uses the transparent cutout edited from the user-supplied product image. The two active WebP assets preserve transparency and total 193,998 bytes. Neither image is evidence of commissioned equipment.
+- Both illustrations are enlarged and clipped within their source sections. Cards initially sit below the image. As the page scrolls down, bounded CSS sticky artwork lets the first card row overlap the image progressively, capped at 80–100px across mobile and desktop layouts. Scrolling back restores the initial separation. This uses native scrolling without animation libraries or scroll event handlers. Reading cards use the shared 28% surface tint with 2px background blur, keeping the underlying artwork visible without fading text or chart values.
+- Solar uses a tighter, upper-left crop at 160% width: the right side extends beyond the section and the lower panel extends behind the cards, following the supplied framing reference.
 - Each source has four translucent reading cards. Solar: PV input V/A, PV power W, and separate controller-output V/A. Wind: output V/A, power W, and recorded energy yield Wh.
 - Voltage uses small traces, current uses bars, and power uses area curves. Controller voltage/current use separate plots and units.
 - Battery metrics, harvested-solar total, CPE channels/history/export, calibration notes and forecasting limitations remain available below the new sections.

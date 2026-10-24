@@ -41,7 +41,7 @@ try{
     gps:demo?{latitude:14.61,longitude:121.03,measured_at:new Date().toISOString()}:hardwareFix};
    await route.fulfill({json:emptyFleet?[]:extraVehicle?[vehicle,{...vehicle,id:'ET-02',model:'NWOW',device_id:'SOL-ET-02',gps:null,telemetry:null}]:[vehicle]});
   });
-  await page.goto(base);await page.getByLabel('Email address').fill('operator@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('heading',{name:'Fleet overview'}).waitFor();
+  await page.goto(base);if(width<=650)await page.getByRole('button',{name:'Get started',exact:true}).click();await page.getByLabel('Email address').fill('operator@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('heading',{name:'Fleet overview'}).waitFor();
   async function refresh(){const response=page.waitForResponse(r=>r.url().includes('/api/fleet?'));await page.getByRole('button',{name:'Refresh',exact:true}).click();await response;await page.waitForTimeout(300);}
   await page.getByLabel('Data mode').selectOption('demo');await refresh();await page.locator('.leaflet-tile-loaded').first().waitFor();
   await assertPosition(page,14.61,121.03);
@@ -56,8 +56,8 @@ try{
   model='NWOW';await refresh();await page.getByRole('button',{name:'Malabon reference',exact:true}).waitFor();await assertPosition(page,14.668,120.965);
   await page.screenshot({path:'test-results/map/nwow-'+width+'.png',fullPage:true});
   model='BEMAC 68VM';extraVehicle=true;await refresh();await assertPosition(page,14.5995,120.9842);
-  await page.getByLabel('Selected vehicle').selectOption('ET-02');await assertPosition(page,14.668,120.965);
-  await page.getByLabel('Selected vehicle').selectOption('ET-01');await assertPosition(page,14.5995,120.9842);
+  await page.getByLabel('Selected vehicle',{exact:true}).selectOption('ET-02');await assertPosition(page,14.668,120.965);
+  await page.getByLabel('Selected vehicle',{exact:true}).selectOption('ET-01');await assertPosition(page,14.5995,120.9842);
   extraVehicle=false;
   hardwareFix={latitude:14.61,longitude:121.03,measured_at:new Date().toISOString()};await refresh();await page.locator('.map-vehicle .offline').waitFor();await assertPosition(page,14.61,121.03);
   gpsAge=0;await refresh();await page.locator('.map-vehicle .online').waitFor();
@@ -76,7 +76,7 @@ try{
   let driverModel='NWOW';
   await driver.route('https://tile.openstreetmap.org/**',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"/>'}));
   await driver.route(/\/api\/fleet\?/,route=>route.fulfill({json:[{id:'ET-01',name:'Driver assigned vehicle',model:driverModel,image_url:'/bemac-white.png',driver_name:'Map test driver',driver_id:'driver',device_id:'SOL-ET-01',status:'Never connected',nominal_voltage:60,nominal_capacity:100,solar_wh:null,wind_wh:null,telemetry:null,gps:null}]}));
-  await driver.goto(base);await driver.getByLabel('Email address').fill('driver@solair.local');await driver.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await driver.getByRole('button',{name:'Sign in',exact:true}).click();
+  await driver.goto(base);if(width<=650)await driver.getByRole('button',{name:'Get started',exact:true}).click();await driver.getByLabel('Email address').fill('driver@solair.local');await driver.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await driver.getByRole('button',{name:'Sign in',exact:true}).click();
   await driver.getByRole('button',{name:'Open account menu',exact:true}).waitFor();
   if(width<768)await driver.getByRole('button',{name:'Toggle menu'}).click();
   await driver.locator('.sidebar nav').getByRole('button',{name:'Location',exact:true}).click();await driver.getByRole('button',{name:'Malabon reference',exact:true}).waitFor();await assertPosition(driver,14.668,120.965);

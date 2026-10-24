@@ -1,5 +1,5 @@
 :root {
-  font-family: "DM Sans", Arial, sans-serif;
+  font-family: var(--font-body, "Work Sans", Arial, sans-serif);
   color: var(--text);
   background: var(--page);
   font-synthesis: none;
@@ -89,7 +89,7 @@ h1,
 h2,
 h3,
 strong {
-  font-family: "Manrope", "DM Sans", Arial, sans-serif;
+  font-family: var(--font-display, Outfit, "Work Sans", Arial, sans-serif);
 }
 h1 {
   font-size: 30px;
@@ -169,7 +169,7 @@ form button.primary {
   display: flex;
   gap: 10px;
   align-items: center;
-  font-family: Manrope, Arial, sans-serif;
+  font-family: var(--font-display, Outfit, "Work Sans", Arial, sans-serif);
   font-size: 27px;
   letter-spacing: 3.4px;
   font-weight: 800;
@@ -178,7 +178,7 @@ form button.primary {
 .brand i {
   display: block;
   font:
-    7px "DM Sans",
+    7px "Work Sans",
     Arial,
     sans-serif;
   letter-spacing: 2px;
@@ -695,7 +695,7 @@ form button.primary {
   background: #087f79;
   border-radius: 7px;
   color: white;
-  font: bold 9px Arial;
+  font: bold 9px var(--font-body);
   display: block;
   padding: 6px 3px;
   text-align: center;
@@ -1929,7 +1929,7 @@ code {
 .mobile-intro>.brand{font-size:25px;flex-shrink:0}.mobile-intro .brand i{font-size:6px}
 .intro-message{margin-top:clamp(28px,9vh,80px);flex-shrink:0;position:relative;z-index:1}
 .intro-message .eyebrow{color:#73cdc3;font-size:8px;letter-spacing:1.8px}
-.intro-message h1{font-family:Manrope,Arial,sans-serif;font-size:clamp(32px,10vw,46px);line-height:1.15;letter-spacing:-1.5px;margin:18px 0 0}
+.intro-message h1{font-family:var(--font-display);font-size:clamp(32px,10vw,46px);line-height:1.15;letter-spacing:-1.5px;margin:18px 0 0}
 .mobile-intro .vehicle-visual{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;margin:0}
 .mobile-intro .vehicle-visual img{width:100%;height:100%;object-fit:contain;max-height:42dvh;transform:scale(1.12);transform-origin:center}
 .mobile-intro .vehicle-visual figcaption{display:none}.mobile-intro>small{color:#8caabd;font-size:8px;flex-shrink:0}
