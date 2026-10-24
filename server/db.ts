@@ -81,6 +81,8 @@ export class Store {
     if(this.pg)await this.pg.query(details);else this.sqlite!.exec(details);
     const incidentUpdates=readFileSync(new URL('../backend/migrations/011_incident_updates.sql',import.meta.url),'utf8');
     if(this.pg)await this.pg.query(incidentUpdates);else this.sqlite!.exec(incidentUpdates);
+    const lifecycle=readFileSync(new URL('../backend/migrations/013_account_lifecycle.sql',import.meta.url),'utf8');
+    if(this.pg)await this.pg.query(lifecycle);else this.sqlite!.exec(lifecycle);
     const cpe = readFileSync(new URL("../backend/migrations/003_cpe.sql", import.meta.url), "utf8");
     if (this.pg) {
       await this.pg.query(cpe);
@@ -92,6 +94,7 @@ export class Store {
     if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/008_registration_supabase.sql',import.meta.url),'utf8'));
     if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/010_registration_details_supabase.sql',import.meta.url),'utf8'));
     if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/012_incident_updates_supabase.sql',import.meta.url),'utf8'));
+    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/014_account_lifecycle_supabase.sql',import.meta.url),'utf8'));
   }
   async close() {
     if (this.pg) await this.pg.end();

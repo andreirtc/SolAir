@@ -39,7 +39,7 @@ export async function recordIncident(db: Store, t: Telemetry, device: any, recei
   const [registration] = await db.query('SELECT * FROM device_operation WHERE device_id=? AND commissioned=1', [t.device_id]);
   if (!registration) return;
   // Without assignment history, delayed events go only to the designated operator for review.
-  const recipients = await db.query(`SELECT p.id,c.phone_e164 FROM profiles p JOIN contact_preferences c ON c.user_id=p.id WHERE p.org_id=? AND c.sms_consent=1 AND c.phone_verified_at IS NOT NULL AND c.email_verified_at IS NOT NULL AND ((p.id=? AND p.role IN ('operator','admin')) OR (p.role='driver' AND EXISTS(SELECT 1 FROM assignments a WHERE a.driver_id=p.id AND a.vehicle_id=?)))`, [device.org_id, registration.operator_id, delayed ? '' : device.vehicle_id]);
+  const recipients = await db.query(`SELECT p.id,c.phone_e164 FROM profiles p JOIN contact_preferences c ON c.user_id=p.id WHERE p.org_id=? AND NOT EXISTS(SELECT 1 FROM account_states s WHERE s.user_id=p.id AND (s.active=0 OR s.deletion_pending=1)) AND c.sms_consent=1 AND c.phone_verified_at IS NOT NULL AND c.email_verified_at IS NOT NULL AND ((p.id=? AND p.role IN ('operator','admin')) OR (p.role='driver' AND EXISTS(SELECT 1 FROM assignments a WHERE a.driver_id=p.id AND a.vehicle_id=?)))`, [device.org_id, registration.operator_id, delayed ? '' : device.vehicle_id]);
   const seen = new Set<string>();
   for (const person of recipients) {
     if (!person.phone_e164 || seen.has(person.phone_e164)) continue;
@@ -75,7 +75,7 @@ export async function processSms(db:Store,provider:SmsProvider = new TwilioSms()
   if(!pending) return;
   const [job]=await db.query("UPDATE sms_jobs SET status='unknown',reason='Claimed; outcome pending reconciliation',attempts=attempts+1,updated_at=? WHERE id=? AND status='queued' RETURNING *",[clock,pending.id]);
   if(!job) return;
-  const [access]=await db.query(`SELECT c.*,p.org_id,p.role,i.vehicle_id,i.org_id AS incident_org,d.operator_id,d.commissioned FROM contact_preferences c JOIN profiles p ON p.id=c.user_id JOIN alarm_incidents i ON i.id=? JOIN device_operation d ON d.device_id=i.device_id WHERE c.user_id=?`,[job.incident_id,job.user_id]);
+  const [access]=await db.query(`SELECT c.*,p.org_id,p.role,i.vehicle_id,i.org_id AS incident_org,d.operator_id,d.commissioned FROM contact_preferences c JOIN profiles p ON p.id=c.user_id JOIN alarm_incidents i ON i.id=? JOIN device_operation d ON d.device_id=i.device_id WHERE c.user_id=? AND NOT EXISTS(SELECT 1 FROM account_states s WHERE s.user_id=p.id AND (s.active=0 OR s.deletion_pending=1))`,[job.incident_id,job.user_id]);
   const [assignment]=await db.query('SELECT driver_id FROM assignments WHERE vehicle_id=?',[access?.vehicle_id || '']);
   if(!access||!access.commissioned||!access.sms_consent||!access.phone_verified_at||!access.email_verified_at||access.phone_e164!==job.phone_e164||access.org_id!==access.incident_org||!((access.operator_id===job.user_id&&['operator','admin'].includes(access.role)) || (access.role==='driver'&&assignment?.driver_id===job.user_id))) {
     await db.run("UPDATE sms_jobs SET status='suppressed',reason='Recipient verification, consent or access changed',updated_at=? WHERE id=?",[clock,job.id]);return;

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { CircleHelp, Flag } from "lucide-react";
 import { api } from "./api";
+import HelpResources from './HelpResources';
 
 export function HelpSupport({ go }: { go: (page: string,target?:string) => void }) {
   return <section className="panel support-panel">
@@ -15,9 +16,10 @@ export function HelpSupport({ go }: { go: (page: string,target?:string) => void 
       <small>After your administrator confirms the change, return Home to check the updated checklist.</small>
     </section>
     <details open><summary>My vehicle readings are missing or old</summary><p>Check the data mode and the measurement time. Real hardware needs a connected, registered ESP32. Demonstration readings are simulated records and can become stale. Try Refresh after the connection returns.</p></details>
-    <details><summary>The map is showing Malabon but no vehicle</summary><p>Malabon is the reference view. A vehicle marker needs a valid reported GPS fix. Choose Show vehicles to find recorded positions outside the current view.</p></details>
+    <details><summary>The map shows a city but no vehicle</summary><p>The reference area follows your assigned vehicle: BEMAC uses Manila and NWOW uses Malabon. Without an assigned or recognized vehicle, the map shows Metro Manila. A city reference is not a vehicle position. A marker needs valid reported GPS coordinates. Choose Show vehicles to find recorded positions outside the current view.</p></details>
     <details><summary>I need vehicle or roadside assistance</summary><p>Use SOS &amp; Assistance to contact your TODA. A queued request has not reached the server; check for the operator's acknowledgment.</p><button onClick={() => go("SOS & Assistance")}>Open assistance</button></details>
     <details><summary>How do I change appearance or sign out?</summary><p>Open Settings to choose Light, Dark or System. System follows your device's appearance. To sign out, open your initial in the top-right corner and choose Log out. Log out is also directly below Settings in the side menu.</p></details>
+    <HelpResources go={go}/>
     <div className="button-row"><button onClick={() => go("Messages")}>Open TODA messages</button><button onClick={() => go("Report a problem")}><Flag size={16} />Report a problem</button></div>
   </section>;
 }

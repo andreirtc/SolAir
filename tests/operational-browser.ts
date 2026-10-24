@@ -71,12 +71,16 @@ try{
  await page.locator('.sidebar nav').getByRole('button',{name:'Log out',exact:true}).click();
  const requested:string[]=[];page.on('request',r=>{if(/\/api\/(messages|history)\//.test(r.url()))requested.push(r.url());});
  await login('driver');await page.getByRole('heading',{name:'Ready for the road, Miguel.'}).waitFor();
- await page.getByRole('heading',{name:'Your account setup',exact:true}).waitFor();
+ await page.getByRole('region',{name:'Your assigned vehicle',exact:true}).waitFor();
+ assert.equal(await page.locator('.registration-details').count(),0);
+ assert.equal(await page.getByRole('region',{name:'Account setup',exact:true}).count(),0);
+ assert.equal(await page.getByRole('heading',{name:'Energy snapshot',exact:true}).count(),0);
  const status=page.locator('.device-status');await status.getByText('No data',{exact:true}).waitFor();await status.getByText('No current GPS fix',{exact:true}).waitFor();await status.getByText('State unknown',{exact:true}).waitFor();
  await page.getByLabel('Data mode',{exact:true}).selectOption('demo');await status.getByText('Simulated readings',{exact:true}).waitFor();await status.getByText('Sensor status and reading ages',{exact:true}).click();await status.getByText('Age unknown · Time unknown',{exact:true}).first().waitFor();await page.getByLabel('Data mode',{exact:true}).selectOption('hardware');await status.getByText('No data',{exact:true}).waitFor();
  await page.screenshot({path:output+'/driver-home-readiness.png',fullPage:true});
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:output+'/phone-driver-status.png',fullPage:true});await page.setViewportSize({width:1440,height:1050});
  await status.getByRole('button',{name:'View my history',exact:true}).click();await page.getByRole('heading',{name:'Research evidence · ET-02',exact:true}).waitFor();assert.match(await page.getByRole('link',{name:'Download research CSV',exact:true}).getAttribute('href')||'',/ET-02\?mode=hardware/);
+ await page.reload();await page.getByRole('heading',{name:'Research evidence · ET-02',exact:true}).waitFor();
  await page.locator('.sidebar nav').getByRole('button',{name:'My vehicle',exact:true}).click();
  results.push('Driver setup, unknown connection/sensor/GPS states, 390px layout and authorized research history are clear');
 

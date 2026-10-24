@@ -1,0 +1,13 @@
+✔ v2 enforces measurements, quality and calibrated current; v1 remains compatible (1517.9987ms)
+✔ authenticated CPE measurements persist atomically with load and source; duplicate conflict cannot mutate (157.6694ms)
+✔ recovered security events persist without refreshing live readings or GPS (40.5561ms)
+✔ authenticated schema errors are traceable to the device without accepting data or spoofed errors (34.994ms)
+✔ TEST FIXTURE: compatible IMU identity and vectors survive real-mode backend round trip (32.6991ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16089.4635

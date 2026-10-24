@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Store } from "./db";
 import { hash, token, passwordHash, verifyPassword, type User } from "./auth";
 import type {IdentityProvider} from './identity';
+import {AccountActionError,withAccountAdministration,requireActiveAccount} from './account-lifecycle';
 import { notifications } from './notifications';
 import { operationalRoutes } from './operational-routes';
 import { operational, recordIncident } from './operations';
@@ -61,13 +62,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   });
   const clients = new Map<Response, User>();
   const streamSessions = new Map<Response, string>();
+  const revokeAccountStreams=(id:string)=>{for(const [stream,user] of clients)if(user.id===id){clients.delete(stream);streamSessions.delete(stream);stream.end();}};
   const notify = (org: string) => {
     for (const [res, u] of clients)
       if (u.org_id === org) res.write("event: update\ndata: {}\n\n");
   };
   const auth = async (req: Request, res: Response, next: NextFunction) => {
     const [u] = await db.query(
-      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications,o.name AS organization_name FROM sessions s JOIN profiles p ON p.id=s.user_id JOIN organizations o ON o.id=p.org_id WHERE s.token_hash=? AND s.expires_at>?",
+      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications,o.name AS organization_name FROM sessions s JOIN profiles p ON p.id=s.user_id JOIN organizations o ON o.id=p.org_id WHERE s.token_hash=? AND s.expires_at>? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=p.id AND (a.active=0 OR a.deletion_pending=1))",
       [hash(req.cookies.session || ""), now()],
     );
     if (!u) return res.status(401).json({ error: "Sign in required" });
@@ -102,7 +104,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     if(operational() && req.query.mode==='demo')return res.status(403).json({error:'Demonstration data is unavailable in the operational environment'});
     next();
   });
-  operationalRoutes(app,db,auth,identity,notify);
+  operationalRoutes(app,db,auth,identity,notify,revokeAccountStreams);
   app.get("/api/health", (_req, res) =>
     res.json({
       status: "ok",
@@ -134,6 +136,8 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
           .status(401)
           .json({ error: "Email or password is incorrect" });
       if(operational()&&(!identity?.emailVerified||!await identity.emailVerified(u.id)))return res.status(403).json({error:'Verify email ownership before operational access'});
+      const [inactive]=await db.query('SELECT user_id FROM account_states WHERE user_id=? AND (active=0 OR deletion_pending=1)',[u.id]);
+      if(inactive)return res.status(403).json({error:'This account is deactivated or pending deletion. Contact your administrator.'});
       if(identity&&u.email!==b.email.toLowerCase())await db.run('UPDATE profiles SET email=? WHERE id=?',[b.email.toLowerCase(),u.id]);
       const t = token();
       await db.run("INSERT INTO sessions VALUES (?,?,?)", [
@@ -466,7 +470,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   });
   app.get("/api/users", auth, role("admin"), async (req, res) =>
     res.json(
-      await db.query("SELECT id,name,email,role FROM profiles WHERE org_id=?", [
+      await db.query("SELECT id,name,email,role FROM profiles WHERE org_id=? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=profiles.id AND (a.active=0 OR a.deletion_pending=1))", [
         (req as AuthRequest).user.org_id,
       ]),
     ),
@@ -481,7 +485,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       [operator]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role IN ('operator','admin')",[b.operator_id,u.org_id]);
       if(!operator)return res.status(403).json({error:'Choose an authorized operator in this TODA'});
     }
-    await db.transaction(async tx=>{
+    await withAccountAdministration(db,async tx=>{
+      const actor=await requireActiveAccount(tx,u.id),driver=await requireActiveAccount(tx,b.driver_id);
+      if(actor.role!=='admin'||driver.role!=='driver'||driver.org_id!==u.org_id)throw new AccountActionError(409,'Account access changed. Refresh before assigning the vehicle.');
+      if(operator){const current=await requireActiveAccount(tx,operator.id);if(!['operator','admin'].includes(current.role)||current.org_id!==u.org_id)throw new AccountActionError(409,'Operator access changed. Refresh before assigning the vehicle.');}
       await tx.run('INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id',[b.vehicle_id,b.driver_id]);
       if(operator){
         await tx.run('INSERT INTO vehicle_operators VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET operator_id=excluded.operator_id',[b.vehicle_id,operator.id]);
@@ -598,19 +605,22 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       if (
         !p ||
         u.id === p.id ||
+        p.role === 'admin' ||
         (u.role === "operator" && (p.role !== "driver" || b.role !== "driver"))
       )
         return res
           .status(403)
           .json({ error: "Account update is not permitted" });
-      await db.run("UPDATE profiles SET name=?,role=? WHERE id=?", [
-        b.name,
-        b.role,
-        p.id,
-      ]);
-      if(!["operator","admin"].includes(b.role))await db.run("DELETE FROM vehicle_operators WHERE operator_id=?",[p.id]);
-      await db.run("DELETE FROM sessions WHERE user_id=?", [p.id]);
-      await audit(u, "account_updated", p.id);
+      await withAccountAdministration(db,async tx=>{
+        const actor=await requireActiveAccount(tx,u.id),person=await requireActiveAccount(tx,p.id);
+        if(actor.role!=='admin'||person.role==='admin'||person.org_id!==u.org_id)throw new AccountActionError(403,'Account update is not permitted');
+        await tx.run('UPDATE profiles SET name=?,role=? WHERE id=?',[b.name,b.role,p.id]);
+        if(b.role!=='driver')await tx.run('DELETE FROM assignments WHERE driver_id=?',[p.id]);
+        if(!['operator','admin'].includes(b.role)){await tx.run('DELETE FROM vehicle_operators WHERE operator_id=?',[p.id]);await tx.run('UPDATE device_operation SET commissioned=0,operator_id=NULL WHERE operator_id=?',[p.id]);}
+        await tx.run('DELETE FROM sessions WHERE user_id=?',[p.id]);
+        await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),u.org_id,u.id,'account_updated',p.id,now()]);
+      });
+      revokeAccountStreams(p.id);notify(u.org_id);
       res.json({ ok: true });
     },
   );
@@ -882,7 +892,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         return res.status(401).json({ error: "Device authentication failed" });
       if (req.headers["x-bench-transport"] === "usb") {
         const [u] = await db.query(
-          "SELECT p.* FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?",
+          "SELECT p.* FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=p.id AND (a.active=0 OR a.deletion_pending=1))",
           [hash(req.cookies.session || ""), now()],
         );
         if (
@@ -1027,6 +1037,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     res.status(404).json({ error: "Endpoint not found" }),
   );
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    if(err instanceof AccountActionError)return res.status(err.status).json({error:err.message});
     if (err instanceof z.ZodError || err instanceof SyntaxError)
       return res.status(400).json({ error: "Invalid request" });
     console.error(err.message);

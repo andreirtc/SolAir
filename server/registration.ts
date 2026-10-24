@@ -38,13 +38,13 @@ export function registrationRoutes(app:Express,db:Store,auth:RequestHandler){
  app.get('/api/admin/activity',auth,async(req:any,res)=>{
   if(req.user.role!=='admin')return res.sendStatus(403);
   const b=z.object({category:z.enum(['all','registrations','assignments','accounts','devices','security','signins']).default('all'),q:z.string().max(100).default(''),page:z.coerce.number().int().min(1).max(100000).default(1)}).parse(req.query);
-  const groups:Record<string,string[]>={registrations:['account_registered','register','registration_details_updated'],assignments:['vehicle_assigned','vehicle_created','account_membership_updated'],accounts:['account_updated','operator_information_updated','invite_created','legacy_request_archived'],devices:['device_commissioning_changed','device_credential_rotated','calibration_recorded'],security:['alert_ack','incident_acknowledged','incident_note','incident_resolved','help_submitted','help_acknowledged','help_resolved','problem_report'],signins:['sign_in']};
+  const groups:Record<string,string[]>={registrations:['account_registered','register','registration_details_updated'],assignments:['vehicle_assigned','vehicle_created','account_membership_updated'],accounts:['account_updated','operator_information_updated','invite_created','legacy_request_archived','account_deactivated','account_reactivated','account_deletion_requested','account_deleted'],devices:['device_commissioning_changed','device_credential_rotated','calibration_recorded'],security:['alert_ack','incident_acknowledged','incident_note','incident_resolved','help_submitted','help_acknowledged','help_resolved','problem_report'],signins:['sign_in']};
   const where:string[]=[],args:any[]=[];
   if(b.category==='all')where.push("a.action <> 'sign_in'");else{where.push('a.action IN ('+groups[b.category].map(()=>'?').join(',')+')');args.push(...groups[b.category]);}
-  if(b.q){where.push('(LOWER(COALESCE(p.name,\'\')) LIKE ? OR LOWER(COALESCE(t.name,\'\')) LIKE ? OR LOWER(a.action) LIKE ?)');const q='%'+b.q.toLowerCase()+'%';args.push(q,q,q);}
+  if(b.q){where.push('(LOWER(COALESCE(p.name,\'\')) LIKE ? OR LOWER(COALESCE(t.name,\'\')) LIKE ? OR LOWER(a.action) LIKE ? OR LOWER(COALESCE(d.description,\'\')) LIKE ?)');const q='%'+b.q.toLowerCase()+'%';args.push(q,q,q,q);}
   const joins=' FROM audit_logs a LEFT JOIN profiles p ON p.id=a.user_id LEFT JOIN profiles t ON t.id=a.target LEFT JOIN vehicles v ON v.id=a.target LEFT JOIN organizations o ON o.id=a.org_id LEFT JOIN activity_details d ON d.audit_id=a.id WHERE '+where.join(' AND ');
   const [count]=await db.query('SELECT COUNT(*) AS total'+joins,args);
-  const items=await db.query('SELECT a.id,a.action,a.created_at,p.name AS actor,t.name AS person,v.id AS vehicle_id,o.name AS organization,d.description'+joins+' ORDER BY a.created_at DESC,a.id DESC LIMIT 25 OFFSET ?',[...args,(b.page-1)*25]);
+  const items=await db.query("SELECT a.id,a.action,a.created_at,COALESCE(p.name,CASE WHEN a.user_id IS NULL AND d.description LIKE '%Former account:%' THEN 'Former account' ELSE NULL END) AS actor,t.name AS person,v.id AS vehicle_id,o.name AS organization,d.description"+joins+' ORDER BY a.created_at DESC,a.id DESC LIMIT 25 OFFSET ?',[...args,(b.page-1)*25]);
   res.json({items,total:Number(count.total),page:b.page});
  });
 }

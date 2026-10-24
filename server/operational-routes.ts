@@ -10,12 +10,13 @@ import {operational,paidEnabled,smsMode} from './operations';
 import {administrationRoutes} from './administration';
 import {workflowRoutes,verificationAvailability} from './workflows';
 import {incidentRoutes} from './incidents';
+import {withAccountAdministration,requireActiveAccount} from './account-lifecycle';
 import {elapsed} from '../packages/device-health';
 const user=(req:any)=>req.user as User;
 const timestamp=()=>new Date().toISOString();
 const phone=z.string().transform((value,ctx)=>{try{return normalizePhilippineMobile(value);}catch{ctx.addIssue({code:'custom',message:'Use 09XX XXX XXXX or +63 9XX XXX XXXX'});return z.NEVER;}});
-export function operationalRoutes(app:Express,db:Store,auth:RequestHandler,identity:IdentityProvider|null,notify:(org:string)=>void) {
-  administrationRoutes(app,db,auth,notify);
+export function operationalRoutes(app:Express,db:Store,auth:RequestHandler,identity:IdentityProvider|null,notify:(org:string)=>void,revoke:(id:string)=>void=()=>{}) {
+  administrationRoutes(app,db,auth,notify,identity,revoke);
   workflowRoutes(app,db,auth);
   const roles=(...allowed:string[]):RequestHandler=>(req,res,next)=>allowed.includes(user(req).role)?next():void res.status(403).json({error:'This role is not permitted'});
   const restricted=rateLimit({windowMs:3600000,limit:5});
@@ -116,7 +117,7 @@ export function operationalRoutes(app:Express,db:Store,auth:RequestHandler,ident
     if(b.commissioned&&!b.operator_id)return res.status(400).json({error:'A responsible operator is required'});
     const [assignedOperator]=await db.query('SELECT operator_id FROM vehicle_operators WHERE vehicle_id=?',[device.vehicle_id]);
     if(b.commissioned&&assignedOperator&&assignedOperator.operator_id!==b.operator_id)return res.status(400).json({error:'Choose the operator assigned to this vehicle in People & assignments'});
-    await db.run('INSERT INTO device_operation VALUES (?,?,?,?,?) ON CONFLICT(device_id) DO UPDATE SET commissioned=excluded.commissioned,operator_id=excluded.operator_id,evidence=excluded.evidence,updated_at=excluded.updated_at',[device.id,b.commissioned?1:0,b.operator_id,b.evidence,timestamp()]);
+    await withAccountAdministration(db,async tx=>{await requireActiveAccount(tx,u.id);if(b.operator_id)await requireActiveAccount(tx,b.operator_id);await tx.run('INSERT INTO device_operation VALUES (?,?,?,?,?) ON CONFLICT(device_id) DO UPDATE SET commissioned=excluded.commissioned,operator_id=excluded.operator_id,evidence=excluded.evidence,updated_at=excluded.updated_at',[device.id,b.commissioned?1:0,b.operator_id,b.evidence,timestamp()]);});
     await db.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),u.org_id,u.id,'device_commissioning_changed',device.id,timestamp()]);res.json({ok:true});
   });
   app.get('/api/device-operation/:id',auth,roles('engineer','admin'),async(req,res)=>{

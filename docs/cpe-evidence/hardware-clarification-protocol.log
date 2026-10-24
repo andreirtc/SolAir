@@ -1,0 +1,2 @@
+PASS: TEST FIXTURE Modbus scaling/address/length/CRC; no device opened
+PASS: TEST FIXTURE 50 A register/readback, mismatch, timeout and exact write echo; no device opened

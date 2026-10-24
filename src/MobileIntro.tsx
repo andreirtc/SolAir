@@ -1,11 +1,15 @@
 import Brand from './Brand';
 import {VehicleVisualization} from './VehicleVisualization';
+import {ChevronsRight} from 'lucide-react';
 
-export default function MobileIntro(){
-  return <main className="mobile-intro" role="status" aria-label="Starting SOLAIR">
+export default function MobileIntro({onStart}:{onStart:()=>void}){
+  return <main className="mobile-intro welcome-screen" aria-labelledby="welcome-heading">
     <Brand/>
-    <div className="intro-message"><span className="eyebrow">ENERGY. SECURITY. CONNECTION.</span><h1>A smarter<br/>journey<br/>starts here.</h1></div>
-    <VehicleVisualization/>
-    <small>White BEMAC 68VM · Reference-based visualization</small>
+    <div className="welcome-art"><VehicleVisualization/><span className="welcome-art-label">BEMAC 68VM · Illustration</span></div>
+    <div className="intro-message"><span className="eyebrow">ENERGY. SECURITY. CONNECTION.</span><h1 id="welcome-heading">A smarter<br/><mark>journey</mark><br/>starts with you.</h1><p>Your vehicle, location and alerts.<br/>Together in one simple app.</p></div>
+    <div className="welcome-actions">
+      <button type="button" className="welcome-start" onClick={onStart}>Get started</button>
+      <button type="button" className="welcome-next" aria-label="Continue to sign in" onClick={onStart}><ChevronsRight size={22} aria-hidden="true"/></button>
+    </div>
   </main>;
 }

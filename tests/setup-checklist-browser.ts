@@ -21,10 +21,13 @@ try{
  for(const width of [1440,390]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'});
   const page=await context.newPage(),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base);await page.getByLabel('Email address',{exact:true}).fill('driver@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();
+  await page.goto(base);if(page.viewportSize()!.width<=650&&!await page.getByLabel('Email address',{exact:true}).count())await page.getByRole('button',{name:'Get started',exact:true}).click();await page.getByLabel('Email address',{exact:true}).fill('driver@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();
   const checklist=page.getByRole('region',{name:'Account setup'});
+  assert.equal(await checklist.count(),0);
+  assert.equal(await page.locator('.registration-details').count(),0);
+  await page.getByRole('region',{name:'Account setup reminder'}).getByRole('button',{name:'Review setup',exact:true}).click();
   await checklist.getByRole('button',{name:/Assigned vehicle/}).waitFor();
-  async function home(){if(width<=900)await page.getByRole('button',{name:'Toggle menu',exact:true}).click();await page.locator('.sidebar nav').getByRole('button',{name:'My vehicle',exact:true}).click();await checklist.getByRole('button',{name:/Assigned vehicle/}).waitFor();}
+  async function home(){if(width<=900)await page.getByRole('button',{name:'Toggle menu',exact:true}).click();await page.locator('.sidebar nav').getByRole('button',{name:'Settings',exact:true}).click();await page.reload();await checklist.getByRole('button',{name:/Assigned vehicle/}).waitFor();}
   async function target(id:string){await page.waitForFunction(id=>document.activeElement?.id===id,id);assert.equal(await page.locator('#'+id).isVisible(),true);const box=await page.locator('#'+id).boundingBox();assert.ok(box&&box.y>=0&&box.y<900,JSON.stringify(box));}
   await checklist.getByRole('button',{name:/Account created/}).focus();await page.keyboard.press('Enter');await target('profile-settings');await home();
   await checklist.getByRole('button',{name:/TODA membership/}).click();await target('registration-details');await home();
@@ -36,10 +39,16 @@ try{
   // Cover optional verification, pending membership/access and completed assignment branches.
   const cases=[['toda','TODA membership',false,'assignment-help'],['operator-access','Operator access',false,'assignment-help'],['vehicle','Assigned vehicle',true,'registration-details'],['operator','Responsible operator',true,'registration-details'],['email','Email ownership verified',false,'email-verification'],['phone','Mobile ownership verified',false,'verify-mobile']] as const;
   for(const [id,label,complete,destination] of cases){
+   // Checklist now lives in Settings; return before testing the next task.
+   await home();
    await page.route('**/api/setup-readiness',route=>route.fulfill({json:{assignment_complete:false,sms_opted_in:true,tasks:[{id,label,complete,required:true,action:'Isolated navigation fixture'}]}}));
-   await page.reload();await checklist.getByRole('button',{name:new RegExp(label)}).click();await target(destination);await page.unroute('**/api/setup-readiness');
+   const readiness=page.waitForResponse(response=>response.url().endsWith('/api/setup-readiness'));
+   await page.reload();await readiness;
+   if(complete){await page.waitForFunction(()=>!document.querySelector('.setup-checklist'));assert.equal(await checklist.count(),0);}
+   else {await checklist.getByRole('button',{name:new RegExp(label)}).click();await target(destination);}
+   await page.unroute('**/api/setup-readiness');
   }
-  await page.reload();await checklist.getByRole('button',{name:/Assigned vehicle/}).waitFor();
+  await home();await page.reload();await checklist.getByRole('button',{name:/Assigned vehicle/}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await page.screenshot({path:`test-results/setup-checklist/${width}.png`,fullPage:true});assert.deepEqual(errors,[]);await context.close();
   console.log(`${width}px: real pending setup, keyboard activation, precise settings focus, administrator guidance, optional verification and completed assignment links passed`);

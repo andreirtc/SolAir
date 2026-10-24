@@ -11,8 +11,9 @@ function readSaved(key: string): string[] {
   } catch { return []; }
 }
 const icons = { security: Shield, alert: Shield, energy: Sun, system: Radio, assistance: LifeBuoy, message: MessageSquare };
-export default function Notifications({ user, mode, refreshKey, go, select }: {
+export default function Notifications({ user, mode, refreshKey, go, select, fullPage=false }: {
   user: Profile; mode: string; refreshKey: number; go: (page: string) => void; select: (id: string) => void;
+  fullPage?:boolean;
 }) {
   const key = `solair-notifications-read:${user.id}:${user.org_id}:${mode}`;
   const [open, setOpen] = useState(false), [items, setItems] = useState<ActivityNotification[]>([]);
@@ -33,13 +34,13 @@ export default function Notifications({ user, mode, refreshKey, go, select }: {
     return () => window.removeEventListener("storage", sync);
   }, [key]);
   useEffect(() => {
-    if (!open) return;
+    if (!open || fullPage) return;
     close.current?.focus();
     const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); trigger.current?.focus(); } };
     document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape);
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
-  }, [open]);
+  }, [open,fullPage]);
   const unread = items.filter((item) => !seen.includes(item.revision)).length;
   function markRead(revisions: string[]) {
     setSeen((current) => {
@@ -48,12 +49,12 @@ export default function Notifications({ user, mode, refreshKey, go, select }: {
       return next;
     });
   }
-  return <div className="notification-menu" ref={root}>
-    <button ref={trigger} className="notification-trigger" aria-label={`Open notifications${user.notifications && unread ? `, ${unread} unread` : ""}`} aria-expanded={open} aria-controls="notification-feed" aria-haspopup="dialog" onClick={() => setOpen(!open)}>
+  return <div className={fullPage ? "panel notification-page" : "notification-menu"} ref={root}>
+    {!fullPage && <button ref={trigger} className="notification-trigger" aria-label={`Open notifications${user.notifications && unread ? `, ${unread} unread` : ""}`} aria-expanded={open} aria-controls="notification-feed" aria-haspopup="dialog" onClick={() => setOpen(!open)}>
       <Bell size={20} />{user.notifications && unread > 0 ? <span className="notification-count">{unread > 9 ? "9+" : unread}</span> : null}
-    </button>
-    {open && <div id="notification-feed" className="notification-dropdown" role="dialog" aria-label="Notifications">
-      <div className="notification-heading"><div><h2>Notifications</h2><p>{mode === "demo" ? "Demonstration · simulated activity" : "Recorded hardware & system activity"}</p></div><button ref={close} aria-label="Close notifications" onClick={() => { setOpen(false); trigger.current?.focus(); }}><X size={18} /></button></div>
+    </button>}
+    {(fullPage || open) && <div id="notification-feed" className={fullPage ? "notification-page-feed" : "notification-dropdown"} role={fullPage ? "region" : "dialog"} aria-label="Notifications">
+      <div className="notification-heading"><div><h2>{fullPage ? "Recent activity" : "Notifications"}</h2><p>{mode === "demo" ? "Demonstration · simulated activity" : "Recorded hardware & system activity"}</p></div>{!fullPage && <button ref={close} aria-label="Close notifications" onClick={() => { setOpen(false); trigger.current?.focus(); }}><X size={18} /></button>}</div>
       <div className="notification-tools"><label>Show<select aria-label="Notification category" value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">All activity</option><option value="security">Security</option><option value="alert">Alerts</option><option value="energy">Harvested energy</option><option value="system">System updates</option><option value="assistance">Assistance</option><option value="message">Messages</option></select></label><button disabled={!unread} onClick={() => markRead(items.map((item) => item.revision))}><CheckCheck size={15} />Mark all read</button></div>
       {!user.notifications && <p className="notification-hint">Notification badges are off in your profile. Activity is still available here.</p>}
       {error && <div className="notification-error" role="status"><p>{error}</p><button onClick={() => { setLoading(true); setRetry((value) => value + 1); }}>Retry</button></div>}

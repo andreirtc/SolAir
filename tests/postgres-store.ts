@@ -28,6 +28,7 @@ export class PostgresTestStore extends Store {
     await this.engine.exec(readFileSync(new URL('../backend/migrations/007_registration.sql',import.meta.url),'utf8'));
     await this.engine.exec(readFileSync(new URL('../backend/migrations/009_registration_details.sql',import.meta.url),'utf8'));
     await this.engine.exec(readFileSync(new URL('../backend/migrations/011_incident_updates.sql',import.meta.url),'utf8'));
+    await this.engine.exec(readFileSync(new URL('../backend/migrations/013_account_lifecycle.sql',import.meta.url),'utf8'));
   }
   override async transaction<T>(fn: (tx: Store) => Promise<T>): Promise<T> {
     return this.engine.transaction(async (tx: any) => {

@@ -3,6 +3,7 @@ import NextImage from 'next/image';
 import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import {
   LayoutDashboard,
+  Home,
   MapPin,
   Truck,
   Zap,
@@ -15,7 +16,6 @@ import {
   ArrowUpRight,
   ArrowRight,
   Sun,
-  Wind,
   Bell,
   LogOut,
   Radio,
@@ -24,6 +24,9 @@ import {
   UserRound,
   Plus,
   WifiOff,
+  Eye,
+  EyeOff,
+  LoaderCircle,
 } from "lucide-react";
 import { api, stamp, value, money } from "./api";
 import { VehicleVisualization } from "./VehicleVisualization";
@@ -36,21 +39,30 @@ import Brand from './Brand';
 import AdminHome from './AdminHome';
 import WorkspaceGuide,{ReadingDetails} from './WorkspaceGuide';
 import SignInArtwork from './SignInArtwork';
+import {EmptyState,workspaceDescription} from './WorkspaceFeedback';
+import {vehicleMapReference,hasMapPosition} from './map-reference';
 import MobileIntro from './MobileIntro';
+import DriverVehicleCard from './DriverVehicleCard';
+import EnergyHarvestSections from './EnergyHarvestSections';
+import {permittedPage,workspacePageKey} from './workspace-navigation';
 import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
 import TodaMenu from './TodaMenu';
 import {RegistrationDetails,ActivityLog} from './Registration';
 import Notifications from './Notifications';
 import { Appearance, ThemeProvider } from './Theme';
 import { HelpSupport, ProblemReport } from './Support';
+import HelpResources from './HelpResources';
+import PolicyDraft from './PolicyDrafts';
 import CpeReadings from './CpeReadings';
 import CpeHistory from './CpeHistory';
 import { power, freshness } from "../packages/telemetry-contract";
 import "./style.css";
 import "./design-system.css";
 import "./sign-in.css";
+import "./experience.css";
 const FleetMap = lazy(() => import("./FleetMap"));
 const Lab = lazy(() => import("./Lab"));
+const mobileDestinations=['Overview','Live Fleet Map','Energy','Security','Notifications','Settings'];
 const nav = [
   ["Overview", LayoutDashboard],
   ["Live Fleet Map", MapPin],
@@ -85,13 +97,15 @@ class Boundary extends React.Component<
     );
   }
 }
-function Login({ onLogin }: { onLogin: () => void }) {
+function Login({ onLogin }: { onLogin: () => void|Promise<void> }) {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [health, setHealth] = useState<any>(null);
   const invite = new URLSearchParams(location.search).get("token");
   const [name, setName] = useState("");
+  const [signingIn,setSigningIn]=useState(false),[passwordVisible,setPasswordVisible]=useState(false);
+  const signInPending=useRef(false);
   useEffect(() => {
     api("/health")
       .then((h) => {
@@ -112,6 +126,8 @@ function Login({ onLogin }: { onLogin: () => void }) {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            if(signInPending.current)return;
+            signInPending.current=true;setSigningIn(true);setError('');
             try {
               if (invite) {
                 await api("/register", "POST", {
@@ -123,11 +139,11 @@ function Login({ onLogin }: { onLogin: () => void }) {
                 setError("Account created. Sign in with your invited email.");
               } else {
                 await api("/login", "POST", { email, password });
-                onLogin();
+                await onLogin();
               }
             } catch (e) {
               setError((e as Error).message);
-            }
+            } finally {signInPending.current=false;setSigningIn(false);}
           }}
         >
           {invite ? (
@@ -144,30 +160,36 @@ function Login({ onLogin }: { onLogin: () => void }) {
               Email address
               <input
                 type="email"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </label>
           )}
-          <label>
-            Password
+          <div className="password-field">
+            <label htmlFor="signin-password">Password</label>
+            <span className="password-control">
             <input
-              type="password"
+              id="signin-password"
+              type={passwordVisible?'text':'password'}
+              autoComplete={invite?'new-password':'current-password'}
               required
               minLength={invite ? 12 : 1}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </label>
+            <button type="button" aria-label={passwordVisible?'Hide password':'Show password'} aria-pressed={passwordVisible} onClick={()=>setPasswordVisible(visible=>!visible)}>{passwordVisible?<EyeOff size={19} aria-hidden="true"/>:<Eye size={19} aria-hidden="true"/>}</button>
+            </span>
+          </div>
           {error && (
             <p role="alert" className="error">
               {error}
             </p>
           )}
-          <button className="primary auth-entry-action">
-            {invite ? "Create account" : "Sign in"}
-            <ArrowRight size={17} />
+          <button className="primary auth-entry-action" disabled={signingIn} aria-busy={signingIn}>
+            {signingIn?invite?'Creating account…':'Signing in…':invite ? "Create account" : "Sign in"}
+            {signingIn?<LoaderCircle className="action-spinner" size={17} aria-hidden="true"/>:<ArrowRight size={17} />}
           </button>
         </form>
         {!invite&&<a className="button auth-entry-action" href="/signup">Sign up<ArrowRight size={17}/></a>}
@@ -250,7 +272,7 @@ function Hero({
       <div className="hero-copy">
         <span>{v.id} / PASSENGER ELECTRIC</span>
         <h2>
-          BEMAC <b>68VM</b>
+          {v.model}
         </h2>
         <p>
           {v.driver_name || "Awaiting driver assignment"} · {organization}
@@ -283,9 +305,8 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
   const t = v.telemetry;
   return (
     <>
-      <CpeReadings t={t} />
-      <CpeHistory vehicleId={v.id} mode={mode} />
-      <div className="metrics energy-metrics">
+      <EnergyHarvestSections vehicle={v} mode={mode}/>
+      <div className="metrics energy-metrics" id="energy-battery">
         <Metric
           label="Battery voltage"
           val={value(t?.battery_voltage_v)}
@@ -326,81 +347,8 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
           icon={Sun}
         />
       </div>
-      <div className="two-col">
-        <section className="panel">
-          <div className="panel-heading">
-            <h3>
-              <Sun size={18} /> Solar intelligence
-            </h3>
-            <span className="badge amber">400 W nominal array</span>
-          </div>
-          <div className="electrical-grid">
-            <div>
-              <span>PV input voltage</span>
-              <strong>{value(t?.solar_voltage_v)} V</strong>
-            </div>
-            <div>
-              <span>PV input current</span>
-              <strong>{value(t?.solar_current_a)} A</strong>
-            </div>
-            <div>
-              <span>PV power</span>
-              <strong>
-                {value(
-                  power(t?.solar_voltage_v ?? null, t?.solar_current_a ?? null),
-                )}{" "}
-                W
-              </strong>
-            </div>
-            <div>
-              <span>Controller output</span>
-              <strong>
-                {value(t?.solar_output_voltage_v)} V /{" "}
-                {value(t?.solar_output_current_a)} A
-              </strong>
-            </div>
-          </div>
-          <p className="subtle">
-            PV input and controller output are separate measurements. MPT-7210A
-            validation remains pending.
-          </p>
-        </section>
-        <section className="panel">
-          <div className="panel-heading">
-            <h3>
-              <Wind size={18} /> Wind subsystem
-            </h3>
-            <span className="badge">Not commissioned</span>
-          </div>
-          <div className="electrical-grid">
-            <div>
-              <span>Output voltage</span>
-              <strong>{value(t?.wind_voltage_v)} V</strong>
-            </div>
-            <div>
-              <span>Output current</span>
-              <strong>{value(t?.wind_current_a)} A</strong>
-            </div>
-            <div>
-              <span>Power</span>
-              <strong>
-                {value(
-                  power(t?.wind_voltage_v ?? null, t?.wind_current_a ?? null),
-                )}{" "}
-                W
-              </strong>
-            </div>
-            <div>
-              <span>Energy yield</span>
-              <strong>{value(v.wind_wh, 2)} Wh</strong>
-            </div>
-          </div>
-          <p className="subtle">
-            Future wind harvesting is supported by the contract. No operational
-            yield is claimed.
-          </p>
-        </section>
-      </div>
+      <CpeReadings t={t} />
+      <CpeHistory vehicleId={v.id} mode={mode} />
       <section className="forecast panel">
         <Shield size={24} />
         <div>
@@ -423,14 +371,17 @@ function Energy({ v, mode }: { v: Vehicle; mode: string }) {
   );
 }
 function App() {
+  const [helpSending,setHelpSending]=useState(false),[messageSending,setMessageSending]=useState(false);
+  const helpPending=useRef(false),messagePending=useRef(false);
   const [navigationTarget,setNavigationTarget]=useState<{id:string}|null>(null);
   const [mobileLaunch] = useState(() => window.matchMedia('(max-width: 650px)').matches);
-  const [introDone,setIntroDone] = useState(false);
-  useEffect(()=>{
-    if(!mobileLaunch)return;
-    const timer=window.setTimeout(()=>setIntroDone(true),500);
-    return()=>window.clearTimeout(timer);
-  },[mobileLaunch]);
+  const [introDone,setIntroDone] = useState(()=>{
+    try{return sessionStorage.getItem('solair-welcome-complete')==='1';}catch{return false;}
+  });
+  function finishIntro(){
+    try{sessionStorage.setItem('solair-welcome-complete','1');}catch{/* Continue when browser storage is unavailable. */}
+    setIntroDone(true);
+  }
   const [user, setUser] = useState<Profile | null>(null),
     [loaded, setLoaded] = useState(false),
     [page, setPage] = useState("Overview"),
@@ -454,6 +405,7 @@ function App() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [notificationRevision, setNotificationRevision] = useState(0);
   const logoutPending = useRef(false);
+  const navigationSession = useRef<string | null>(null);
   const [reportPage, setReportPage] = useState("Overview");
   const requestKey = useRef("");
   requestKey.current = `${user?.id || ""}:${user?.org_id || ""}:${mode}`;
@@ -462,6 +414,10 @@ function App() {
     setTimeout(() => setNotice(""), 7000);
   }, []);
   const clearSession = useCallback(() => {
+    setIntroDone(true);
+    try { sessionStorage.setItem('solair-welcome-complete','1'); } catch { /* Sign-in remains available without browser storage. */ }
+    try { if(navigationSession.current) sessionStorage.removeItem(navigationSession.current); } catch { /* Storage may be unavailable. */ }
+    navigationSession.current = null;
     requestKey.current = "";
     setUser(null); setFleet([]); setAlerts([]); setHelp([]); setMessages([]);
     setRecords([]); setUsers([]); setOrgs([]); setNotice("");
@@ -501,7 +457,10 @@ function App() {
         setUser(u);
         setOrganization(u.organization_name||"Your TODA");
         setLoaded(true);
-        setPage("Overview");
+        navigationSession.current = workspacePageKey(u);
+        let savedPage: string | null = null;
+        try { savedPage = sessionStorage.getItem(navigationSession.current); } catch { /* Navigation still works without storage. */ }
+        setPage(permittedPage(savedPage,u.role));
       })
       .catch(() => {
         setUser(null);
@@ -642,14 +601,23 @@ function App() {
       }
     : undefined;
   const driver = user?.role === "driver";
+  const mapReference=vehicleMapReference(v);
   const administrator = user?.role === "admin";
   const labAllowed = ["engineer", "admin"].includes(user?.role || "");
+  useEffect(()=>{
+    if(!user)return;
+    const safePage=permittedPage(page,user.role);
+    if(safePage!==page)setPage(safePage);
+    navigationSession.current=workspacePageKey(user);
+    try { sessionStorage.setItem(navigationSession.current,safePage); } catch { /* Navigation still works without storage. */ }
+  },[page,user]);
   useEffect(()=>{
     if(!navigationTarget)return;
     const destination=document.getElementById(navigationTarget.id);
     if(destination){destination.focus({preventScroll:true});destination.scrollIntoView({block:'start',behavior:'auto'});}
   },[page,navigationTarget]);
   const go = (p: string, target?:string) => {
+    if(p==='Notifications')window.scrollTo(0,0);
     if (p === "Report a problem") setReportPage(page);
     setPage(p);
     setNavigationTarget(target?{id:target}:null);
@@ -666,8 +634,8 @@ function App() {
           : "Offline",
   }));
   void tick;
-  if (mobileLaunch && (!introDone || !loaded)) return <MobileIntro/>;
   if (!loaded) return <div className="loading">Connecting to SOLAIR…</div>;
+  if (mobileLaunch && !user && !introDone && !new URLSearchParams(location.search).has('token')) return <MobileIntro onStart={finishIntro}/>;
   if (!user) return <Login onLogin={login} />;
   const driverNav = [
     ["Overview", LayoutDashboard],
@@ -760,7 +728,7 @@ function App() {
           >
             <Menu size={21} />
           </button>
-          <div>
+          <div className="workspace-breadcrumb">
             <span>SOLAIR PLATFORM</span>
             <b> / </b>
             {page}
@@ -771,7 +739,7 @@ function App() {
                 ? "Local development"
                 : health?.environment === 'local production preview' ? 'Local production preview' : 'Centralized workspace'}
             </span>
-            <Notifications key={`${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick + notificationRevision} go={go} select={select} />
+            {page!=='Notifications'&&<Notifications key={`${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick + notificationRevision} go={go} select={select}/> }
             <AccountMenu user={user} go={go} logout={logout} busy={loggingOut} />
           </div>
         </header>
@@ -813,12 +781,12 @@ function App() {
             <button onClick={flushQueue}>Retry delivery</button>
           </div>
         )}
-        <main id="workspace-content" tabIndex={-1}>
+        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':undefined} tabIndex={-1}>
           <div className="page-heading">
             <div>
               <span className="eyebrow">
                 {driver
-                  ? "YOUR EVERYDAY COMPANION"
+                  ? page==='Overview'?`Hello, ${user.name.split(' ')[0]}`:"YOUR EVERYDAY COMPANION"
                   : page === "CPE Lab"
                     ? "SOLAIR ENGINEERING"
                     : organization.toUpperCase()}
@@ -833,11 +801,7 @@ function App() {
                       : page}
               </h1>
               <p>
-                {page === "Overview"
-                  ? administrator ? "Accounts, TODAs, assignments and device readiness." : "A clearer view of your energy, vehicles and people."
-                  : page === "CPE Lab"
-                    ? "Observe real hardware. Build reliable evidence."
-                    : "Connected insights. Clear decisions."}
+                {workspaceDescription(page,user.role)}
               </p>
             </div>
             <div className="heading-actions">
@@ -858,8 +822,9 @@ function App() {
               </button>
             </div>
           </div>
-          {page==='Overview'&&!administrator&&<WorkspaceGuide user={user} go={go}/>}
-          {!(administrator && page === "Overview") && v?.telemetry && (
+          {page==='Overview'&&!administrator&&!driver&&<WorkspaceGuide user={user} go={go}/>}
+          {driver&&page==='Overview'&&!v&&<WorkspaceGuide user={user} go={go}/>}
+          {page!=='Notifications' && !(administrator && page === "Overview") && v?.telemetry && (
             <ReadingDetails compact={driver}>
               {!v.telemetry.device_timestamp ? "MEASUREMENT TIME UNKNOWN" : Date.now() - Date.parse(v.telemetry.device_timestamp) < 30000
                 ? "RECENT READING"
@@ -868,18 +833,19 @@ function App() {
               {mode === "demo" ? "SIMULATED" : "REPORTED HARDWARE"}
             </ReadingDetails>
           )}
-          {driver&&page==='Overview'&&!v&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><RegistrationDetails userId={user.id} compact/></>}
+          {driver&&page==='Overview'&&!v&&<SetupChecklist compact key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/>}
           {administrator && page === "Overview" && <AdminHome revision={notificationRevision} go={go}/>}
+          {page === 'SOS & Assistance' && <HelpResources go={go}/>}
           {!v ? (
-            !(administrator && page === "Overview") && !["Settings","People & assignments","Devices","Organizations","Activity log"].includes(page) &&
+            !(administrator && page === "Overview") && !["Settings","People & assignments","Devices","Organizations","Activity log","Terms of Service","Privacy Policy","Notifications"].includes(page) &&
             <section className={page === "Live Fleet Map" ? "panel full-map" : "panel empty"}>
               {page === "Live Fleet Map" ? (
                 <>
-                  <div className="panel-heading"><h3>Malabon, Philippines</h3><span className="badge">0 valid positions</span></div>
+                  <div className="panel-heading"><h3>{mapReference.city}, Philippines</h3><span className="badge">0 valid positions</span></div>
                   <Suspense fallback={<p>Loading map…</p>}>
-                    <FleetMap vehicles={fleet} select={select} mode={mode} />
+                    <FleetMap vehicles={fleet} select={select} mode={mode} selectedId={selected} />
                   </Suspense>
-                  <p>No assigned vehicles. Showing Malabon as a reference.</p>
+                  <p>No assigned vehicles. Showing {mapReference.city} as a reference.</p>
                 </>
               ) : (
                 <>
@@ -932,13 +898,13 @@ function App() {
                     </div>
                   )}
                   <div className={driver ? "driver-overview" : "overview-grid"}>
-                    <Hero
+                    {driver?<DriverVehicleCard vehicle={v} organization={organization} mode={mode} go={go}/>:<Hero
                       v={v}
                       mode={mode}
                       organization={organization}
                       driver={driver}
                       onDetail={() => go("Vehicle details")}
-                    />
+                    />}
                     {driver&&<DeviceStatus vehicle={v} mode={mode} go={go}/>}
                     {!driver && (
                       <section className="panel overview-map">
@@ -954,6 +920,7 @@ function App() {
                             vehicles={fleet}
                             select={select}
                             mode={mode}
+                            selectedId={selected}
                           />
                         </Suspense>
                         <div className="map-footer">
@@ -961,14 +928,14 @@ function App() {
                             <span className="dot green" />
                             Valid reported fixes
                           </span>
-                <span>Malabon, Philippines</span>
+                <span>Reference area: {mapReference.city}</span>
                         </div>
                       </section>
                     )}
                   </div>
-                  {driver&&<><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/><RegistrationDetails userId={user.id} compact/></>}
-                  <div className="overview-bottom">
-                    <section className="panel">
+                  {driver&&<WorkspaceGuide user={user} go={go}/>}
+                  <div className={driver ? 'driver-priority' : 'overview-bottom'}>
+                    {!driver&&<section className="panel">
                       <div className="panel-heading">
                         <h3>Energy snapshot</h3>
                         <button onClick={() => go("Energy")}>
@@ -1000,7 +967,7 @@ function App() {
                           ? "SIMULATED · Last recorded PV reading"
                           : "Last recorded PV reading · inspect Energy for timestamps"}
                       </small>
-                    </section>
+                    </section>}
                     <section className="panel">
                       <div className="panel-heading">
                         <h3>Priority activity</h3>
@@ -1060,19 +1027,7 @@ function App() {
                         )}
                     </section>
                   </div>
-                  {driver && (
-                    <button
-                      className="help-wide"
-                      onClick={() => go("SOS & Assistance")}
-                    >
-                      <LifeBuoy size={22} />
-                      <span>
-                        Need a hand?
-                        <small>Contact your TODA or send an SOS</small>
-                      </span>
-                      <ArrowRight size={20} />
-                    </button>
-                  )}
+                  {driver&&<SetupChecklist compact key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/>}
                   {!driver && (
                     <VehicleTable
                       vehicles={currentFleet}
@@ -1093,15 +1048,15 @@ function App() {
                         : "Reported GPS locations"}
                     </h3>
                     <span className="badge">
-                      {fleet.filter((v) => v.gps).length} valid positions
+                      {fleet.filter(hasMapPosition).length} valid positions
                     </span>
                   </div>
                   <Suspense fallback={<p>Loading map…</p>}>
-                    <FleetMap vehicles={fleet} select={select} mode={mode} />
+                    <FleetMap vehicles={fleet} select={select} mode={mode} selectedId={selected} />
                   </Suspense>
                   <p>
                     {v.id}:{" "}
-                    {v.gps
+                    {hasMapPosition(v)
                       ? `${v.gps.latitude}, ${v.gps.longitude} · last known ${stamp(v.gps.measured_at)}`
                       : "No valid GPS fix recorded"}
                   </p>
@@ -1246,10 +1201,7 @@ function App() {
                         </div>
                       ))
                     ) : (
-                      <p className="empty">
-                        No recorded alerts. Missing sensors do not establish a
-                        secure state.
-                      </p>
+                      <EmptyState icon={<Shield size={25}/>} title="No recorded alerts">New events will appear here when reported. Missing sensors do not establish a secure state.</EmptyState>
                     )}
                   </section>
                 </>
@@ -1266,6 +1218,8 @@ function App() {
                         <form
                           onSubmit={async (e) => {
                             e.preventDefault();
+                            if(helpPending.current)return;
+                            helpPending.current=true;setHelpSending(true);
                             const f = new FormData(e.currentTarget);
                             const body = {
                               id: crypto.randomUUID(),
@@ -1290,7 +1244,7 @@ function App() {
                               toast(
                                 "Request QUEUED / UNSENT. No server acknowledgment received.",
                               );
-                            }
+                            } finally {helpPending.current=false;setHelpSending(false);}
                           }}
                         >
                           <label>
@@ -1311,9 +1265,9 @@ function App() {
                               placeholder="Your situation and how to reach you"
                             />
                           </label>
-                          <button className="primary">
-                            <LifeBuoy size={17} />
-                            Send help request
+                          <button className="primary" disabled={helpSending} aria-busy={helpSending}>
+                            {helpSending?<LoaderCircle className="action-spinner" size={17} aria-hidden="true"/>:<LifeBuoy size={17} />}
+                            {helpSending?'Sending request…':'Send help request'}
                           </button>
                         </form>
                       </section>
@@ -1372,9 +1326,7 @@ function App() {
                           </div>
                         ))
                       ) : (
-                        <p className="empty">
-                          No server-received requests in this data mode.
-                        </p>
+                        <EmptyState icon={<LifeBuoy size={25}/>} title="No server-received requests in this data mode.">{driver?'Send a request using the form, then check here for acknowledgment.':'New requests from drivers will appear here for follow-up.'}</EmptyState>
                       )}
                     </section>
                   </div>
@@ -1422,23 +1374,24 @@ function App() {
                         </div>
                       ))
                     ) : (
-                      <p className="empty">
-                        Start the conversation. No canned messages.
-                      </p>
+                      <EmptyState icon={<MessageSquare size={25}/>} title="Start the conversation">Write a message below about this vehicle. Messages appear here after the server receives them.</EmptyState>
                     )}
                   </div>
                   <form
+                    className="message-composer"
                     onSubmit={async (e) => {
                       e.preventDefault();
+                      if(messagePending.current)return;
+                      messagePending.current=true;setMessageSending(true);
                       const form = e.currentTarget;
                       const body = new FormData(form).get("body");
-                      await act(async () => {
+                      try{await act(async () => {
                         await api(`/messages/${v.id}${suffix}`, "POST", {
                           body,
                         });
                         setMessages(await api(`/messages/${v.id}${suffix}`));
                         form.reset();
-                      }, "Message received by server");
+                      }, "Message received by server");}finally{messagePending.current=false;setMessageSending(false);}
                     }}
                   >
                     <input
@@ -1450,10 +1403,11 @@ function App() {
                     />
                     <button
                       className="primary"
-                      disabled={offline || user.role === "engineer"}
+                      disabled={offline || user.role === "engineer" || messageSending}
+                      aria-busy={messageSending}
                     >
-                      Send
-                      <ArrowRight size={16} />
+                      {messageSending?'Sending…':'Send'}
+                      {messageSending?<LoaderCircle className="action-spinner" size={16} aria-hidden="true"/>:<ArrowRight size={16} />}
                     </button>
                   </form>
                   {offline && (
@@ -1543,6 +1497,7 @@ function App() {
             </>
           )}
           {page === "Settings" && <div className="settings-grid">
+              {driver&&<div id="account-setup" className="setup-destination" tabIndex={-1}><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/></div>}
               <section className="panel setup-destination" id="profile-settings" tabIndex={-1} aria-label="Your SOLAIR profile">
                 <Appearance />
                 <h3>Your SOLAIR profile</h3>
@@ -1787,6 +1742,8 @@ function App() {
           {page === "Activity log" && user.role==='admin' && <ActivityLog/>}
           {page === "Help and support" && <HelpSupport go={go} />}
           {page === "Report a problem" && <ProblemReport page={reportPage} mode={mode} vehicleId={v?.id} />}
+          {['Terms of Service','Privacy Policy'].includes(page)&&<PolicyDraft title={page} go={go}/>}
+          {page==='Notifications'&&<Notifications fullPage key={`page:${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick+notificationRevision} go={go} select={select}/>}
           <footer>
             SOLAIR · Hybrid energy & edge security
             <span>
@@ -1799,15 +1756,16 @@ function App() {
         </main>
       </div>
       {driver && (
-        <nav className="bottom-nav" aria-label="Driver navigation">
-          {driverNav.map(([p, I]) => (
+        <nav className="bottom-nav" aria-label="Driver navigation" data-active-tab={mobileDestinations.indexOf(page)} style={{'--active-tab':mobileDestinations.indexOf(page)} as React.CSSProperties}>
+          <span className="bottom-nav-indicator" aria-hidden="true"/>
+          {driverNav.map(([p, I]) => p==='SOS & Assistance'?<button key="notifications" className={page==='Notifications'?'bottom-notifications active':'bottom-notifications'} aria-current={page==='Notifications'?'page':undefined} onClick={()=>go('Notifications')}><Bell size={20} aria-hidden="true"/><span>Notifications</span></button>:(
             <button
               className={page === p ? "active" : ""}
               aria-current={page === p ? 'page' : undefined}
               key={p}
               onClick={() => go(p)}
             >
-              <I size={20} />
+              {p==='Overview'?<Home size={20} className="bottom-home-icon" aria-hidden="true"/>:p==='Settings'?<Settings size={20} aria-hidden="true"/>:<I size={20} aria-hidden="true"/>}
               <span>
                 {
                   (

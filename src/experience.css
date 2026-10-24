@@ -1,0 +1,220 @@
+/* SOLAIR experience layer: original vehicle UI, inspired by warm, quiet energy dashboards. */
+:root{
+ --radius-card:24px;--radius-control:14px;--radius-pill:999px;
+ --elevation-card:0 5px 24px #202B3A06;--elevation-float:0 8px 32px #202B3A14;
+ --journey-wash:linear-gradient(140deg,var(--pale-solar),var(--surface) 70%);
+ --glass-card:color-mix(in srgb,var(--surface) 28%,transparent);
+ --glass-panel:color-mix(in srgb,var(--surface) 20%,transparent);
+}
+:root[data-theme='dark']{--elevation-card:0 4px 18px #0000000D;--elevation-float:0 8px 32px #00000030;--journey-wash:linear-gradient(140deg,var(--pale-solar),var(--surface) 75%)}
+body{font-feature-settings:'ss01' on;-webkit-font-smoothing:antialiased}
+h1{font-weight:550;letter-spacing:-1.1px}h2,h3,h4{font-weight:550}
+button,.button{border-radius:var(--radius-control);transition:background-color .14s ease,border-color .14s ease}
+button.primary,.button.primary{border-radius:var(--radius-control);font-weight:600}
+input,select,textarea{border-radius:var(--radius-control)}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+.panel,.metric{border-radius:var(--radius-card);box-shadow:var(--elevation-card)}
+.panel-heading{gap:12px}.panel-heading h3{font-size:19px;line-height:1.35}
+.badge{border-radius:var(--radius-pill);padding:6px 10px;font-size:11px;font-weight:500}
+.page-heading h1{max-width:24ch}.page-heading p{max-width:62ch;line-height:1.7}
+.page-heading>.heading-actions{align-self:center}.heading-actions>button{border-radius:var(--radius-pill)}
+.data-banner{font-weight:500;letter-spacing:.2px}.data-banner select{border-radius:8px}
+.sidebar{border-right-color:var(--line);padding-top:30px}.sidebar nav button{border-radius:var(--radius-control);font-weight:500;margin-bottom:5px}
+.sidebar nav button.active{box-shadow:none;background:var(--pale-solar);color:var(--text)}.sidebar nav button.active>svg{color:var(--blue)}
+.organization,.toda-menu .organization{background:var(--surface);border-radius:18px}.sidebar-bottom{border-top:1px solid var(--line)}
+.workspace main{padding-top:32px}.topbar{border-bottom:1px solid var(--line)}
+.account-trigger .avatar{border-radius:50%;background:var(--pale-blue)}
+.admin-intro{border-radius:28px;background:var(--journey-wash);border:1px solid var(--line);padding:32px}
+.admin-intro h2{font-weight:500;line-height:1.12}.admin-intro-symbol{color:var(--blue)}
+.admin-summary-card{border-radius:22px;box-shadow:var(--elevation-card);border-color:var(--line);background:var(--surface)}
+.admin-summary-card strong{font-size:42px;line-height:1.15;font-weight:550}.summary-icon{border-radius:50%;background:var(--pale-blue)}
+.metrics{gap:16px}.metric strong{letter-spacing:-1.2px;font-weight:500}.metric svg{background:var(--pale-blue);border-radius:50%;padding:8px;box-sizing:content-box}
+.table-scroll{border-radius:18px}thead th{font-weight:500;text-transform:none;letter-spacing:.1px}
+.table-scroll td{line-height:1.6}.table-scroll button{min-height:44px}
+.person-card,.activity-record,.incident-record{border-radius:18px}.directory-filters{border-radius:18px;padding:18px}
+.appearance-options label{border-radius:var(--radius-control)}.registration-details dl{line-height:1.8}
+.notification-page{border-radius:24px}.notification-page .notification-heading{padding:24px 22px 18px}.notification-page .notification-item{padding:18px 22px;min-height:84px}.notification-page .notification-content strong{font-weight:600;line-height:1.5}
+.notification-icon{border-radius:50%}.notification-page .notification-empty{padding:40px 22px}
+.help-resources .help-resource-row{border-radius:14px;min-height:56px}.help-resource-legal{margin-top:12px;padding-top:12px}
+.notification-dropdown,.account-dropdown,.toda-dropdown{box-shadow:var(--elevation-float)}
+.support-panel>h2,.policy-draft>h2{line-height:1.25}.support-panel details{background:var(--surface-soft);padding:0 16px;border:1px solid var(--line)}
+.support-panel details[open]{padding-bottom:14px}.support-panel .help-resources details{background:transparent;padding:0;border:0}
+.setup-checklist,.driver-setup-notice{border-left-width:3px}.setup-tasks li{border-radius:14px}.setup-task-action{border-radius:10px}
+.settings-grid>#account-setup:empty{display:none}
+.full-map .map-wrap{border-radius:20px;overflow:hidden}.map-location-controls{border-radius:16px;box-shadow:var(--elevation-card)}
+.tiny-bars{gap:4px}.tiny-bars i{border-radius:5px 5px 0 0;background:var(--solar)}
+.energy-snapshot{gap:16px}.solar-icon{border-radius:50%;background:var(--pale-solar);color:var(--warning-text)}
+.lab-grid>.panel,.lab-grid>.metric{border-radius:20px}.axis-readings strong{letter-spacing:-.8px}
+/* The driver's landing screen puts identity and trustworthy status ahead of secondary records. */
+.driver-app .driver-overview{gap:18px}.driver-app .workspace-guide{margin-bottom:20px}
+.driver-app .quick-actions{gap:12px}.driver-app .quick-actions>button{border-radius:22px;padding:18px;min-height:94px;box-shadow:var(--elevation-card)}
+.driver-app .quick-action-icon{border-radius:50%;background:var(--pale-blue)}.driver-app .quick-actions>button:last-child{background:var(--pale-solar)}
+.driver-app .journey-vehicle{display:block;padding:24px;margin:0;background:var(--journey-wash);overflow:hidden;min-width:0}
+.journey-vehicle-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.journey-vehicle-heading>.eyebrow{display:flex;gap:7px;align-items:center;font-size:10px;letter-spacing:1px}
+.journey-vehicle-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;min-height:180px;gap:16px}
+.journey-vehicle-copy h2{font-size:clamp(23px,2.5vw,34px);line-height:1.12;letter-spacing:-.8px;margin:14px 0 10px;max-width:15ch}.journey-vehicle-copy p{font-size:13px;color:var(--muted);margin:0;line-height:1.7}
+.journey-vehicle .vehicle-visual{position:relative;width:100%;height:180px;min-height:0;margin:0;display:flex;align-items:center;justify-content:center}
+.journey-vehicle .vehicle-visual img{position:static;width:100%;height:100%;object-fit:contain;transform:none;filter:drop-shadow(0 12px 12px #202B3A12)}
+.journey-vehicle .vehicle-visual figcaption{display:none}.journey-vehicle .vehicle-placeholder{font-size:12px;padding:16px;border:1px dashed var(--line);border-radius:18px}
+.journey-vehicle-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:16px}
+.journey-vehicle-footer>span{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;line-height:1.6}.journey-vehicle-footer>span svg{flex-shrink:0}
+.journey-vehicle-footer button{min-height:44px;flex-shrink:0;border-radius:var(--radius-pill);font-size:12px;background:var(--surface)}
+.driver-app .device-status{padding:24px}.driver-app .status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.driver-app .status-grid article{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--surface-soft);min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.driver-app .status-grid h4{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.5;margin:0 0 12px}.driver-app .status-grid h4 svg{color:var(--blue);flex-shrink:0}
+.driver-app .status-grid strong{font-size:22px;line-height:1.25;font-weight:500;letter-spacing:-.5px;overflow-wrap:anywhere}.driver-app .status-grid p{font-size:12px;line-height:1.65;margin:10px 0;color:var(--muted)}
+.driver-app .status-grid button{margin-top:auto;min-height:44px;font-size:12px;background:var(--surface);padding:8px 10px}
+.driver-app .device-status>details{margin-top:16px}.driver-app .device-status>.button-row{margin-top:12px}
+.driver-app .driver-priority>.panel{border-radius:24px}.activity-row{border-radius:12px;min-height:60px}.activity-row strong{font-weight:550}
+/* Auth retains its approved vehicle placement and equal-sized actions. */
+.login-entry input,.login-entry select{border-radius:14px}.login-entry .auth-entry-action{border-radius:var(--radius-pill)}
+.login-entry .login-form h2{font-weight:500;letter-spacing:-1px}.login-entry .error{border-radius:14px;line-height:1.7}
+@media(min-width:1100px){.driver-app .driver-overview{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:start}.driver-app .journey-vehicle-stage{grid-template-columns:1fr;gap:0}.driver-app .journey-vehicle .vehicle-visual{height:235px}.driver-app .journey-vehicle-copy h2{max-width:20ch}}
+@media(max-width:900px){.workspace main{padding-left:20px;padding-right:20px}.admin-intro{padding:26px}.metric{padding:22px}}
+@media(max-width:650px){
+ .workspace main{padding:24px 16px 0}.page-heading{margin-bottom:22px}.page-heading h1{font-size:30px;line-height:1.12;letter-spacing:-1px}.page-heading p{font-size:13px;line-height:1.7}.page-heading .eyebrow{font-size:9px;letter-spacing:1.5px}
+ .panel{padding:22px 18px;margin-bottom:18px}.panel-heading{margin-bottom:16px}.panel-heading h3{font-size:18px}.panel-heading button{font-size:12px;border-radius:var(--radius-pill)}
+ .driver-app .quick-actions{gap:9px}.driver-app .quick-actions>button{padding:14px 8px;min-height:92px;gap:8px;border-radius:22px;flex-direction:column;justify-content:center;text-align:center}
+ .driver-app .quick-action-icon{width:36px;height:36px}.driver-app .quick-actions strong{font-size:12px}.driver-app .quick-actions .quick-action-arrow{display:none}
+ .driver-app .journey-vehicle{padding:20px 18px;border-radius:26px}.journey-vehicle-heading>.eyebrow{font-size:9px;letter-spacing:.5px}.journey-vehicle-heading .badge{font-size:10px}
+ .journey-vehicle-stage{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:6px;min-height:160px}.journey-vehicle-copy h2{font-size:24px;max-width:12ch}.journey-vehicle-copy p{font-size:12px}
+ .journey-vehicle .vehicle-visual{height:150px}.journey-vehicle-footer{flex-wrap:wrap;padding-top:12px}.journey-vehicle-footer>span{font-size:11px}.journey-vehicle-footer button{padding:9px 12px}
+ .driver-app .device-status{padding:20px 16px}.driver-app .status-grid{gap:10px}.driver-app .status-grid article{padding:14px 12px}.driver-app .status-grid h4{font-size:12px;gap:6px;align-items:flex-start}.driver-app .status-grid h4 svg{width:16px;height:16px;margin-top:1px}.driver-app .status-grid strong{font-size:20px}.driver-app .status-grid p{font-size:12px}.driver-app .status-grid button{font-size:11px;padding:7px 9px}
+ .driver-app .device-status .button-row{display:grid;grid-template-columns:1fr}.driver-app .device-status .button-row>button{justify-content:center;min-height:46px}
+ .driver-setup-notice{padding:18px}.driver-setup-notice strong{font-size:16px}.driver-setup-notice p{font-size:13px}
+ .bottom-nav{left:50%;right:auto;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 16px);max-width:420px;border:1px solid color-mix(in srgb,var(--line) 55%,transparent);border-radius:999px;box-shadow:0 4px 18px #202B3A0A;padding:6px 4px;min-height:78px;gap:0;background:transparent;background:color-mix(in srgb,var(--surface) 28%,transparent);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+ .bottom-nav button{position:relative;z-index:1;background:transparent;box-shadow:none;padding:3px 0;min-height:64px;gap:3px;justify-content:center;border-radius:999px}.bottom-nav button>svg{box-sizing:content-box;width:18px;height:18px;padding:10px;border-radius:50%}.bottom-nav button.active{background:transparent;color:var(--text)}.bottom-nav button.active>svg{color:#202B3A;background:transparent}.bottom-nav button.active>.bottom-home-icon{fill:currentColor}.bottom-nav button span{font-weight:500;font-size:10px}.bottom-nav .bottom-notifications span{font-size:clamp(8px,2.3vw,10px)}
+ .bottom-nav-indicator{position:absolute;pointer-events:none;left:4px;top:9px;width:calc((100% - 8px)/6);height:38px;display:flex;justify-content:center;transform:translateX(calc(var(--active-tab)*100%));transition:transform .24s cubic-bezier(.22,.61,.36,1),opacity .14s ease}
+ .bottom-nav-indicator::before{content:'';display:block;width:38px;height:38px;border-radius:50%;background:var(--gold)}
+ .bottom-nav[data-active-tab='-1'] .bottom-nav-indicator{opacity:0;transform:translateX(0)}
+ .driver-app .workspace{padding-bottom:calc(98px + env(safe-area-inset-bottom))}.driver-app .workspace main>footer{padding-bottom:0;margin-bottom:0;row-gap:4px;line-height:1.5}.toast{bottom:112px}
+ .notification-page{padding:0}.notification-page .notification-heading{padding:22px 18px 16px}.notification-page .notification-tools{padding:14px 18px;gap:12px}.notification-page .notification-tools button{min-height:44px}.notification-page .notification-item{padding:18px}.notification-page .notification-footer{font-size:12px;line-height:1.7}
+ .admin-intro{padding:24px;border-radius:26px}.admin-summary-card{padding:22px;min-height:148px}.admin-summary-card strong{font-size:38px}.metric strong{font-size:34px}.metric>div{line-height:1.5}
+ .person-card{padding:18px}.directory-filters{padding:16px}.activity-record{padding:18px}.policy-draft{line-height:1.8}.policy-draft h3{font-size:18px}
+ .login-entry .login-form{padding-left:24px;padding-right:24px}.login-entry .auth-entry-action{min-height:52px}.login-entry .login-form label{font-size:14px}
+}
+@media(max-width:359px){.workspace main{padding-left:12px;padding-right:12px}.driver-app .journey-vehicle{padding:18px 14px}.journey-vehicle-copy h2{font-size:21px}.journey-vehicle-stage{min-height:150px}.journey-vehicle .vehicle-visual{height:130px}.driver-app .device-status{padding:18px 12px}.driver-app .status-grid article{padding:13px 10px}.driver-app .status-grid strong{font-size:18px}.bottom-nav{width:calc(100% - 12px)}.bottom-nav button span{font-size:9px}.bottom-nav .bottom-notifications span{font-size:8px}}
+@media(prefers-reduced-motion:reduce){button,.button{transition:none}}
+/* Mobile welcome: an intentional entry screen, without a timed dismissal. */
+.mobile-intro.welcome-screen{height:auto;min-height:100vh;min-height:100dvh;overflow:visible;padding:max(20px,env(safe-area-inset-top)) 24px max(22px,env(safe-area-inset-bottom));background:radial-gradient(ellipse at 85% 33%,#EFB14220,transparent 55%),var(--page);gap:0}
+.welcome-screen>.brand{width:154px;align-self:flex-start;flex-shrink:0}
+.welcome-screen .welcome-art{position:relative;display:flex;flex-direction:column;justify-content:center;flex:1;min-height:220px;margin:16px -12px 22px}
+.welcome-screen .vehicle-visual{flex:none;width:100%;margin:0;min-height:0}
+.welcome-screen .vehicle-visual img{width:100%;height:auto;max-height:35dvh;object-fit:contain;transform:none;filter:drop-shadow(0 18px 16px #202B3A18)}
+.welcome-art-label{font-size:10px;line-height:1.5;color:var(--muted);text-align:center;margin-top:8px}
+.welcome-screen .intro-message{margin:0;flex-shrink:0}
+.welcome-screen .intro-message .eyebrow{font-size:9px;letter-spacing:1.4px;color:var(--blue)}
+.welcome-screen .intro-message h1{font-family:Outfit,sans-serif;font-size:clamp(36px,10.5vw,46px);font-weight:400;line-height:1.08;letter-spacing:-1.5px;margin:14px 0 16px}
+.welcome-screen mark{display:inline-block;padding:0 8px 3px;margin-left:-8px;border-radius:10px;background:var(--gold);color:#202B3A}
+.welcome-screen .intro-message p{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 24px}
+.welcome-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;width:100%;padding:5px;border-radius:999px;background:var(--surface-soft)}
+.welcome-screen .welcome-start{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;min-height:54px;padding:12px 20px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--text);font-size:15px;font-weight:600;box-shadow:0 3px 12px #202B3A0A}
+.welcome-screen .welcome-next{display:grid;place-items:center;flex:none;width:54px;height:54px;padding:0;border:1px solid transparent;border-radius:50%;background:var(--gold);color:#202B3A;box-shadow:0 3px 12px #202B3A0A}
+.welcome-start:focus-visible,.welcome-next:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+@media(min-height:800px){.mobile-intro.welcome-screen{height:100dvh}}
+@media(max-height:680px){.welcome-screen .welcome-art{min-height:160px;margin:8px -12px 14px}.welcome-screen .vehicle-visual img{max-height:29dvh}.welcome-screen .intro-message h1{font-size:36px;margin:10px 0 12px}.welcome-screen .intro-message p{margin-bottom:18px}}
+
+/* Driver Home: a vehicle-led opening, with readings grouped beneath the artwork. */
+@media(max-width:650px){
+ .driver-app .driver-home{background:radial-gradient(ellipse 90% 380px at 85% 220px,#EFB14218,transparent);padding-top:20px}
+ .driver-home>.page-heading{align-items:center;gap:12px;margin-bottom:20px}
+ .driver-home>.page-heading>div:first-child{min-width:0;flex:1}
+ .driver-home>.page-heading .eyebrow{font-size:12px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
+ .driver-home>.page-heading h1{font-size:23px;font-weight:500;line-height:1.15;letter-spacing:-.6px;margin:5px 0 0;max-width:18ch}
+ .driver-home>.page-heading p{display:none}
+ .driver-home>.page-heading .heading-actions{align-self:center;flex:none}
+ .driver-home>.page-heading .heading-actions button{padding:10px;min-width:44px;min-height:44px;font-size:11px;background:var(--surface)}
+ .driver-home .driver-overview{display:flex;flex-direction:column;gap:14px;margin-top:12px}
+ .driver-home .journey-vehicle{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+ .driver-home .journey-vehicle-heading{gap:8px}
+ .driver-home .journey-vehicle-heading>.eyebrow{font-size:10px;letter-spacing:.3px;color:var(--muted)}
+ .driver-home .journey-vehicle-stage{display:flex;flex-direction:column;align-items:stretch;gap:0;min-height:0}
+ .driver-home .journey-vehicle-copy h2{font-size:32px;max-width:20ch;font-weight:500;letter-spacing:-1px;line-height:1.08;margin:14px 0 6px}
+ .driver-home .journey-vehicle-copy p{font-size:12px;margin:0}
+ .driver-home .journey-vehicle .vehicle-visual{height:230px;margin:8px 0 12px;width:100%}
+ .driver-home .journey-vehicle .vehicle-visual img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 16px #202B3A18)}
+ .driver-home .journey-vehicle .vehicle-placeholder{width:100%;text-align:center;background:var(--surface);padding:22px}
+ .driver-home .journey-vehicle-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:14px;border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:var(--elevation-card)}
+ .driver-home .journey-vehicle-footer>span{font-size:11px;align-items:flex-start}
+ .driver-home .journey-vehicle-footer>span svg{margin-top:2px}
+ .driver-home .journey-vehicle-footer button{padding:8px 10px;font-size:11px}
+ .driver-home .device-status{padding:18px 14px;border-radius:26px;margin-bottom:0;background:var(--surface);box-shadow:var(--elevation-card)}
+ .driver-home .device-status>.panel-heading{gap:8px;align-items:flex-start;margin-bottom:16px}
+ .driver-home .device-status>.panel-heading h3{font-size:16px;line-height:1.4}
+ .driver-home .device-status>.panel-heading .badge{font-size:9px;line-height:1.4;padding:5px 7px;max-width:100px}
+ .driver-home .status-grid{gap:10px}
+ .driver-home .status-grid article{border:0;border-radius:18px;padding:14px 12px;background:var(--surface-soft)}
+ .driver-home .status-grid h4{font-size:11px;gap:6px;margin-bottom:10px}
+ .driver-home .status-grid strong{font-size:21px;line-height:1.2}
+ .driver-home .status-grid p{font-size:11px;line-height:1.6;margin:8px 0}
+ .driver-home .status-grid button{font-size:11px;min-height:44px;border-radius:999px;background:var(--surface)}
+ .driver-home>.workspace-guide{margin-top:20px}
+ .driver-home .driver-priority{margin-top:20px}
+}
+@media(max-width:359px){.driver-home>.page-heading h1{font-size:21px}.driver-home .journey-vehicle-copy h2{font-size:29px}.driver-home .journey-vehicle .vehicle-visual{height:205px}.driver-home .journey-vehicle-footer{padding:12px;gap:8px}.driver-home .status-grid strong{font-size:19px}}
+
+/* A translucent energy tray sits at the foot of the vehicle artwork. */
+.driver-energy-summary{position:relative;margin:12px 0 16px;padding:18px;border:1px solid var(--line);border-color:color-mix(in srgb,var(--line) 65%,transparent);border-radius:26px;background:transparent;background:var(--glass-panel);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px #202B3A08}
+.energy-summary-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.energy-summary-heading h3{font-size:17px;font-weight:500;line-height:1.3;margin:0}.energy-summary-heading p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.energy-summary-heading>button{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;border-radius:50%;background:transparent;background:color-mix(in srgb,var(--surface) 35%,transparent);color:var(--blue);border:1px solid var(--line)}
+.energy-glass-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.energy-glass-grid .energy-glass-card{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;min-width:0;min-height:154px;padding:14px;text-align:left;border:1px solid var(--line);border-color:color-mix(in srgb,var(--line) 50%,transparent);border-radius:20px;background:transparent;background:var(--glass-card);color:var(--text);box-shadow:0 3px 12px #202B3A04}
+.energy-glass-card>svg{color:var(--blue);flex:none;margin-bottom:3px}.energy-glass-card>span{font-size:12px;line-height:1.4}.energy-glass-card>strong{font-family:Outfit,sans-serif;font-size:28px;font-weight:500;line-height:1.15;letter-spacing:-.6px;overflow-wrap:anywhere}
+.energy-glass-card em{font-style:normal;font-size:12px;font-weight:400;letter-spacing:0}.energy-glass-card .energy-secondary-value{font-size:18px;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.energy-glass-card>small{font-size:10px;color:var(--muted);line-height:1.5;margin-top:auto}
+.driver-energy-summary .energy-summary-note{font-size:10px;color:var(--muted);line-height:1.6;margin:12px 0 0}
+.energy-glass-card:focus-visible,.energy-summary-heading>button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+@media(max-width:650px){.driver-home .journey-vehicle{background:radial-gradient(ellipse at 90% 65%,#EFB14226,transparent 65%)}.driver-home .driver-energy-summary{margin-top:-20px;z-index:1;padding:16px}.driver-home .journey-vehicle-footer{margin-top:14px}.energy-glass-grid .energy-glass-card{padding:13px 12px;min-height:148px}}
+@media(max-width:359px){.driver-home .driver-energy-summary{padding:12px}.energy-summary-heading h3{font-size:16px}.energy-glass-grid{gap:8px}.energy-glass-grid .energy-glass-card{padding:12px 10px}.energy-glass-card>strong{font-size:25px}}
+
+/* Match the energy tray's glass treatment across the remaining Home cards. */
+.driver-home .device-status,.driver-home .driver-priority>.panel{background:transparent;background:var(--glass-panel);border-color:color-mix(in srgb,var(--line) 65%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.driver-home .status-grid article,.driver-home .quick-actions>button{background:transparent;background:var(--glass-card);border:1px solid color-mix(in srgb,var(--line) 50%,transparent);box-shadow:0 3px 12px #202B3A04}
+.driver-home .quick-actions>button{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.driver-home .quick-actions>button:last-child{background:color-mix(in srgb,var(--pale-solar) 28%,transparent)}
+.driver-home .device-status button,.driver-home .driver-priority button{background:transparent;background:var(--glass-card)}
+
+/* Glass needs a visible backdrop: carry the brand wash behind every Home panel. */
+.driver-app .workspace:has(>.driver-home){background:radial-gradient(ellipse at 100% 0%,#EFB14240,transparent 65%),radial-gradient(ellipse at 0% 60%,#1959B52E,transparent 65%),radial-gradient(ellipse at 100% 100%,#EFB1422E,transparent 60%)}
+.driver-app .driver-home{background:transparent}
+:root:not([data-theme='dark']) .driver-app .workspace:has(>.driver-home){--muted:#536170}
+.driver-home .journey-vehicle-footer{background:transparent;background:var(--glass-panel);border-color:color-mix(in srgb,var(--line) 65%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+
+/* Renewable-energy workspace: original product art above transparent recorded-reading cards. */
+.workspace:has(>.energy-page){background:radial-gradient(ellipse at 100% 0%,#EFB14240,transparent 60%),radial-gradient(ellipse at 0% 55%,#1959B52E,transparent 65%),radial-gradient(ellipse at 100% 100%,#EFB14224,transparent 60%)}
+:root:not([data-theme='dark']) .workspace:has(>.energy-page){--muted:#536170}
+.energy-harvest-workspace{margin-bottom:28px}
+.energy-source-navigation{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.energy-source-navigation>a,.energy-history-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:999px;min-height:44px;padding:10px 16px;text-decoration:none;font-size:13px;color:var(--blue);background:var(--glass-card)}
+.energy-source-navigation>span{margin-left:auto;color:var(--muted);font-size:11px}
+.harvest-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+.harvest-source{min-width:0;padding:24px;border:1px solid color-mix(in srgb,var(--line) 65%,transparent);border-radius:30px;background:var(--glass-panel);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);scroll-margin-top:20px;box-shadow:var(--elevation-card);--harvest-accent:var(--solar)}
+.wind-source{--harvest-accent:var(--blue)}
+.harvest-source-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.harvest-source-heading .eyebrow{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:1.1px;color:var(--blue)}
+.harvest-source-heading h2{font-size:28px;line-height:1.15;font-weight:500;letter-spacing:-.8px;margin:8px 0 0}
+.harvest-source-heading>.badge{font-size:10px;line-height:1.4}
+.harvest-total{display:flex;flex-direction:column;gap:5px;margin-top:24px}
+.harvest-total>span{font-size:12px;color:var(--muted)}.harvest-total>strong{font-family:Outfit,sans-serif;font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-1.3px;overflow-wrap:anywhere}.harvest-total em{font-size:16px;font-style:normal;font-weight:400;letter-spacing:0}.harvest-total>small{font-size:10px;color:var(--muted)}
+.harvest-artwork{position:relative;display:flex;align-items:center;justify-content:center;height:260px;margin:12px -8px 10px}
+.harvest-artwork img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 16px 18px #202B3A12)}
+.harvest-reading-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.harvest-reading-card{min-width:0;display:flex;flex-direction:column;align-items:stretch;padding:16px;border:1px solid color-mix(in srgb,var(--line) 50%,transparent);border-radius:21px;background:var(--glass-card);min-height:235px;box-shadow:0 3px 12px #202B3A04}
+.harvest-reading-label{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px}.harvest-reading-label h3{font-size:13px;font-weight:500;line-height:1.4;margin:0;letter-spacing:0}.harvest-reading-label>svg{color:var(--blue);flex:none;margin-top:2px}
+.harvest-reading-value{font-family:Outfit,sans-serif;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:4px;font-size:30px;line-height:1.2;font-weight:500;letter-spacing:-.8px;overflow-wrap:anywhere}.harvest-reading-value em{font-size:12px;line-height:1.5;letter-spacing:0;font-weight:400;font-style:normal}.controller-divider{font-size:20px;color:var(--muted)}
+.harvest-reading-status{font-size:10px;line-height:1.5;color:var(--muted);margin-top:5px}
+.harvest-plots{margin-top:auto;padding-top:14px}.harvest-chart{margin:0;color:var(--harvest-accent)}
+.harvest-chart svg{display:block;width:100%;height:auto;overflow:visible}.harvest-chart-axis{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4;fill:none}
+.harvest-chart figcaption{display:flex;flex-direction:column;gap:2px;font-size:9px;color:var(--muted);line-height:1.5;margin-top:5px;overflow-wrap:anywhere}.harvest-chart figcaption>span{font-weight:500}
+.empty-chart>div{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:64px;border-bottom:1px dashed var(--line);color:var(--muted);font-size:10px;text-align:center}.empty-chart>div>svg{width:22px;height:22px;opacity:.55}
+.paired-plots{display:grid;gap:9px}.paired-plots .harvest-chart svg{height:32px}.paired-plots .empty-chart>div{min-height:34px;flex-direction:row;font-size:9px}.paired-plots .empty-chart>div>svg{width:16px;height:16px}.paired-plots figcaption{font-size:8px}
+.harvest-source .harvest-source-note{font-size:11px;color:var(--muted);line-height:1.7;margin:18px 0 0}
+.harvest-history-note{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--muted);line-height:1.7;margin:20px 0 16px}.harvest-history-note>svg{flex:none;margin-top:3px;color:var(--blue)}
+.energy-history-error{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px;margin-bottom:20px;border-radius:18px;border:1px solid var(--line);background:var(--error-soft);color:var(--error);font-size:13px}.energy-history-error button{min-height:44px;background:var(--surface);flex:none}
+.energy-page>.metrics.energy-metrics{scroll-margin-top:20px}.energy-page .panel,.energy-page .metric{background:var(--glass-panel);border-color:color-mix(in srgb,var(--line) 65%,transparent)}
+.energy-source-navigation>a:focus-visible,.energy-history-link:focus-visible,.harvest-source:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+@media(max-width:1199px){.harvest-sources{grid-template-columns:1fr}.harvest-artwork{height:290px}.harvest-reading-card{min-height:215px}}
+@media(max-width:650px){.harvest-sources{gap:22px}.harvest-source{padding:18px 16px;border-radius:27px}.harvest-source-heading h2{font-size:27px}.harvest-source-heading>.badge{font-size:9px}.harvest-source-heading .eyebrow{font-size:8px;letter-spacing:.8px}.harvest-total{margin-top:20px}.harvest-total>strong{font-size:38px}.harvest-artwork{height:225px;margin:12px -6px 12px}.wind-artwork{height:250px}.harvest-reading-grid{gap:10px}.harvest-reading-card{padding:14px 12px;min-height:225px;border-radius:19px}.harvest-reading-label h3{font-size:12px}.harvest-reading-value{font-size:28px}.energy-source-navigation>span{font-size:10px}.energy-source-navigation>a{font-size:12px;padding:9px 13px}.harvest-history-note{font-size:10px}.energy-page>.metrics.energy-metrics{margin-top:24px}}
+@media(max-width:359px){.harvest-source{padding:17px 12px}.harvest-source-heading h2{font-size:25px}.harvest-reading-card{padding:12px 10px}.harvest-reading-label{gap:5px}.harvest-reading-label h3{font-size:11px}.harvest-reading-label>svg{width:13px;height:13px}.harvest-reading-value{font-size:25px}.harvest-artwork{height:200px}.wind-artwork{height:235px}.energy-source-navigation{gap:7px}.energy-source-navigation>span{width:100%;margin-left:0}}
