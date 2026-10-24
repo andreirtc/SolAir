@@ -189,7 +189,22 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     const id=await identity.recoverPassword(b.access_token,b.refresh_token,b.password);
     await db.run('DELETE FROM sessions WHERE user_id=?',[id]);res.json({ok:true});
   });
-  app.get("/api/me", auth, (req, res) => res.json((req as AuthRequest).user));
+  app.get("/api/me", auth, async (req, res) => {
+    const u=(req as AuthRequest).user;
+    const pending=await db.query("SELECT id FROM audit_logs WHERE user_id=? AND target=? AND action='notification_intro_pending' AND NOT EXISTS (SELECT 1 FROM audit_logs done WHERE done.user_id=? AND done.target=? AND done.action='notification_intro_completed') LIMIT 1",[u.id,u.id,u.id,u.id]);
+    res.json({...u,notification_intro_pending:pending.length>0});
+  });
+  app.post("/api/notifications/onboarding",auth,async(req,res)=>{
+    const u=(req as AuthRequest).user;
+    const choice=z.object({enable:z.boolean()}).strict().parse(req.body);
+    await db.transaction(async tx=>{
+      const pending=await tx.query("SELECT id FROM audit_logs WHERE user_id=? AND target=? AND action='notification_intro_pending' AND NOT EXISTS (SELECT 1 FROM audit_logs done WHERE done.user_id=? AND done.target=? AND done.action='notification_intro_completed') LIMIT 1",[u.id,u.id,u.id,u.id]);
+      if(!pending.length)return;
+      if(choice.enable)await tx.run('UPDATE profiles SET notifications=1 WHERE id=?',[u.id]);
+      await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),u.org_id,u.id,'notification_intro_completed',u.id,now()]);
+    });
+    res.json({ok:true});
+  });
   app.get("/api/events", auth, (req, res) => {
     const u = (req as AuthRequest).user;
     res.set({ "Content-Type": "text/event-stream", Connection: "keep-alive" });

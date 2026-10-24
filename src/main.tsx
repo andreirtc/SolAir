@@ -461,7 +461,7 @@ function App() {
         navigationSession.current = workspacePageKey(u);
         let savedPage: string | null = null;
         try { savedPage = sessionStorage.getItem(navigationSession.current); } catch { /* Navigation still works without storage. */ }
-        setPage(permittedPage(savedPage,u.role));
+        setPage(u.notification_intro_pending?"Notifications":permittedPage(savedPage,u.role));
       })
       .catch(() => {
         setUser(null);
@@ -783,7 +783,7 @@ function App() {
             <button onClick={flushQueue}>Retry delivery</button>
           </div>
         )}
-        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':undefined} tabIndex={-1}>
+        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':page==='Notifications'?'notifications-workspace':undefined} tabIndex={-1}>
           <div className="page-heading">
             <div>
               <span className="eyebrow">
@@ -1721,7 +1721,7 @@ function App() {
           {page === "Help and support" && <HelpSupport go={go} />}
           {page === "Report a problem" && <ProblemReport page={reportPage} mode={mode} vehicleId={v?.id} />}
           {['Terms of Service','Privacy Policy'].includes(page)&&<PolicyDraft title={page} go={go}/>}
-          {page==='Notifications'&&<Notifications fullPage key={`page:${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick+notificationRevision} go={go} select={select}/>}
+          {page==='Notifications'&&<Notifications fullPage onPreferenceSaved={login} key={`page:${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick+notificationRevision} go={go} select={select}/>}
           <footer>
             SOLAIR · Hybrid energy & edge security
             <span>

@@ -24,4 +24,5 @@ export type Profile = {
   org_id: string;
   organization_name?:string;
   notifications: number;
+  notification_intro_pending?: boolean;
 };

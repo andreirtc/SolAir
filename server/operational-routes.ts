@@ -42,6 +42,7 @@ export function operationalRoutes(app:Express,db:Store,auth:RequestHandler,ident
       await tx.run('INSERT INTO registration_preferences VALUES (?,?,?)',[id,b.requested_role,now]);
       await tx.run('INSERT INTO profile_registration VALUES (?,?,?)',[id,b.vehicle_brand,b.name]);
       await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),org,id,'account_registered',id,now]);
+      await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),org,id,'notification_intro_pending',id,now]);
     });
     res.status(201).json({message:providerId?'Account created. Check your email to confirm your address, then sign in.':'Account created. You can now sign in.',email_confirmation_required:!!providerId});
   });
