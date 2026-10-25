@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { Store } from "./db";
+import {profilePhotoRoutes} from './profile-photos';
 import { hash, token, passwordHash, verifyPassword, type User } from "./auth";
 import type {IdentityProvider} from './identity';
 import {AccountActionError,withAccountAdministration,requireActiveAccount} from './account-lifecycle';
@@ -44,6 +45,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         : false,
     }),
   );
+  app.use("/api/profile-photo", express.json({ limit: "4mb" }));
   app.use("/api/vehicle-image", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "96kb" }));
   app.use(cookieParser());
@@ -192,8 +194,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   app.get("/api/me", auth, async (req, res) => {
     const u=(req as AuthRequest).user;
     const pending=await db.query("SELECT id FROM audit_logs WHERE user_id=? AND target=? AND action='notification_intro_pending' AND NOT EXISTS (SELECT 1 FROM audit_logs done WHERE done.user_id=? AND done.target=? AND done.action='notification_intro_completed') LIMIT 1",[u.id,u.id,u.id,u.id]);
-    res.json({...u,notification_intro_pending:pending.length>0});
+    const [photo]=await db.query('SELECT updated_at FROM profile_photos WHERE user_id=?',[u.id]);
+    res.json({...u,notification_intro_pending:pending.length>0,avatar_url:photo?'/api/profile-photo?v='+encodeURIComponent(photo.updated_at):null});
   });
+  profilePhotoRoutes(app,db,auth);
   app.post("/api/notifications/onboarding",auth,async(req,res)=>{
     const u=(req as AuthRequest).user;
     const choice=z.object({enable:z.boolean()}).strict().parse(req.body);

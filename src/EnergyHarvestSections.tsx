@@ -62,12 +62,12 @@ export default function EnergyHarvestSections({vehicle,mode}:{vehicle:Vehicle;mo
    <section className="harvest-source solar-source" id="energy-solar" aria-labelledby="solar-energy-heading" tabIndex={-1}>
     <header className="harvest-source-heading"><div><span className="eyebrow"><Sun size={15} aria-hidden="true"/>POWER FROM THE SUN</span><h2 id="solar-energy-heading">Solar energy</h2></div><span className="badge amber">400 W nominal array</span></header>
     <div className="harvest-total"><span>Recorded solar harvest</span><strong>{display(vehicle.solar_wh,2)} <em>Wh</em></strong><small>Recorded samples · gaps excluded</small></div>
-    <div className="harvest-artwork-stage"><figure className="harvest-artwork"><Image src="/energy-solar-panels.webp" width={1000} height={667} sizes="(max-width:650px) 95vw, (max-width:1100px) 85vw, 600px" loading="eager" alt="Illustration of two tilted blue photovoltaic solar panels"/></figure></div>
+    <div className="harvest-artwork-stage"><figure className="harvest-artwork"><Image src="/energy-solar-panels.webp" width={1000} height={667} sizes="(max-width:650px) 160vw, 800px" loading="eager" alt="Illustration of two tilted blue photovoltaic solar panels"/></figure></div>
     <div className="harvest-reading-grid">
      <ReadingCard title="PV input voltage" value={field('solar_voltage_v')} unit="V" status={status} plots={[{kind:'solar_voltage_v',unit:'V'}]} {...common}/>
-     <ReadingCard title="PV input current" value={field('solar_current_a')} unit="A" status={status} plots={[{kind:'solar_current_a',unit:'A',style:'bars'}]} {...common}/>
-     <ReadingCard title="PV power" value={sourcePower(t,'solar')} unit="W" status={status} plots={[{kind:'solar_power_w',unit:'W',style:'area'}]} {...common}/>
-     <ReadingCard title="Controller output" value={field('solar_output_voltage_v')} second={field('solar_output_current_a')} unit="V" status={status} plots={[{kind:'solar_output_voltage_v',unit:'V',caption:'Voltage · V'},{kind:'solar_output_current_a',unit:'A',caption:'Current · A',style:'bars'}]} {...common}/>
+     <ReadingCard title="PV input current" value={field('solar_current_a')} unit="A" status={status} plots={[{kind:'solar_current_a',unit:'A'}]} {...common}/>
+     <ReadingCard title="PV power" value={sourcePower(t,'solar')} unit="W" status={status} plots={[{kind:'solar_power_w',unit:'W'}]} {...common}/>
+     <ReadingCard title="Controller output" value={field('solar_output_voltage_v')} second={field('solar_output_current_a')} unit="V" status={status} plots={[{kind:'solar_output_voltage_v',unit:'V',caption:'Voltage · V'},{kind:'solar_output_current_a',unit:'A',caption:'Current · A'}]} {...common}/>
     </div>
     <p className="harvest-source-note">PV input and controller output are separate measurements. MPT-7210A validation remains pending.</p>
    </section>
@@ -77,9 +77,9 @@ export default function EnergyHarvestSections({vehicle,mode}:{vehicle:Vehicle;mo
     <div className="harvest-artwork-stage"><figure className="harvest-artwork wind-artwork"><Image src="/energy-vawt-cutout.webp" width={900} height={900} sizes="(max-width:650px) 80vw, 400px" loading="lazy" alt="White curved-blade vertical-axis wind turbine with a silver generator and white mounting pole"/></figure></div>
     <div className="harvest-reading-grid">
      <ReadingCard title="Output voltage" value={field('wind_voltage_v')} unit="V" status={status} plots={[{kind:'wind_voltage_v',unit:'V'}]} {...common}/>
-     <ReadingCard title="Output current" value={field('wind_current_a')} unit="A" status={status} plots={[{kind:'wind_current_a',unit:'A',style:'bars'}]} {...common}/>
-     <ReadingCard title="Power" value={sourcePower(t,'wind')} unit="W" status={status} plots={[{kind:'wind_power_w',unit:'W',style:'area'}]} {...common}/>
-     <ReadingCard title="Energy yield" value={vehicle.wind_wh} unit="Wh" status={vehicle.wind_wh==null?'Not available':'Recorded total'} plots={[{kind:'wind_window_wh',unit:'Wh',style:'area',caption:'Displayed sample window · Wh'}]} {...common}/>
+     <ReadingCard title="Output current" value={field('wind_current_a')} unit="A" status={status} plots={[{kind:'wind_current_a',unit:'A'}]} {...common}/>
+     <ReadingCard title="Power" value={sourcePower(t,'wind')} unit="W" status={status} plots={[{kind:'wind_power_w',unit:'W'}]} {...common}/>
+     <ReadingCard title="Energy yield" value={vehicle.wind_wh} unit="Wh" status={vehicle.wind_wh==null?'Not available':'Recorded total'} plots={[{kind:'wind_window_wh',unit:'Wh',caption:'Displayed sample window · Wh'}]} {...common}/>
     </div>
     <p className="harvest-source-note">Wind harvesting remains uncommissioned. The illustration does not confirm installed hardware or operational yield.</p>
    </section>

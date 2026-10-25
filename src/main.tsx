@@ -2,6 +2,7 @@
 import NextImage from 'next/image';
 import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import {
+  ClipboardList,
   LayoutDashboard,
   Home,
   MapPin,
@@ -43,9 +44,13 @@ import {EmptyState,workspaceDescription} from './WorkspaceFeedback';
 import {vehicleMapReference} from './map-reference';
 import MobileIntro from './MobileIntro';
 import DriverVehicleCard from './DriverVehicleCard';
+import {HomeEnergyHistoryProvider} from './HomeEnergyHistory';
 import EnergyHarvestSections from './EnergyHarvestSections';
 import LocationPage from './LocationPage';
-import {permittedPage,workspacePageKey} from './workspace-navigation';
+import ProfilePhotoEditor from './ProfilePhotoEditor';
+import ProfileAvatar from './ProfileAvatar';
+import SettingsMenu,{SettingsBack} from './SettingsMenu';
+import {permittedPage,workspacePageKey,settingsPages,settingsDestination} from './workspace-navigation';
 import {SetupChecklist,DeviceStatus,EvidenceDownloads,NotificationReadiness} from './Workflows';
 import TodaMenu from './TodaMenu';
 import {RegistrationDetails,ActivityLog} from './Registration';
@@ -615,9 +620,10 @@ function App() {
   useEffect(()=>{
     if(!navigationTarget)return;
     const destination=document.getElementById(navigationTarget.id);
-    if(destination){destination.focus({preventScroll:true});destination.scrollIntoView({block:'start',behavior:'auto'});}
+    if(destination){if(destination instanceof HTMLDetailsElement)destination.open=true;destination.focus({preventScroll:true});destination.scrollIntoView({block:'start',behavior:'auto'});}
   },[page,navigationTarget]);
   const go = (p: string, target?:string) => {
+    const destination=settingsDestination(p,target);p=destination.page;target=destination.target;
     if(p==='Notifications')window.scrollTo(0,0);
     if (p === "Report a problem") setReportPage(page);
     setPage(p);
@@ -646,8 +652,13 @@ function App() {
     ["SOS & Assistance", LifeBuoy],
     ["Settings", UserRound],
   ] as const;
+  const activeNavigationPage=settingsPages.includes(page)?'Settings':page;
   const driverSidebarNav=[...driverNav.slice(0,5),["History & Reports",History] as const,driverNav[5]];
   const adminNav = [nav[0],nav[8],nav[10],nav[9],nav[11],...nav.slice(1,8),nav[12]];
+  const baseSidebarNav=driver?driverSidebarNav:administrator?adminNav:nav;
+  const helpNavIndex=baseSidebarNav.findIndex(([p])=>p==='SOS & Assistance');
+  const sidebarNav=[...baseSidebarNav.slice(0,helpNavIndex),['My registration and assignments',ClipboardList] as const,...baseSidebarNav.slice(helpNavIndex)];
+  const activeSidebarPage=page==='My registration and assignments'?page:activeNavigationPage;
   return (
     <div className={"app " + user.role + "-app"}>
       <a className="skip-link" href="#workspace-content">Skip to main content</a>
@@ -657,15 +668,15 @@ function App() {
         <TodaMenu key={`${user.id}:${user.org_id}`} user={user} organization={organization} selectedVehicle={v}/>
         <span className="nav-label">WORKSPACE</span>
         <nav aria-label="Main navigation">
-          {(driver ? driverSidebarNav : administrator ? adminNav : nav).filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
+          {sidebarNav.filter(([p])=>!["Organizations","Activity log"].includes(p)||user.role==='admin').filter(([p])=>p!=='Devices'||labAllowed).filter(([p])=>p!=='People & assignments'||user.role==='admin').map(([p, Icon]) => (
             <button
               key={p}
-              className={page === p ? "active" : ""}
-              aria-current={page === p ? 'page' : undefined}
+              className={activeSidebarPage === p ? "active" : ""}
+              aria-current={activeSidebarPage === p ? 'page' : undefined}
               onClick={() => go(p)}
             >
               <Icon size={18} />
-              {driver
+              {p==='My registration and assignments'?'Registration':driver
                 ? (
                     {
                       Overview: "My vehicle",
@@ -707,13 +718,7 @@ function App() {
             </span>
           </div>
           <button className="account" onClick={() => go("Settings")}>
-            <span className="avatar">
-              {user.name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")}
-            </span>
+            <ProfileAvatar user={user}/>
             <span>
               {user.name}
               <small>{user.role}</small>
@@ -783,7 +788,7 @@ function App() {
             <button onClick={flushQueue}>Retry delivery</button>
           </div>
         )}
-        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':page==='Notifications'?'notifications-workspace':undefined} tabIndex={-1}>
+        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':page==='Notifications'?'notifications-workspace':settingsPages.includes(page)?'settings-workspace':['SOS & Assistance','Help and support'].includes(page)?'help-workspace':undefined} tabIndex={-1}>
           <div className="page-heading">
             <div>
               <span className="eyebrow">
@@ -839,7 +844,7 @@ function App() {
           {administrator && page === "Overview" && <AdminHome revision={notificationRevision} go={go}/>}
           {page === 'SOS & Assistance' && <HelpResources go={go}/>}
           {!v ? (
-            !(administrator && page === "Overview") && !["Settings","People & assignments","Devices","Organizations","Activity log","Terms of Service","Privacy Policy","Notifications"].includes(page) &&
+            !(administrator && page === "Overview") && !settingsPages.includes(page) && !["Settings","People & assignments","Devices","Organizations","Activity log","Terms of Service","Privacy Policy","Notifications"].includes(page) &&
             <section className={page === "Live Fleet Map" ? "panel full-map" : "panel empty"}>
               {page === "Live Fleet Map" ? (
                 <>
@@ -900,14 +905,13 @@ function App() {
                     </div>
                   )}
                   <div className={driver ? "driver-overview" : "overview-grid"}>
-                    {driver?<DriverVehicleCard vehicle={v} organization={organization} mode={mode} go={go}/>:<Hero
+                    {driver?<HomeEnergyHistoryProvider vehicle={v} mode={mode}><DriverVehicleCard vehicle={v} organization={organization} mode={mode} go={go}/><DeviceStatus vehicle={v} mode={mode} go={go}/></HomeEnergyHistoryProvider>:<Hero
                       v={v}
                       mode={mode}
                       organization={organization}
                       driver={driver}
                       onDetail={() => go("Vehicle details")}
                     />}
-                    {driver&&<DeviceStatus vehicle={v} mode={mode} go={go}/>}
                     {!driver && (
                       <section className="panel overview-map">
                         <div className="panel-heading">
@@ -1186,7 +1190,7 @@ function App() {
               )}
               {page === "SOS & Assistance" && (
                 <>
-                  <div className="two-col">
+                  <div className="two-col help-request-grid setup-destination" id="assistance-request" tabIndex={-1}>
                     {driver && (
                       <section className="panel">
                         <h3>Help is one request away.</h3>
@@ -1474,56 +1478,31 @@ function App() {
               )}
             </>
           )}
-          {page === "Settings" && <div className="settings-grid">
-              {driver&&<div id="account-setup" className="setup-destination" tabIndex={-1}><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/></div>}
-              <section className="panel setup-destination" id="profile-settings" tabIndex={-1} aria-label="Your SOLAIR profile">
-                <Appearance />
-                <h3>Your SOLAIR profile</h3>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const f = new FormData(e.currentTarget);
-                    void act(async () => {
-                      await api("/profile", "PATCH", {
-                        name: f.get("name"),
-                        notifications: f.get("notifications") === "on",
-                      });
-                      await login();
-                    }, "Profile updated");
-                  }}
-                >
-                  <label>
-                    Name
-                    <input name="name" defaultValue={user.name} required />
-                  </label>
-                  <label>
-                    Email
-                    <input value={user.email} readOnly />
-                  </label>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      name="notifications"
-                      defaultChecked={!!user.notifications}
-                    />
-                    In-app notification preference
-                  </label>
-                  <p className="subtle">
-                    Push delivery is not configured. This preference does not
-                    enable browser push.
-                  </p>
-                  <button className="primary">Save profile</button>
-                </form>
-                <button onClick={() => go("Messages")}>
-                  Open TODA messages
-                  <MessageSquare size={16} />
-                </button>
-                <p className="subtle">
-                  Your account details and alert preferences are saved securely. Vehicle access is managed separately.
-                </p>
-              </section>
-              <RegistrationDetails userId={user.id}/>
-              <ContactPreferences />
+          {page==='Settings'&&<SettingsMenu user={user} go={go}/>}
+          {settingsPages.includes(page)&&page!=='Settings'&&<div className="settings-detail"><SettingsBack go={go}/>
+            {page==='Account profile'&&<section className="panel setup-destination" id="profile-settings" tabIndex={-1} aria-label="Your SOLAIR profile">
+              <h3>Your SOLAIR profile</h3>
+              <ProfilePhotoEditor user={user} onSaved={login}/>
+              <form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void act(async()=>{await api('/profile','PATCH',{name:f.get('name'),notifications:!!user.notifications});await login();},'Profile updated');}}>
+                <label>Name<input name="name" defaultValue={user.name} maxLength={80} required/></label>
+                <label>Email<input value={user.email} readOnly/></label>
+                <button className="primary">Save profile</button>
+              </form>
+              <p className="subtle">Change your verified email and mobile number in Contact &amp; SMS preferences.</p>
+              <button onClick={()=>go('Contact & SMS preferences')}>Manage contact details <ArrowRight size={16}/></button>
+              <button onClick={()=>go('Messages')}>Open TODA messages <MessageSquare size={16}/></button>
+            </section>}
+            {page==='My registration and assignments'&&<RegistrationDetails userId={user.id}/>}
+            {page==='Contact & SMS preferences'&&<ContactPreferences/>}
+            {page==='Appearance'&&<section className="panel"><h3>Choose your appearance</h3><p>Use Light, Dark, or follow your device with System.</p><Appearance/></section>}
+            {page==='Notification preferences'&&<section className="panel" aria-label="Notification preferences"><h3>In-app notifications</h3>
+              <form key={`${user.id}:${user.notifications}`} onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void act(async()=>{await api('/profile','PATCH',{name:user.name,notifications:f.get('notifications')==='on'});await login();},'Notification preference updated');}}>
+                <label className="check"><input type="checkbox" name="notifications" defaultChecked={!!user.notifications}/>Show in-app notification badges</label>
+                <p className="subtle">Recorded activity remains available in Notifications. Browser push delivery is not configured. SMS preferences are managed separately.</p>
+                <button className="primary">Save notification preference</button>
+              </form><button onClick={()=>go('Notifications')}>View notifications <Bell size={16}/></button>
+            </section>}
+            {page==='Account setup'&&<div id="account-setup" className="setup-destination" tabIndex={-1}><section className="panel"><h3>Your account setup</h3><p>Review your account readiness and linked vehicle or TODA details.</p><button onClick={()=>go('My registration and assignments')}>My registration and assignments <ArrowRight size={16}/></button></section><SetupChecklist key={`${user.id}:${user.org_id}`} user={user} revision={notificationRevision} go={go}/></div>}
           </div>}
           {page === "People & assignments" && user.role==='admin' && <div className="settings-grid"><People user={user} refreshKey={notificationRevision} onChange={async()=>{setUsers(await api('/users'));await refresh();}}/>
                 <section className="panel">
@@ -1734,12 +1713,12 @@ function App() {
         </main>
       </div>
       {driver && (
-        <nav className="bottom-nav" aria-label="Driver navigation" data-active-tab={mobileDestinations.indexOf(page)} style={{'--active-tab':mobileDestinations.indexOf(page)} as React.CSSProperties}>
+        <nav className="bottom-nav" aria-label="Driver navigation" data-active-tab={mobileDestinations.indexOf(activeNavigationPage)} style={{'--active-tab':mobileDestinations.indexOf(activeNavigationPage)} as React.CSSProperties}>
           <span className="bottom-nav-indicator" aria-hidden="true"/>
           {driverNav.map(([p, I]) => p==='SOS & Assistance'?<button key="notifications" className={page==='Notifications'?'bottom-notifications active':'bottom-notifications'} aria-current={page==='Notifications'?'page':undefined} onClick={()=>go('Notifications')}><Bell size={20} aria-hidden="true"/><span>Notifications</span></button>:(
             <button
-              className={page === p ? "active" : ""}
-              aria-current={page === p ? 'page' : undefined}
+              className={activeNavigationPage === p ? "active" : ""}
+              aria-current={activeNavigationPage === p ? 'page' : undefined}
               key={p}
               onClick={() => go(p)}
             >

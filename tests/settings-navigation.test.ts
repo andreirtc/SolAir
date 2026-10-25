@@ -1,0 +1,5 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {permittedPage,settingsDestination,settingsPages} from '../src/workspace-navigation';
+test('Each account role can refresh settings detail pages without losing its destination',()=>{for(const role of ['driver','operator','admin','engineer'])for(const page of settingsPages)assert.equal(permittedPage(page,role),page);assert.equal(permittedPage('People & assignments','driver'),'Overview');});
+test('Existing setup links resolve to the correct individual page and retain their focus target',()=>{for(const [target,page] of Object.entries({'registration-details':'My registration and assignments','alert-contact':'Contact & SMS preferences','verify-mobile':'Contact & SMS preferences','email-verification':'Contact & SMS preferences','profile-settings':'Account profile','account-setup':'Account setup'}))assert.deepEqual(settingsDestination('Settings',target),{page,target});assert.deepEqual(settingsDestination('Settings'),{page:'Settings',target:undefined});assert.deepEqual(settingsDestination('Energy','energy-solar'),{page:'Energy',target:'energy-solar'});});

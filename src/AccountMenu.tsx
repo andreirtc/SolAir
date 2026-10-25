@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, CircleHelp, Flag, LogOut, UserRound } from "lucide-react";
 import type { Profile } from "./types";
+import ProfileAvatar from './ProfileAvatar';
 import { Appearance } from "./Theme";
 
 export default function AccountMenu({ user, go, logout, busy }: {
@@ -24,11 +25,11 @@ export default function AccountMenu({ user, go, logout, busy }: {
   function navigate(page: string) { setOpen(false); go(page); }
   return <div className="account-menu" ref={root}>
     <button ref={trigger} className="account-trigger" aria-label="Open account menu" aria-expanded={open} aria-controls="account-options" aria-haspopup="dialog" onClick={() => setOpen(!open)}>
-      <span className="avatar small">{user.name[0]}</span><ChevronDown size={12} />
+      <ProfileAvatar user={user} className="avatar small"/><ChevronDown size={12} />
     </button>
     {open && <div id="account-options" className="account-dropdown" role="dialog" aria-label="Account options">
       <div className="account-menu-heading"><strong>{user.name}</strong><span>{user.email}</span></div>
-      <button ref={first} onClick={() => navigate("Settings")}><UserRound size={17} />Profile</button>
+      <button ref={first} onClick={() => navigate("Account profile")}><UserRound size={17} />Profile</button>
       <button onClick={() => navigate("Help and support")}><CircleHelp size={17} />Help and support</button>
       <button onClick={() => navigate("Report a problem")}><Flag size={17} />Report a problem</button>
       <Appearance />

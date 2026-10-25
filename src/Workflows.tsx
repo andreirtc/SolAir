@@ -2,6 +2,9 @@ import {useEffect,useState} from 'react';
 import {api,stamp,value} from './api';
 import type {Profile,Vehicle} from './types';
 import {deviceHealth} from '../packages/device-health';
+import RecordedLineChart from './RecordedLineChart';
+import {useHomeEnergyHistory} from './HomeEnergyHistory';
+import {energySeries} from './energy-visual-data';
 import {Radio,Battery,MapPin,Shield,ArrowRight} from 'lucide-react';
 
 type SetupTask={id:string;label:string;complete:boolean;action:string;required:boolean};
@@ -38,11 +41,12 @@ export function NotificationReadiness({vehicleId,revision,mode,go}:{vehicleId:st
   return <section className="panel notification-readiness"><div className="panel-heading"><h3>SMS alert readiness</h3><button onClick={()=>go('Settings')}>Manage my alert contact</button></div>{error&&<p role="alert">{error}</p>}{!data&&!error&&<p>Checking alert configuration…</p>}{data&&<><p>{data.configured_for_future_alerts?'Configuration checks complete; actual delivery is still unverified.':'SMS alerts are not fully configured for this vehicle.'} Sending mode: {data.mode}.</p><details><summary>View notification requirements</summary><ul>{data.checks.map((c:any)=><li key={c.label}>{c.complete?'✓':'○'} {c.label}</li>)}</ul></details><small>{data.message}</small></>}</section>;
 }
 export function DeviceStatus({vehicle,mode,go}:{vehicle:Vehicle;mode:string;go:(page:string)=>void}) {
+  const history=useHomeEnergyHistory();
   const t=vehicle.telemetry,h=deviceHealth(t),gps=vehicle.gps;
   return <section className="panel device-status" aria-label="Vehicle status"><div className="panel-heading"><h3>Your vehicle status · {vehicle.id}</h3><span className="badge">{mode==='demo'?'Simulated readings':'Reported hardware'}</span></div>
     <div className="status-grid">
       <article><h4><Radio size={18} aria-hidden="true"/>Device connection</h4><strong>{h.connection}</strong><p>{t?'Last contact: '+stamp(t.received_at):'Waiting for the device.'}</p>{h.connection!=='Recent contact'&&<p>Check the device power and connection with your TODA. An old reading does not confirm the vehicle is safe.</p>}</article>
-      <article><h4><Battery size={18} aria-hidden="true"/>Battery</h4><strong>{h.battery==='fresh'?`${value(t?.battery_voltage_v)} V`:h.battery==='unavailable'?'Not available':h.battery==='uncalibrated'?'Calibration needed':h.battery==='stale'?'Old reading':'Time unknown'}</strong><p>{h.battery==='fresh'?'Measured voltage, not remaining range.':'No recent, verified battery reading.'}</p><button onClick={()=>go('Energy')}>View energy</button></article>
+      <article><h4><Battery size={18} aria-hidden="true"/>Battery</h4><strong>{h.battery==='fresh'?`${value(t?.battery_voltage_v)} V`:h.battery==='unavailable'?'Not available':h.battery==='uncalibrated'?'Calibration needed':h.battery==='stale'?'Old reading':'Time unknown'}</strong><p>{h.battery==='fresh'?'Measured voltage, not remaining range.':'No recent, verified battery reading.'}</p><RecordedLineChart points={energySeries(history.samples,'battery_voltage_v')} label="Battery voltage" unit="V" simulated={mode==='demo'}/><button onClick={()=>go('Energy')}>View energy</button></article>
       <article><h4><MapPin size={18} aria-hidden="true"/>Location</h4><strong>{h.gps==='fresh'?'Recent GPS fix':h.gps==='stale'?'GPS fix is old':h.gps==='unknown'?'GPS time unknown':'No current GPS fix'}</strong><p>Fix age: {age(h.gps_age_ms)}{gps?`. Last saved position: ${stamp(gps.measured_at)}.`:'. No saved position.'}</p><button onClick={()=>go('Live Fleet Map')}>View location</button></article>
       <article><h4><Shield size={18} aria-hidden="true"/>Security</h4><strong>{h.security!=='fresh'?'State unknown':t?.alarm_active?'Alarm activation reported':t?.armed?'Reported armed':'Reported disarmed'}</strong><p>{h.security!=='fresh'?'Waiting for a recent device report.':'Reported state; siren sound unconfirmed.'}</p><button onClick={()=>go('Security')}>View alerts</button></article>
     </div>

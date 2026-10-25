@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS profile_photos(
+ user_id TEXT PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+ mime TEXT NOT NULL,
+ base64 TEXT NOT NULL,
+ updated_at TEXT NOT NULL
+);

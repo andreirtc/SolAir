@@ -29,3 +29,19 @@ test('Wind window energy integrates only valid short intervals and is distinct f
  const zero=energySeries(samples.slice(0,2).map(s=>({...s,t:frame(0,{wind_current_a:0})})),'wind_window_wh');assert.equal(zero[1].value,0);
  const missing=energySeries(samples.slice(0,3).map((s,i)=>({...s,t:frame(i,{wind_current_a:i===1?null:2})})),'wind_window_wh');assert.ok(missing.every(p=>p.value===null));
 });
+
+
+test('Home solar energy integrates its own calibrated channel without bridging missing intervals',()=>{
+ const samples=[0,15000,60000,75000].map((at,i)=>({at:base+at,t:frame(i)}));
+ const points=energySeries(samples,'solar_window_wh');
+ assert.equal(points[0].value,null);assert.equal(points[2].value,null);
+ assert.ok(Math.abs(points[1].value!-76*15/3600)<1e-9);
+ assert.ok(Math.abs(points[3].value!-76*30/3600)<1e-9);
+ assert.ok(energySeries(samples.map(s=>({...s,t:frame(0,{calibration_status:'unverified'})})),'solar_window_wh').every(p=>p.value===null));
+});
+
+test('Battery trends retain signed current and zero, and mask unverified hardware',()=>{
+ const samples=[{at:base,t:frame(0,{battery_voltage_v:72.4,battery_current_a:-2.3})},{at:base+1000,t:frame(1,{battery_voltage_v:0,battery_current_a:0})},{at:base+2000,t:frame(2,{battery_voltage_v:75,calibration_status:'unverified'})}];
+ assert.deepEqual(energySeries(samples,'battery_voltage_v').map(p=>p.value),[72.4,0,null]);
+ assert.deepEqual(energySeries(samples.slice(0,2),'battery_current_a').map(p=>p.value),[-2.3,0]);
+});

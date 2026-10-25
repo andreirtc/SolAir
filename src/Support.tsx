@@ -1,27 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { CircleHelp, Flag } from "lucide-react";
+import { Flag } from "lucide-react";
 import { api } from "./api";
 import HelpResources from './HelpResources';
 
 export function HelpSupport({ go }: { go: (page: string,target?:string) => void }) {
-  return <section className="panel support-panel">
-    <h2><CircleHelp size={23} /> How can we help?</h2>
-    <p>Find a quick answer or contact your TODA through SOLAIR.</p>
-    <section className="setup-assignment-help setup-destination" id="assignment-help" tabIndex={-1} aria-label="Complete your assignments">
-      <h3>Complete your TODA and vehicle assignments</h3>
-      <p>Contact your TODA administrator and share your account name and sign-in email. Ask them to complete the missing steps shown in your checklist:</p>
-      <ul><li><strong>TODA membership:</strong> link your account to the correct TODA.</li><li><strong>Assigned vehicle:</strong> link your account to the correct vehicle ID and model.</li><li><strong>Responsible operator:</strong> link an authorized operator to your vehicle.</li><li><strong>Operator access, if requested:</strong> review and approve your account role.</li></ul>
-      <p>These changes require an administrator. Operators can monitor and respond to their fleet, but cannot manage accounts or assignments.</p>
-      <button onClick={()=>go('Settings','registration-details')}>View my registration and assignments</button>
-      <small>After your administrator confirms the change, return Home to check the updated checklist.</small>
-    </section>
-    <details open><summary>My vehicle readings are missing or old</summary><p>Check the data mode and the measurement time. Real hardware needs a connected, registered ESP32. Demonstration readings are simulated records and can become stale. Try Refresh after the connection returns.</p></details>
-    <details><summary>The map shows a city but no vehicle</summary><p>The reference area follows your assigned vehicle: BEMAC uses Manila and NWOW uses Malabon. Without an assigned or recognized vehicle, the map shows Metro Manila. A city reference is not a vehicle position. A marker needs valid reported GPS coordinates. Choose Show vehicles to find recorded positions outside the current view.</p></details>
-    <details><summary>I need vehicle or roadside assistance</summary><p>Use SOS &amp; Assistance to contact your TODA. A queued request has not reached the server; check for the operator's acknowledgment.</p><button onClick={() => go("SOS & Assistance")}>Open assistance</button></details>
-    <details><summary>How do I change appearance or sign out?</summary><p>Open Settings to choose Light, Dark or System. System follows your device's appearance. To sign out, open your initial in the top-right corner and choose Log out. Log out is also directly below Settings in the side menu.</p></details>
-    <HelpResources go={go}/>
-    <div className="button-row"><button onClick={() => go("Messages")}>Open TODA messages</button><button onClick={() => go("Report a problem")}><Flag size={16} />Report a problem</button></div>
-  </section>;
+ return <HelpResources go={go}/>;
 }
 export function ProblemReport({ page, mode, vehicleId }: { page: string; mode: string; vehicleId?: string }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState(""), [receipt, setReceipt] = useState("");

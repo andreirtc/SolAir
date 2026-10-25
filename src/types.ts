@@ -25,4 +25,5 @@ export type Profile = {
   organization_name?:string;
   notifications: number;
   notification_intro_pending?: boolean;
+  avatar_url?: string|null;
 };

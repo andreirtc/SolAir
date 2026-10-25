@@ -32,6 +32,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }
+export function useAppearance(){return useContext(ThemeContext);}
 export function Appearance() {
   const context = useContext(ThemeContext);
   const group = useId();
