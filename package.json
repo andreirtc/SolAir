@@ -15,7 +15,11 @@
     "bootstrap": "tsx server/bootstrap.ts",
     "retention": "tsx server/retention.ts",
     "test:pwa": "tsx tests/pwa.ts",
-    "start:combined": "node scripts/start-combined.mjs"
+    "start:combined": "node scripts/start-combined.mjs",
+    "audit:production": "npm audit --omit=dev --audit-level=high",
+    "quality:check": "npm run lint && npm run typecheck && npm test && npm run audit:production",
+    "test:performance": "tsx tests/frontend-performance-browser.ts",
+    "quality:browser": "tsx tests/settings-menu-browser.ts && tsx tests/home-energy-charts-browser.ts && tsx tests/location-explorer-browser.ts && tsx tests/help-center-manual-browser.ts && tsx tests/notification-onboarding-browser.ts && tsx tests/account-lifecycle-browser.ts && tsx tests/profile-photos-browser.ts && tsx tests/mobile-startup-browser.ts && tsx tests/help-queue-browser.ts && tsx tests/cpe-browser.ts && tsx tests/role-workflows-browser.ts"
   },
   "dependencies": {
     "@fontsource/dm-sans": "5.2.6",
@@ -23,16 +27,16 @@
     "@supabase/supabase-js": "2.117.3",
     "cookie-parser": "1.4.7",
     "express": "5.1.0",
-    "express-rate-limit": "8.1.0",
+    "express-rate-limit": "8.7.1",
     "helmet": "8.1.0",
     "leaflet": "1.9.4",
     "lucide-react": "0.468.0",
-    "next": "16.4.0",
+    "next": "16.4.3",
     "pg": "8.16.3",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "tsx": "4.20.5",
-    "zod": "4.1.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.10",
@@ -45,7 +49,7 @@
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "eslint": "9.35.0",
-    "playwright": "1.55.0",
+    "playwright": "1.64.1",
     "prettier": "3.6.2",
     "typescript": "5.9.2",
     "typescript-eslint": "8.42.0"

@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { Pool, type PoolClient } from "pg";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync } from "node:fs";
+import {coreMigrations, supabaseMigrations, readMigration} from "./migrations";
 export class Store {
   private sqlite?: DatabaseSync;
   private pg?: Pool;
@@ -67,37 +68,14 @@ export class Store {
     }
   }
   async migrate() {
-    const sql = readFileSync(
-      new URL("../backend/migrations/001_core.sql", import.meta.url),
-      "utf8",
-    );
-    if (this.pg) await this.pg.query(sql);
-    else this.sqlite!.exec(sql);
-    const operations = readFileSync(new URL('../backend/migrations/005_operations.sql', import.meta.url),'utf8');
-    if (this.pg) await this.pg.query(operations); else this.sqlite!.exec(operations);
-    const registration=readFileSync(new URL('../backend/migrations/007_registration.sql',import.meta.url),'utf8');
-    if(this.pg)await this.pg.query(registration);else this.sqlite!.exec(registration);
-    const details=readFileSync(new URL('../backend/migrations/009_registration_details.sql',import.meta.url),'utf8');
-    if(this.pg)await this.pg.query(details);else this.sqlite!.exec(details);
-    const incidentUpdates=readFileSync(new URL('../backend/migrations/011_incident_updates.sql',import.meta.url),'utf8');
-    if(this.pg)await this.pg.query(incidentUpdates);else this.sqlite!.exec(incidentUpdates);
-    const lifecycle=readFileSync(new URL('../backend/migrations/013_account_lifecycle.sql',import.meta.url),'utf8');
-    if(this.pg)await this.pg.query(lifecycle);else this.sqlite!.exec(lifecycle);
-    const profilePhotos=readFileSync(new URL('../backend/migrations/015_profile_photos.sql',import.meta.url),'utf8');
-    if(this.pg)await this.pg.query(profilePhotos);else this.sqlite!.exec(profilePhotos);
-    const cpe = readFileSync(new URL("../backend/migrations/003_cpe.sql", import.meta.url), "utf8");
-    if (this.pg) {
-      await this.pg.query(cpe);
-      await this.pg.query("ALTER TABLE cpe_samples ENABLE ROW LEVEL SECURITY");
-    } else this.sqlite!.exec(cpe);
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/002_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/004_cpe_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/006_operations_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/008_registration_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/010_registration_details_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/012_incident_updates_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/014_account_lifecycle_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/016_profile_photos_supabase.sql',import.meta.url),'utf8'));
+    for (const name of coreMigrations) {
+      const sql = readMigration(name);
+      if (this.pg) await this.pg.query(sql); else this.sqlite!.exec(sql);
+    }
+    if (this.pg) await this.pg.query("ALTER TABLE cpe_samples ENABLE ROW LEVEL SECURITY");
+    if (this.pg && process.env.SOLAIR_AUTH_PROVIDER === 'supabase') {
+      for (const name of supabaseMigrations) await this.pg.query(readMigration(name));
+    }
   }
   async close() {
     if (this.pg) await this.pg.end();

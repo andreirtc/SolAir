@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createServer,type Server} from 'node:http';
 import {readFileSync} from 'node:fs';
 import {Store} from '../server/db';
+import {PostgresTestStore} from './postgres-store';
 import {seed} from '../server/seed';
 import {createApp} from '../server/app';
 import {decodeProfilePhoto} from '../server/profile-photos';
@@ -10,7 +11,7 @@ const png=readFileSync('public/icon-192.png'),replacement=readFileSync('public/i
 let db:Store,server:Server,base:string,driverCookie:string,operatorCookie:string;
 async function login(email:string){const r=await fetch(base+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:'SolairDemo!2026'})});assert.equal(r.status,200);return r.headers.get('set-cookie')!.split(';')[0];}
 const request=(path:string,cookie='',method='GET',body?:unknown)=>fetch(base+path,{method,headers:{...(cookie?{Cookie:cookie}:{}),'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
-before(async()=>{db=new Store(':memory:');await db.migrate();await db.migrate();await seed(db);server=createServer(createApp(db));await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();assert(address&&typeof address!=='string');base='http://127.0.0.1:'+address.port;driverCookie=await login('driver@solair.local');operatorCookie=await login('operator@solair.local');});
+before(async()=>{db=process.env.SOLAIR_TEST_POSTGRES==='1'?new PostgresTestStore():new Store(':memory:');await db.migrate();await db.migrate();await seed(db);server=createServer(createApp(db));await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();assert(address&&typeof address!=='string');base='http://127.0.0.1:'+address.port;driverCookie=await login('driver@solair.local');operatorCookie=await login('operator@solair.local');});
 after(async()=>{server?.closeAllConnections();if(server)await new Promise<void>(resolve=>server.close(()=>resolve()));await db?.close();});
 test('Photo validation accepts PNG and rejects disguised, malformed, oversized or redirected uploads',()=>{
  assert.deepEqual(decodeProfilePhoto({filename:'photo.png',mime:'image/png',base64:png.toString('base64')}).bytes,png);

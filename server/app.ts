@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { Store } from "./db";
+import {databaseReady} from "./readiness";
 import {profilePhotoRoutes} from './profile-photos';
 import { hash, token, passwordHash, verifyPassword, type User } from "./auth";
 import type {IdentityProvider} from './identity';
@@ -107,9 +108,11 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     next();
   });
   operationalRoutes(app,db,auth,identity,notify,revokeAccountStreams);
-  app.get("/api/health", (_req, res) =>
-    res.json({
-      status: "ok",
+  app.get("/api/health", async (_req, res) => {
+    const ready = await databaseReady(db);
+    res.status(ready ? 200 : 503).json({
+      status: ready ? "ok" : "unavailable",
+      database_status: ready ? "reachable" : "unavailable",
       environment: production
         ? process.env.DATABASE_URL
           ? "production PostgreSQL"
@@ -121,8 +124,8 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       auth_provider:identity?.name||'local',
       realtime_provider:process.env.SOLAIR_REALTIME_PROVIDER||'local',
       realtime_status:app.locals.realtimeStatus||'local',
-    }),
-  );
+    });
+  });
   app.post(
     "/api/login",
     rateLimit({ windowMs: 60000, limit: 10 }),
@@ -389,11 +392,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         now(),
       ],
     );
+    const [saved] = await db.query("SELECT org_id,vehicle_id,driver_id,mode,type,notes,status,created_at FROM help_requests WHERE id=?", [b.id]);
+    if (!saved || saved.org_id !== u.org_id || saved.driver_id !== u.id || saved.vehicle_id !== b.vehicle_id || saved.mode !== mode(req) || saved.type !== b.type || saved.notes !== b.notes)
+      return res.status(409).json({error: "This request identifier is already used for a different request"});
     await audit(u, "help_submitted", b.id);
     notify(u.org_id);
     res
       .status(201)
-      .json({ id: b.id, status: "pending", server_received_at: now() });
+      .json({ id: b.id, status: saved.status, server_received_at: saved.created_at });
   });
   app.patch(
     "/api/help/:id",
@@ -1059,6 +1065,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     if(err instanceof AccountActionError)return res.status(err.status).json({error:err.message});
     if (err instanceof z.ZodError || err instanceof SyntaxError)
       return res.status(400).json({ error: "Invalid request" });
+    if (err.expose === true && [400, 413, 415].includes(err.status)) {
+      const message = err.status === 413 ? "Request is too large" : err.status === 415 ? "Unsupported request encoding" : "Invalid request";
+      return res.status(err.status).json({ error: message });
+    }
     console.error(err.message);
     res.status(500).json({ error: "Server could not complete this action" });
   });

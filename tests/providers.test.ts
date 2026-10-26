@@ -1,3 +1,4 @@
+import {coreMigrations, supabaseMigrations, readMigration} from '../server/migrations';
 import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -34,4 +35,22 @@ test('Operational signup creates a profile immediately but still requires provid
   verified=true;const login=await req('/login','POST',{email,password});assert.equal(login.status,200);
   const fleet=await fetch(base+'/api/fleet?mode=hardware',{headers:{Cookie:login.headers.get('set-cookie')!.split(';')[0]}});assert.deepEqual(await fleet.json(),[]);
  }finally{identity.registerApplicant=oldRegister;identity.emailVerified=oldVerified;if(old===undefined)delete process.env.SOLAIR_ENVIRONMENT;else process.env.SOLAIR_ENVIRONMENT=old;}
+});
+
+test('Every current hosted migration preserves direct-table privacy, including profile photos', async () => {
+ const pg = new PGlite();
+ try {
+  for (const name of coreMigrations) await pg.exec(readMigration(name));
+  await pg.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS; CREATE PUBLICATION supabase_realtime;');
+  for (const name of supabaseMigrations) await pg.exec(readMigration(name));
+  for (const role of ['anon', 'authenticated']) {
+   await pg.exec(`SET ROLE ${role}`);
+   for (const table of ['profiles', 'profile_photos', 'gps_records', 'sessions', 'messages', 'account_states']) {
+    await assert.rejects(pg.query(`SELECT * FROM ${table}`));
+   }
+   await pg.exec('RESET ROLE');
+  }
+  await pg.exec('SET ROLE service_role');
+  assert.equal((await pg.query('SELECT * FROM profile_photos')).rows.length, 0);
+ } finally { await pg.close(); }
 });

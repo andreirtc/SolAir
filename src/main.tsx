@@ -1,5 +1,6 @@
 'use client';
 import NextImage from 'next/image';
+import {readHelpQueue, saveHelpQueue, helpQueueReadError, helpQueueWriteError, type QueuedHelpItem} from './help-queue';
 import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import {
   ClipboardList,
@@ -552,9 +553,11 @@ function App() {
   },[page,user,toast]);
   const flushQueue = useCallback(async () => {
     if (!user) return;
-    const key = `solair-unsent-${user.id}`,
-      q = JSON.parse(localStorage.getItem(key) || "[]");
-    const remaining = [];
+    const key = `solair-unsent-${user.id}`;
+    let q: QueuedHelpItem[];
+    try { q = readHelpQueue(localStorage, key); }
+    catch { toast(helpQueueReadError); return; }
+    const remaining: QueuedHelpItem[] = [];
     for (const item of q) {
       try {
         await api(`/help?mode=${item.mode}`, "POST", item.body);
@@ -562,7 +565,8 @@ function App() {
         remaining.push(item);
       }
     }
-    localStorage.setItem(key, JSON.stringify(remaining));
+    try { saveHelpQueue(localStorage, key, remaining); }
+    catch { toast('Could not update saved requests on this device. Check request activity before retrying.'); return; }
     setQueueCount(remaining.length);
     if (q.length > remaining.length) {
       toast("Queued help request received by server");
@@ -578,16 +582,15 @@ function App() {
     const off = () => setOffline(true);
     window.addEventListener("online", online);
     window.addEventListener("offline", off);
-    if (user)
-      setQueueCount(
-        JSON.parse(localStorage.getItem(`solair-unsent-${user.id}`) || "[]")
-          .length,
-      );
+    if (user) {
+      try { setQueueCount(readHelpQueue(localStorage, `solair-unsent-${user.id}`).length); }
+      catch { setQueueCount(0); toast(helpQueueReadError); }
+    }
     return () => {
       window.removeEventListener("online", online);
       window.removeEventListener("offline", off);
     };
-  }, [user, flushQueue, refresh]);
+  }, [user, flushQueue, refresh, toast]);
   const act = async (fn: () => Promise<any>, message: string) => {
     try {
       await fn();
@@ -741,11 +744,6 @@ function App() {
             {page}
           </div>
           <div className="top-actions">
-            <span className="local-label">
-              {health?.environment === "local development"
-                ? "Local development"
-                : health?.environment === 'local production preview' ? 'Local production preview' : 'Centralized workspace'}
-            </span>
             {page!=='Notifications'&&<Notifications key={`${user.id}:${user.org_id}:${mode}`} user={user} mode={mode} refreshKey={tick + notificationRevision} go={go} select={select}/> }
             <AccountMenu user={user} go={go} logout={logout} busy={loggingOut} />
           </div>
@@ -788,7 +786,7 @@ function App() {
             <button onClick={flushQueue}>Retry delivery</button>
           </div>
         )}
-        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':page==='Notifications'?'notifications-workspace':settingsPages.includes(page)?'settings-workspace':['SOS & Assistance','Help and support'].includes(page)?'help-workspace':undefined} tabIndex={-1}>
+        <main id="workspace-content" className={driver&&page==='Overview'?'driver-home':page==='Energy'?'energy-page':page==='Security'?'alerts-page':page==='Notifications'?'notifications-workspace':settingsPages.includes(page)?'settings-workspace':['SOS & Assistance','Help and support'].includes(page)?'help-workspace':undefined} tabIndex={-1}>
           <div className="page-heading">
             <div>
               <span className="eyebrow">
@@ -1216,16 +1214,13 @@ function App() {
                               );
                               void refresh();
                             } catch {
-                              const key = `solair-unsent-${user.id}`,
-                                q = JSON.parse(
-                                  localStorage.getItem(key) || "[]",
-                                );
-                              q.push({ body, mode });
-                              localStorage.setItem(key, JSON.stringify(q));
-                              setQueueCount(q.length);
-                              toast(
-                                "Request QUEUED / UNSENT. No server acknowledgment received.",
-                              );
+                              try {
+                                const key = `solair-unsent-${user.id}`, q = readHelpQueue(localStorage, key);
+                                q.push({ body, mode: mode === 'demo' ? 'demo' : 'hardware' });
+                                saveHelpQueue(localStorage, key, q);
+                                setQueueCount(q.length);
+                                toast("Request QUEUED / UNSENT. No server acknowledgment received.");
+                              } catch { toast(helpQueueWriteError); }
                             } finally {helpPending.current=false;setHelpSending(false);}
                           }}
                         >

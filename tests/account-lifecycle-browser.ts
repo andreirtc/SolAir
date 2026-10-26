@@ -21,7 +21,7 @@ try{
  browser=await chromium.launch();mkdirSync('test-results/account-lifecycle',{recursive:true});
  for(const width of [1440,390]){
   const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'}),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base);await page.getByLabel('Email address',{exact:true}).fill('admin@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Open account menu',exact:true}).waitFor();
+  await page.goto(base);if(width<700)await page.getByRole('button',{name:'Get started',exact:true}).click();await page.getByLabel('Email address',{exact:true}).fill('admin@solair.local');await page.getByLabel('Password',{exact:true}).fill('SolairDemo!2026');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Open account menu',exact:true}).waitFor();
   if(width===390){await page.evaluate(()=>{localStorage.setItem('solair-appearance','dark');window.dispatchEvent(new StorageEvent('storage',{key:'solair-appearance',newValue:'dark'}));});await page.getByRole('button',{name:'Toggle menu',exact:true}).click();}
   await page.locator('.sidebar nav').getByRole('button',{name:'People & assignments',exact:true}).click();
   const directory=page.locator('.people-directory');

@@ -1,0 +1,190 @@
+{
+  "auditDate": "2026-10-26",
+  "timezone": "Asia/Taipei",
+  "reference": "ISO/IEC 25010:2011, selected SOP3 product-quality scope",
+  "overallAcceptability": "Not determined: no completed evaluator data or complete current physical acceptance evidence were supplied.",
+  "gitHead": "972c4068b31a2a61e4339965a5400465e1ed5e8f",
+  "uncommittedWorkIncluded": true,
+  "runtime": {
+    "node": "v24.18.0",
+    "platform": "win32"
+  },
+  "installedVersions": {
+    "next": "16.4.3",
+    "express": "5.1.0",
+    "express-rate-limit": "8.7.1",
+    "body-parser": "2.4.0",
+    "ip-address": "10.7.5",
+    "zod": "4.6.7",
+    "playwright": "1.64.1"
+  },
+  "verification": {
+    "lint": "pass",
+    "typescript": "pass",
+    "productionBuild": "pass",
+    "sqliteMode": {
+      "tests": 140,
+      "pass": 140,
+      "fail": 0,
+      "skipped": 0
+    },
+    "postgresFixtureMode": {
+      "tests": 140,
+      "pass": 140,
+      "fail": 0,
+      "skipped": 0
+    },
+    "postgresScope": "Embedded PGlite for suites using PostgresTestStore; other unit/fixture tests retain their designed stores. Not a hosted Supabase test.",
+    "browserSuites": [
+      {
+        "exitCode": 0,
+        "name": "settings-menu-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "home-energy-charts-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "location-explorer-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "help-center-manual-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "notification-onboarding-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "account-lifecycle-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "profile-photos-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "mobile-startup-browser"
+      },
+      {
+        "exitCode": 0,
+        "name": "help-queue-browser"
+      },
+      {
+        "name": "cpe-browser",
+        "exitCode": 0,
+        "observations": 7
+      },
+      {
+        "name": "role-workflows-browser",
+        "exitCode": 0
+      }
+    ],
+    "dependencyAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "protocolFixtures": "Two synthetic Modbus/range/readback checks passed; no serial device opened."
+  },
+  "performance": {
+    "scope": "Single cold-cache run per condition, isolated local backend, Chromium phone emulation. Service workers blocked for cold loads. No agreed performance threshold; not an LTE, real-phone or cloud result. Browser resource samples: heap sizes in bytes, TaskDuration in seconds, DOM counts dimensionless; one sample is not a peak or sustained-capacity measurement.",
+    "samples": [
+      {
+        "browserResourceSample": {
+          "Documents": 2,
+          "Nodes": 888,
+          "TaskDuration": 0.636289,
+          "JSHeapUsedSize": 7793856,
+          "JSHeapTotalSize": 11493376
+        },
+        "scenario": "Unthrottled localhost",
+        "signInReadyMs": 479,
+        "loginMs": 247,
+        "settingsNavigationMs": 61,
+        "sampledResourceTransferBytes": 1209358
+      },
+      {
+        "browserResourceSample": {
+          "Documents": 2,
+          "Nodes": 888,
+          "TaskDuration": 1.894183,
+          "JSHeapUsedSize": 7940712,
+          "JSHeapTotalSize": 11231232
+        },
+        "scenario": "Simulated 1.6Mbps download, 150ms latency, 4x CPU slowdown",
+        "signInReadyMs": 3647,
+        "loginMs": 1012,
+        "settingsNavigationMs": 97,
+        "sampledResourceTransferBytes": 399924
+      }
+    ],
+    "limitations": [
+      "One cold-load sample per condition; no agreed pass/fail threshold, p95 estimate or capacity result.",
+      "Resource transfer totals include completed resource entries at the sample instant, not all navigation/pending traffic.",
+      "Worker caching is disabled for cold-load measurements; first-install precache cost is separate.",
+      "JS heap/task-duration samples are not peak browser/ESP32 RAM, backend CPU, power consumption or field-LTE measurements."
+    ]
+  },
+  "offline": {
+    "publicPrecacheAssets": [
+      "/",
+      "/icon-192.png",
+      "/icon-512.png",
+      "/icon.svg",
+      "/bemac-white.png",
+      "/manifest.webmanifest",
+      "/fonts/outfit-latin.woff2",
+      "/fonts/work-sans-latin.woff2",
+      "/solair-logo-transparent.png",
+      "/energy-solar-panels.webp",
+      "/energy-vawt-cutout.webp",
+      "/downloads/SOLAIR-user-manual.pdf"
+    ],
+    "publicAssetBytes": 3605674,
+    "scope": "Public essentials plus compiled static bundles are cached after successful online installation. API responses, private photos and unapproved optimized images remain excluded.",
+    "verified": "Offline shell/logo/manual/public solar image fallback, queue corruption/quota handling, reconnect/lost-receipt deduplication, and unrelated-cache preservation.",
+    "limitations": "This is not offline authentication, offline private-history synchronization, offline map-tile provisioning or an unlimited/loss-free firmware buffer."
+  },
+  "openGates": [
+    "Actual IT-expert and TODA ratings using the approved study instrument/decision rules.",
+    "Current firmware build setup: attempted integrated/all-input compiles could not start because .tools/cpe-python is absent. Historical compile logs are not fresh results.",
+    "Reference-instrument sensor/GPS/energy accuracy, commissioned wind/controller channels and genuine full device-to-dashboard tests.",
+    "Physical power/reset/network failure recovery, bounded alarm cutoff and sustained soak/capacity measurements.",
+    "Real hosting/HTTPS/proxy/identity/retention/backup restore and actual SMS delivery verification; local paid services remain disabled.",
+    "Operator/controller identity, privacy contact and final policy effective date; address-provider selection remains deferred."
+  ],
+  "sourceSha256": {
+    "package.json": "8a7a24905f8e63f17fef71b37552f14fdbbfe07d1d3ee04d5343876d038904fd",
+    "package-lock.json": "929007eb065e3946bc787784e7228ad2f7084c57bd9cf2082c9c16bc70e082ce",
+    "server/app.ts": "192f9c6590ccb14a8c498de1b6c7dc782df485748d515e411ae4460a1e142e3e",
+    "server/db.ts": "06eca7d34d15851bb6f25b57e48c7dd2ab37f75655a14a3b4eeff95a4642b5f4",
+    "server/migrations.ts": "0d110a3e369ab7a057d1bedbf954518a4be6b08a7c938a215e1afd847406db9f",
+    "server/readiness.ts": "b6d3031f17eded9c12f21e45c85a271cdc622a1747bde58888076ba4ec90934d",
+    "src/main.tsx": "1894e12f2e36ef6e85ff651aa283ba592250aea2d211c982dc1f4364303db0af",
+    "src/help-queue.ts": "2822a71215f25aa9982829e5f6da9d468b3df7dc4032a23a0aa50e3aeeae3914",
+    "public/sw.js": "8fd373b5785183e89f2e8d0475d2a0cfb756b18c926112b76b40fff4a1e42694",
+    "scripts/finalize-build.mjs": "876181a4f14f4a0d478d86a42137bc8b5dcdc9ed4c66862302c1373816a99962",
+    "tests/quality-boundaries.test.ts": "dcf642b918645fbe62dedba10c9a57bb078bd8ac10161b87c1d1f0fcf84c0256",
+    "tests/help-queue.test.ts": "8e5277a67dbcf2956ee3efac63d41b015a7b0db6a0d98126943737ebe8efead7",
+    "tests/service-worker.test.ts": "43edfc69d69f574d1a9586dad100a31833ad34d5ddcd21794d24bfa6ed6b0cce",
+    "tests/postgres-store.ts": "ccd9a0092ebd3f0870d1e3e386157e0d313f22d46bd4b2701d299119a4900fd9",
+    "tests/profile-photos.test.ts": "72e05e7022b1e3a5060685264466f9c98247c81d6ad53d77d6780e82dfee4ff1",
+    "tests/providers.test.ts": "e8e522442e2298f1f4705c3d54d9d285cee8ebca2cb5c867b32355636f73cb8c",
+    "tests/help-queue-browser.ts": "32c21af09bfddc74ca52d8f99a9fdba25fbd0bcb53a991720cb4f43b91d88314",
+    "tests/role-workflows-browser.ts": "65ad7be1685937c81ef77bbaddbcac6c8b82c1e519f9535e75abeec3e61b575d",
+    "tests/cpe-browser.ts": "4254a79056be0fc78466a03f5b05854579b2bd3742133411ba99faf665973d60",
+    "tests/mobile-startup-browser.ts": "e38f6abcc52ea9cb5135ac2d933c8a0adbe873ad05a67ba9e114865aeb12cb9a",
+    "tests/account-lifecycle-browser.ts": "87580ad67ce9014e1a40bf40c2b7b93c3dcfd344304d63aa3390d28037932f81",
+    "tests/frontend-performance-browser.ts": "0bef580e8010122bbdb7923c4284f826265c107d4e886f3e07c5bc2fdb24b837"
+  },
+  "sources": [
+    "https://www.iso.org/standard/35733.html",
+    "https://www.iso.org/obp/ui/?_escaped_fragment_=iso%3Astd%3Aiso-iec%3A25010%3Aed-1%3Av1%3Aen"
+  ]
+}

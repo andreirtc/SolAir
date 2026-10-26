@@ -3,8 +3,10 @@
  --radius-card:24px;--radius-control:14px;--radius-pill:999px;
  --elevation-card:0 5px 24px #202B3A06;--elevation-float:0 8px 32px #202B3A14;
  --journey-wash:linear-gradient(140deg,var(--pale-solar),var(--surface) 70%);
- --glass-card:color-mix(in srgb,var(--surface) 28%,transparent);
- --glass-panel:color-mix(in srgb,var(--surface) 20%,transparent);
+ --card-surface-opacity:65%;
+ --card-surface:color-mix(in srgb,var(--surface) var(--card-surface-opacity),transparent);
+ --glass-card:var(--card-surface);
+ --glass-panel:var(--card-surface);
 }
 :root[data-theme='dark']{--elevation-card:0 4px 18px #0000000D;--elevation-float:0 8px 32px #00000030;--journey-wash:linear-gradient(140deg,var(--pale-solar),var(--surface) 75%)}
 body{font-feature-settings:'ss01' on;-webkit-font-smoothing:antialiased}
@@ -19,7 +21,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .page-heading h1{max-width:24ch}.page-heading p{max-width:62ch;line-height:1.7}
 .page-heading>.heading-actions{align-self:center}.heading-actions>button{border-radius:var(--radius-pill)}
 .data-banner{font-weight:500;letter-spacing:.2px}.data-banner select{border-radius:8px}
-.sidebar{border-right-color:var(--line);padding-top:30px}.sidebar nav button{border-radius:var(--radius-control);font-weight:500;margin-bottom:5px}
+.sidebar{border-right-color:var(--line);padding-top:30px}
+.sidebar>.brand{margin-bottom:8px}.sidebar>.toda-menu{margin-top:4px}.sidebar nav button{border-radius:var(--radius-control);font-weight:500;margin-bottom:5px}
 .sidebar nav button.active{box-shadow:none;background:var(--pale-solar);color:var(--text)}.sidebar nav button.active>svg{color:var(--blue)}
 .organization,.toda-menu .organization{background:var(--surface);border-radius:18px}.sidebar-bottom{border-top:1px solid var(--line)}
 .workspace main{padding-top:32px}.topbar{border-bottom:1px solid var(--line)}
@@ -184,8 +187,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .driver-home .journey-vehicle-footer{background:transparent;background:var(--glass-panel);border-color:color-mix(in srgb,var(--line) 65%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 
 /* Renewable-energy workspace: enlarged artwork behind translucent reading cards. */
-.workspace:has(>.energy-page),.workspace:has(.full-map){background:radial-gradient(ellipse at 100% 0%,#EFB14240,transparent 60%),radial-gradient(ellipse at 0% 55%,#1959B52E,transparent 65%),radial-gradient(ellipse at 100% 100%,#EFB14224,transparent 60%)}
-:root:not([data-theme='dark']) .workspace:has(>.energy-page),:root:not([data-theme='dark']) .workspace:has(.full-map){--muted:#536170}
+.workspace:has(>.energy-page),.workspace:has(.full-map),.workspace:has(>.alerts-page){background:radial-gradient(ellipse at 100% 0%,#EFB14240,transparent 60%),radial-gradient(ellipse at 0% 55%,#1959B52E,transparent 65%),radial-gradient(ellipse at 100% 100%,#EFB14224,transparent 60%)}
+:root:not([data-theme='dark']) .workspace:has(>.energy-page),:root:not([data-theme='dark']) .workspace:has(.full-map),:root:not([data-theme='dark']) .workspace:has(>.alerts-page){--muted:#536170}
 .energy-harvest-workspace{margin-bottom:28px}
 .energy-source-navigation{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .energy-source-navigation>a,.energy-history-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:999px;min-height:44px;padding:10px 16px;text-decoration:none;font-size:13px;color:var(--blue);background:var(--glass-card)}
@@ -245,11 +248,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 
 @media(max-width:699px){.location-track-summary{grid-template-columns:minmax(0,1fr)}}
 
-/* Location cards reveal the page background without a surface fill. */
+/* Keep every Location card on the same translucent surface. */
 .location-explorer .location-vehicle-card,
 .location-explorer .location-track-summary>div,
 .location-explorer .location-glass,
-.location-explorer .location-leg{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.location-explorer .location-leg,
+.location-explorer .location-map-heading,
+.location-explorer .location-map-stage .map-location-controls,
+.location-explorer .location-map-stage .map-empty{background:var(--card-surface)}
+.location-explorer .location-vehicle-card,
+.location-explorer .location-track-summary>div,
+.location-explorer .location-glass,
+.location-explorer .location-leg{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
 
 /* Quiet notification inbox with SOLAIR accents and transparent activity cards. */
 .notification-page.panel{max-width:760px;margin-inline:auto;background:transparent;border:0;box-shadow:none;overflow:visible}
@@ -321,14 +331,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
  .notification-intro-actions{padding-top:12px}
 }
 
-/* A slightly stronger card surface for laptop-sized Location layouts. */
-@media(min-width:1024px){
- .location-explorer .location-vehicle-card,
- .location-explorer .location-track-summary>div,
- .location-explorer .location-glass,
- .location-explorer .location-leg{background:color-mix(in srgb,var(--surface) 38%,transparent)}
-}
-
 @media(min-width:1024px){
  .location-explorer .location-track-summary,
  .location-explorer .location-information{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -390,8 +392,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .settings-profile-card>div{min-width:0}.settings-profile-card h2{font-size:24px;font-weight:500;margin:0 0 7px;overflow-wrap:anywhere}
 .settings-profile-card p{display:flex;align-items:center;gap:7px;font-size:13px;line-height:1.6;color:var(--muted);margin:0;overflow-wrap:anywhere}.settings-profile-card p svg{flex:none}
 .settings-profile-card button{display:flex;align-items:center;gap:6px;min-height:44px;padding:7px 0;background:transparent;border:0;color:var(--blue);font-size:12px}
-.settings-menu-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 20px;align-items:stretch}
-.settings-menu-group{display:flex;flex-direction:column;min-width:0}.settings-menu-group:last-child{grid-column:1/-1}
+.settings-menu-groups{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:stretch}
+.settings-menu-group{display:flex;flex-direction:column;min-width:0}
 .settings-menu-group>h3{font:400 16px var(--font-body);color:var(--muted);margin:0 0 12px}
 .settings-menu-card{border:1px solid var(--line);border-radius:22px;background:var(--glass-card);overflow:hidden;flex:1}
 .settings-menu-card>button{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:18px;text-align:left;background:transparent;border:0;border-radius:0;font-size:14px;color:var(--text)}
@@ -422,17 +424,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 /* Report download controls share equal columns and fill the mobile card width. */
 .evidence-downloads>.button-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
 .evidence-downloads>.button-row>.button{width:100%;height:100%;min-height:44px;justify-content:center;text-align:center;white-space:normal}
-
-/* Match the status panel to the vehicle panel on the laptop dashboard. */
-@media(min-width:1100px){
- .driver-home .driver-overview>.device-status{background:var(--journey-wash);-webkit-backdrop-filter:none;backdrop-filter:none}
-}
-
-@media(min-width:1100px){
- .driver-home .quick-actions>button,
- .driver-home .quick-actions>button:last-child,
- .driver-home .driver-priority>.panel{background:var(--journey-wash);-webkit-backdrop-filter:none;backdrop-filter:none}
-}
 
 /* Match wind artwork height to the solar frame in the side-by-side layout. */
 @media(min-width:1200px){
@@ -488,3 +479,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .manual-notes{display:grid;gap:12px}.manual-notes>div{padding:14px 16px;border-radius:16px;background:var(--pale-blue);color:var(--text)}.manual-notes strong{font-size:12px}.manual-notes p{font-size:11px;line-height:1.8;margin:7px 0 0}
 @media(max-width:800px){.help-center-layout{grid-template-columns:minmax(0,1fr);gap:24px}.help-center-aside{gap:16px}.help-center-intro h2{font-size:29px}.help-center-intro p{font-size:12px}.help-faq summary{padding:17px 16px;font-size:12px}.help-faq-answer{padding:0 16px 15px}.help-manual-trigger{min-height:96px;padding:18px}.help-contact-card{padding:20px}}
 @media(max-width:650px){.user-manual-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 24px);border-radius:22px}.user-manual-dialog>header{padding:15px 16px;gap:8px}.user-manual-dialog>header h2{font-size:20px}.user-manual-dialog>header>div:last-child{gap:5px}.manual-download{font-size:10px;padding:9px 11px;gap:5px}.manual-dialog-body{padding:20px 16px}.manual-chapter h3{font-size:21px}.manual-intro h3{font-size:19px}.manual-contents{padding:16px}}
+
+/* App-wide card surface contract: override legacy page/breakpoint fills only.
+   Keep content at full opacity; every card background uses the same theme-aware 65% surface. */
+:root :is(
+ .panel,.metric,.hero,.vehicle-hero,.journey-vehicle,.journey-vehicle-footer,
+ .driver-energy-summary,.energy-glass-card,.harvest-source,.harvest-reading-card,
+ .status-grid article,.quick-actions>button,
+ .admin-intro,.admin-summary-card,.person-card,.activity-record,.incident-record,.incident,
+ .organization,.notification-dropdown,.toda-dropdown,
+ .settings-profile-card,.settings-menu-card,.appearance-options label,
+ .setup-tasks li,.setup-assignment-help,.registration-summary,.driver-setup-notice,
+ .directory-filters,.workspace-empty,.measurement-banner,.policy-review,
+ .notification-item,.notification-intro-benefits,
+ .help-faq-card,.help-manual-trigger,.help-contact-card,.help-extra-resources,
+ .support-panel details,.manual-contents,.manual-notes>div,
+ .location-vehicle-card,.location-track-summary>div,.location-glass,.location-leg,
+ .location-map-heading,.map-location-controls,.map-empty
+){background:var(--card-surface)!important}
+:root :is(
+ .energy-glass-card,.quick-actions>button,.admin-summary-card,.notification-item,
+ .help-manual-trigger
+):hover{background:color-mix(in srgb,var(--surface-soft) var(--card-surface-opacity),transparent)!important}

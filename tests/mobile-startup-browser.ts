@@ -40,7 +40,7 @@ try{
    await page.setViewportSize({width,height:844});
    const artwork=intro.getByRole('img',{name:'White BEMAC 68VM Passenger, three-quarter product visualization'});
    await artwork.waitFor();assert.equal(await artwork.evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0),true);
-   const artBox=await artwork.boundingBox(),captionBox=await page.locator('.welcome-art-label').boundingBox();assert.ok(artBox&&captionBox&&captionBox.y>=artBox.y+artBox.height,'Artwork caption must sit below the illustration');
+   const artBox=await artwork.boundingBox();assert.ok(artBox&&artBox.width>0&&artBox.height>0,'Approved cropped artwork must remain visible');assert.equal(await page.locator('.welcome-art-label').count(),0,'The artwork caption was intentionally removed');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    const button=await intro.getByRole('button',{name:'Get started',exact:true}).boundingBox();assert.ok(button&&button.height>=44&&button.y+button.height<=844);
    const next=await intro.getByRole('button',{name:'Continue to sign in',exact:true}).boundingBox();assert.ok(next&&next.height>=44&&next.width===next.height&&next.x>=button.x+button.width&&next.y+next.height<=844);
