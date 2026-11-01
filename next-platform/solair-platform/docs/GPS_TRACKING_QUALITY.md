@@ -1,0 +1,23 @@
+# GPS tracking quality contract
+
+The fleet map uses `GET /api/fleet` → `vehicle.gps` as the last position that passed the application's display policy. `vehicle.telemetry` remains the latest raw device report. These can refer to different acquisition times after reception deteriorates.
+
+For CPE v2, a point can move the tracking marker when its reported fix age is at most 5 seconds, satellites are at least 4, HDOP is greater than zero and at most 3, GPS quality is `ok`, and reported serial activity is recent. Missing v2 quality metadata does not establish a reliable point. Legacy v1 devices retain compatibility with their available age/satellite fields; they do not thereby gain an accuracy measurement.
+
+These are explicit **display thresholds**, not a guaranteed position error in metres. HDOP measures geometry, not actual error against a surveyed reference. Multipath can still produce an inaccurate point that passes these gates. Review thresholds against the thesis requirements and physical route/reference validation before claiming accuracy.
+
+The backend retains every accepted raw telemetry and GPS record, including degraded positions. It scans GPS history for a qualifying point and caches a watermark per device/mode. Cold-start history lookup is paginated and does not stop at an arbitrary history limit; new poor fixes retain the previous reliable point. No database migration, rewritten measurement, coordinate extrapolation or smoothing is used.
+
+The map labels a point live only while both the latest eligible observation and the selected position remain within a 10-second window. It accounts for acquisition and receipt times and includes the fix's age. Its timer expires a marker without requiring another SSE update. Poor-quality reports show `LOW GPS QUALITY · LAST KNOWN GPS`; raw reception information remains visible in CPE Lab.
+
+Keep firmware 2.0.9 and the working LTE setup for this application change. The firmware's legacy `gps_fix` flag can retain a previously valid location for 30 seconds; consumers must apply this quality policy instead of treating that flag alone as current/reliable. No firmware upload is required for the map correction. Maintain USB monitor-only mode during LTE verification.
+
+Validated in isolated API fixtures (including history beyond one page, raw evidence retention and recovery), browser fixtures (quality loss, stale expiry, movement and tile failures), TypeScript and lint. Read-only application of the same backend helper to genuine records selected sequence1384 at22:43:48 rather than sequence1399 at22:44:18, which reported zero satellites, HDOP99.99 and a29.838-second-old location. This validates the software selection, not physical reception or accuracy.
+
+The movement test remains unfinished: the user observed inaccurate movement and repeated signal loss; records show fix loss and reacquisition while LTE uploads continued, plus separate delivery gaps. A stationary outdoor fix is already verified and must not be repeated as new evidence of movement reliability.
+
+For physical reception, verify fixed sky-facing antenna placement, body/metal shielding, separation from the cellular antenna, carrier power stability and connections. Treat these as hypotheses until tested. Do not rewire power, invent a regulator/antenna specification, reset the receiver or purchase parts without checking the actual board. The [u-blox NEO-6 integration manual](https://content.u-blox.com/sites/default/files/products/documents/LEA-NEO-MAX-6_HIM_%28UBX-14054794%29_1.pdf) discusses clean power, antenna implementation and coexistence with cellular radios; it does not certify this breakout's implementation.
+
+Latest physical clarification: the GPS and breadboard were inside the IP65 box with the laptop on top of that box during the walk. Facing the patch upward does not establish unobstructed sky view when the laptop covers it. Treat laptop obstruction/body placement as a likely contributor, not a confirmed sole cause. First controlled test: change only the laptop placement, keeping it beside the box with nothing above the GPS antenna, and repeat the same outdoor walk with LTE still running. Keep box orientation, power and wiring unchanged; do not combine the first comparison with an antenna/module purchase or power rewiring.
+
+Final verification: 58/58 full isolated API tests and14/14 CPE tests against the PostgreSQL-compatible fixture passed, along with the map browser, TypeScript and lint checks. An actual authenticated fleet API request returned200, live LTE telemetry sequence2114/noGPSfix, and the retained reliable map timestamp22:43:48. The temporary verification session was logged out; no user browser session or hardware reading was changed.

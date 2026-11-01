@@ -33,6 +33,7 @@ Prepared 11 October 2026. Accounts and credentials have not been configured. Thi
 | `SUPABASE_ANON_KEY` | Legacy anon JWT; used server-side for identity/recovery |
 | `SUPABASE_SERVICE_ROLE_KEY` | Legacy service-role JWT; sealed, server-only |
 | `SOLAIR_PUBLIC_URL` | Exact Railway HTTPS origin |
+| `SOLAIR_DEVICE_INGEST_URL` | Optional permanent HTTPS `/api/ingest` address; otherwise derived from `SOLAIR_PUBLIC_URL` |
 | `PORT` | Railway-provided port |
 
 Optional: `SOLAIR_LOCATION_RETENTION_DAYS=30`. Bootstrap-only: `SOLAIR_ADMIN_EMAIL`, `SOLAIR_ADMIN_PASSWORD` (unique 12+ characters), `SOLAIR_ORG_ID=manila`, `SOLAIR_ORG_NAME`. Remove the bootstrap password after account creation. Credential examples are blank. `.env`/`.env.local` are ignored; configure credentials locally or in the dashboard, never in chat.

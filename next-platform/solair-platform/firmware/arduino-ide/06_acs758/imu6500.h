@@ -40,7 +40,7 @@ template<class Io> class Imu6500 {
    checked=now;phase=Ready;
   }
   if(uint32_t(now-checked)>=1000){
-   if(!configOK()){changed=now;error="configuration_changed_or_disconnected";return fail();}
+   if(!matches(0x75,0x70)){changed=now;error="configuration_changed_or_disconnected";return fail();}
    checked=now;
   }
   uint8_t bytes[14];

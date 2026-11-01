@@ -1,0 +1,230 @@
+{
+  "version": "1.0",
+  "prepared": "25 October 2026",
+  "operatorName": null,
+  "contact": null,
+  "effectiveDate": null,
+  "policies": {
+    "Terms of Service": {
+      "intro": "Complete policy copy for the current SOLAIR application. Publication details are awaiting confirmation; no effective agreement or privacy notice is claimed by this review copy.",
+      "sections": [
+        {
+          "title": "1. About SOLAIR and these terms",
+          "text": [
+            "SOLAIR is a connected e-trike and TODA fleet application provided by the operator identified above (\"we\", \"us\", or \"our\"). It supports assigned-vehicle information, recorded location and energy readings, security activity, TODA communication, assistance requests and operational reports.",
+            "These terms govern your authorized use of SOLAIR. The Privacy Policy explains how personal information is handled. Neither document replaces applicable law or a separate employment, TODA membership, transport, maintenance or research-participation agreement. Do not use an account or feature for which you are not authorized."
+          ]
+        },
+        {
+          "title": "2. Accounts, eligibility and assignments",
+          "text": [
+            "Provide accurate registration information and keep your available account and contact details current. Use the service only where you are legally permitted to carry out the relevant activity and authorized by the responsible organization. Creating a SOLAIR account does not grant driving authority, TODA membership, operator permissions, insurance or a vehicle assignment.",
+            "Administrators approve roles and assignments. Drivers may access records available for their assigned vehicle; operators may monitor and respond within their authorized fleet. Additional administrative and engineering controls are restricted by role. Your declared vehicle type or requested role does not by itself change these permissions.",
+            "Protect your password and verification codes, keep your device secure, and sign out on shared devices. Report suspected unauthorized access through the service contact or Report a problem. Do not use another person's credentials or allow unauthorized people to use your account."
+          ]
+        },
+        {
+          "title": "3. Acceptable use",
+          "text": [
+            "Use SOLAIR for lawful vehicle, fleet, support and account purposes. Do not impersonate another person, submit deliberately false reports, interfere with the service, attempt to bypass access restrictions, collect another user's information without authorization, or upload harmful or unlawful content.",
+            "Do not tamper with a registered device or manipulate records to misrepresent a vehicle's location, safety or energy performance. Use approved maintenance and commissioning procedures. Do not disclose passwords, device tokens, private credentials or unnecessary sensitive information in messages, assistance notes, photos or problem reports."
+          ]
+        },
+        {
+          "title": "4. Reported information and safe use",
+          "text": [
+            "Interact with the app only when it is safe to do so. Stop the vehicle before using controls that would distract you from driving. Follow applicable road-safety requirements and your TODA's procedures.",
+            "Readings depend on device configuration, calibration, connectivity and available records. Information may be missing, delayed, historical or simulated. A recent device connection does not establish that every sensor is current. Battery voltage is not a remaining-charge percentage or driving range. An illustration is not evidence of installed or commissioned hardware.",
+            "A city reference is not a reported vehicle position. Location history, detected stops and point-to-point distances are estimates derived from available GPS records; they do not independently establish an exact address, route, visit, arrival or departure. Graph gaps are not proof that a vehicle stopped or a device was disconnected.",
+            "A displayed security state does not independently establish that a vehicle is safe, that a siren sounded or that an incident was resolved. SOLAIR does not replace physical inspection, professional maintenance or the responsible operator's assessment."
+          ]
+        },
+        {
+          "title": "5. Assistance requests, messages and notifications",
+          "text": [
+            "Assistance requests and messages depend on network and backend availability. QUEUED / UNSENT means server receipt was not confirmed. Server received means the server accepted the request; it does not mean an operator has acknowledged it or that help has been dispatched. Check recorded request activity and use your established TODA contact arrangements when follow-up is needed.",
+            "SOLAIR is not an emergency-dispatch service. Do not rely on it as your sole channel for urgent assistance. An Emergency SOS selection does not establish that police, medical responders or other outside services have been contacted.",
+            "Reading a notification or selecting Mark all read changes the notification's read state. It does not acknowledge, resolve or close a security incident. In-app badge preferences are separate from browser push and SMS settings."
+          ]
+        },
+        {
+          "title": "6. Optional contact services and charges",
+          "text": [
+            "A saved mobile number, SMS consent or successful verification does not guarantee message delivery. Delivery also depends on the configured provider, account/device eligibility and network conditions. You can change optional SMS consent in Contact & SMS preferences; withdrawing it does not erase other operational records.",
+            "The current interface does not collect payments or operate an in-app billing system. Your network provider may charge for connectivity or messaging under its own agreement. Any separately offered paid service must have its charges disclosed and agreed before activation. The local demonstration environment disables paid SMS and cloud services."
+          ]
+        },
+        {
+          "title": "7. Photos, messages, exports and other content",
+          "text": [
+            "Submit only information and images you are entitled to use. Profile photos are optional. The current photo uploader accepts .png and readable .img files up to 3 MB. Photos may contain embedded metadata, so avoid uploading images with unnecessary private information.",
+            "You retain any rights you have in your submitted content. You permit the operator and its authorized service providers to store, display, transmit and otherwise process it only as needed to provide the service and for the purposes explained in the Privacy Policy. Uploading content does not grant permission for unrelated advertising or public publication.",
+            "Use reports and exports only within your authorized purpose. Export limits, quality labels and missing data still apply after download. You are responsible for safeguarding downloaded copies and sharing them only with authorized recipients. Exporting a file does not establish physical acceptance, calibration or successful service delivery."
+          ]
+        },
+        {
+          "title": "8. Availability and third-party services",
+          "text": [
+            "SOLAIR may be interrupted by maintenance, network outages, device faults or provider unavailability. We do not promise uninterrupted operation, continuous monitoring, exact GPS positioning, or delivery of every update or message. No production availability commitment is implied by access to a local preview or demonstration.",
+            "Maps and other configured integrations may rely on third parties. Their availability and applicable terms may affect those features. We remain responsible for obligations that applicable law places on us; using a service provider does not remove users' mandatory rights."
+          ]
+        },
+        {
+          "title": "9. Restricted access, deactivation and deletion",
+          "text": [
+            "Access may be restricted when authorization changes or when reasonably needed to address suspected misuse, a security concern, a legal requirement or a service-integrity issue. Where practicable, the responsible administrator will explain the restriction and how to request a review. Urgent protective action may occur before notice.",
+            "Deactivation prevents sign-in and removes current assignments while preserving relevant history. Reactivation does not automatically restore assignments. The current administrative deletion workflow permits permanent removal only for eligible inactive accounts without referenced operational history. Administrative evidence may remain after profile deletion.",
+            "These technical limits do not determine your legal privacy rights. Requests for access, correction, restriction, objection or erasure must be assessed separately under the Privacy Policy and applicable law."
+          ]
+        },
+        {
+          "title": "10. Demonstrations and research",
+          "text": [
+            "Demonstration readings are simulated and must not be represented as verified hardware measurements. Access to SOLAIR or acceptance of these terms does not by itself enroll you in a research study or authorize public disclosure of identifiable driver records.",
+            "Any identifiable-data research, recruitment or publication requires a separately explained purpose, an appropriate lawful basis and any required participant information or consent. An operational export is not blanket permission to publish personal data."
+          ]
+        },
+        {
+          "title": "11. Responsibilities and legal rights",
+          "text": [
+            "Each user is responsible for authorized, careful use of the service and for the accuracy of information they deliberately submit. The operator is responsible for its service and data-handling obligations under applicable law.",
+            "Service limitations described here do not exclude liability that cannot lawfully be excluded, excuse fraud or willful misconduct, or waive mandatory consumer, employment, privacy or other statutory rights. No unconfirmed insurance, performance guarantee, compensation cap or automatic indemnity is created by these terms."
+          ]
+        },
+        {
+          "title": "12. Changes and disputes",
+          "text": [
+            "The published version and effective date identify the terms in force. Material changes should be brought to affected users' attention through the app or another appropriate contact channel. A change does not retroactively authorize a new use of personal data; separate notice or consent will be obtained where required by law.",
+            "Raise a service concern with the operator through the contact identified above. These terms are governed by applicable Philippine law, without removing rights or remedies that another mandatory law provides. Unresolved matters may be raised with the competent regulator or court. Nothing here requires a user to waive a lawful complaint or accept an undisclosed arbitration procedure."
+          ]
+        },
+        {
+          "title": "13. Contact",
+          "text": [
+            "For account access and assignments, contact your TODA administrator. For service concerns, policy questions and privacy requests, use the service contact identified at the top of this page. Report a problem may be used to record an app issue, but it is not an emergency contact channel. Do not include passwords, verification codes or device tokens."
+          ]
+        }
+      ],
+      "review": [
+        "Identify the responsible operating organization / personal information controller.",
+        "Provide its official contact email, or confirm the approved in-app TODA contact route.",
+        "Set the publication/effective date after those details are confirmed."
+      ]
+    },
+    "Privacy Policy": {
+      "intro": "Complete policy copy for the current SOLAIR application. Publication details are awaiting confirmation; no effective agreement or privacy notice is claimed by this review copy.",
+      "sections": [
+        {
+          "title": "1. Who is responsible and what this notice covers",
+          "text": [
+            "The operator identified above is responsible for the personal information processed for the SOLAIR deployment it provides. This notice explains the information used in account access, assigned-vehicle monitoring, location history, energy and security records, TODA communication, assistance and reports.",
+            "Your operating TODA is shown in your workspace. Administrators and authorized TODA personnel handle records according to their assigned responsibilities. If a different organization is responsible for a particular deployment or research activity, its identity, contact and role must be explained before that processing begins.",
+            "This notice describes processing; reading it is not blanket consent. A separate choice or lawful basis is needed where the law requires one."
+          ]
+        },
+        {
+          "title": "2. Information we process",
+          "text": [
+            "Account and registration information: name, sign-in email, requested/current role, TODA membership, declared vehicle type, map display name, vehicle/operator assignments and account status.",
+            "Authentication and contact information: credentials used to authenticate, session records, mobile number, verification status and optional SMS preferences. Local authentication stores salted password hashes rather than plaintext passwords; configured hosted identity services manage their own authentication records.",
+            "Optional profile photo: the image you upload and the stored file format/update information. Images are stored as uploaded and may contain embedded metadata. You can replace or remove your photo without changing your role or assignments.",
+            "Vehicle and operational information: vehicle/device identifiers, GPS coordinates and timestamps, sensor age/quality, electrical and energy readings, security events, incident notes, assistance requests, message content and recorded handling/delivery information. These records can identify or relate to a driver through an assignment.",
+            "Administrative and technical information: sign-ins, account/assignment changes, problem-report details, access/session information and technical request metadata needed to operate and protect the service. A problem report can include your account, selected vehicle and data mode.",
+            "We receive information directly from you, from authorized administrators and operators, and from registered vehicle devices. Provide only information needed for the relevant task; avoid unnecessary identification documents, sensitive details or other people's photos."
+          ]
+        },
+        {
+          "title": "3. Why we use information and the basis for processing",
+          "text": [
+            "Account and assignment information enables authentication, access control and the vehicle/fleet service you request. Operational information supports authorized fleet monitoring, maintenance review, incident handling, assistance, communication and record exports.",
+            "Depending on the activity, processing may be necessary to provide an agreed service, comply with a legal obligation, or pursue a legitimate operational or security interest after considering the affected person's rights. Consent is used where applicable, including choices that require it. A service preference is not automatically the lawful basis for every location or fleet-processing purpose.",
+            "Optional photos and notification/SMS choices are used for their stated features. We do not treat acceptance of service terms as consent to unrelated marketing, new research purposes or public disclosure. If a new use requires a different basis or consent, it must be explained and obtained before that use."
+          ]
+        },
+        {
+          "title": "4. Vehicle location, recorded tracks and automated indicators",
+          "text": [
+            "SOLAIR uses reported vehicle-device GPS records to show available positions, tracks, possible stops and distance estimates. A registered vehicle device may continue reporting independently of whether the driver's browser is open. Closing the app, signing out or hiding a track does not necessarily stop the vehicle device from reporting.",
+            "Location and energy indicators are derived from available records. Stop detection considers nearby fixes and a selected stop duration; distance estimates sum valid GPS segments. Electrical graphs use recorded samples, require calibration for hardware values and leave gaps when usable data is missing.",
+            "These indicators support human review. The app does not independently verify an exact address or visit, establish driver fault, issue fines or make employment decisions. Administrative access and assignment changes require authorized human action. Concerns about a record or its interpretation can be raised with the privacy contact or responsible administrator."
+          ]
+        },
+        {
+          "title": "5. Who can access information",
+          "text": [
+            "Access depends on role, TODA membership and assignments. Drivers access their available assigned records; operators review and respond within their authorized fleet; administrators and permitted technical personnel have the access needed for their duties. Personal information must not be accessed or exported merely out of curiosity.",
+            "Profile-photo endpoints in the current app are restricted to the authenticated account. Settings and account menus display that account's own photo. We do not publish a public driver-photo directory through this feature.",
+            "Information may also be disclosed to authorized service providers under appropriate safeguards, to a person you authorize, or when required or permitted by law. A request from an authority does not by itself remove the need to assess its lawful scope. We do not sell personal information or use it for targeted advertising through SOLAIR."
+          ]
+        },
+        {
+          "title": "6. Maps and configured service providers",
+          "text": [
+            "The map uses OpenStreetMap tiles. Your browser requests tiles for the area being displayed; the tile service can receive your IP address, browser/request information and tile coordinates indicating the viewed area. This is separate from the app's vehicle-record database. The map provider's privacy policy applies to its own processing.",
+            "The current local preview uses local authentication and storage, with paid SMS and cloud services disabled. Hosted deployments may use configured services such as Supabase for authentication/database functions and Twilio for verification/SMS. Those services receive only the information needed for the feature when it is enabled.",
+            "Before materially different hosting, recipients or cross-border processing are introduced, affected users must be told the actual providers and relevant processing arrangements. The responsible operator must apply the safeguards required by applicable law; an integration option in the code does not mean that provider is currently receiving your data."
+          ]
+        },
+        {
+          "title": "7. Cookies, browser storage and your device",
+          "text": [
+            "A session cookie keeps you signed in; the current session period is normally eight hours unless ended earlier. Browser storage supports appearance choices, page restoration, notification read markers and unsent assistance requests. The installed/offline app may cache application files and static images.",
+            "Queued assistance can contain your request details and remain in that browser until successfully sent or the relevant storage is cleared. Logging out does not automatically erase every saved preference, read marker, cached file or unsent request from the device. Clearing browser data may remove unsent work and sign-in information.",
+            "The current app does not include advertising-tracker or third-party analytics features. External map requests are described separately above. Protect access to shared devices and downloaded files."
+          ]
+        },
+        {
+          "title": "8. Optional notifications, SMS and photos",
+          "text": [
+            "You can turn in-app badges on or off in Settings. Recorded activity remains available when badges are off. These controls do not enable browser push delivery.",
+            "SMS preferences and contact verification are separate. You may withdraw optional SMS consent in Contact & SMS preferences. This affects that choice going forward and does not erase other fleet records or invalidate otherwise lawful prior processing. Saving consent is not proof that a message was sent or delivered.",
+            "A profile photo is optional. Removing or replacing it updates the active profile-photo store; earlier copies may exist in protected backups or copies you previously downloaded. Requests concerning those copies should be included in a privacy request."
+          ]
+        },
+        {
+          "title": "9. Retention and account removal",
+          "text": [
+            "We retain information only for as long as needed for its stated purpose, an applicable legal obligation or the establishment, exercise or defense of a lawful claim. Relevant criteria include an active account or assignment, an unresolved incident/request, a documented operational or research need and an applicable retention requirement. Data should be reviewed and deleted, restricted or de-identified when those grounds no longer apply.",
+            "Different categories may require different periods. Location-bearing telemetry has a configurable cleanup facility, but a default configuration does not establish that a particular deletion schedule is running. Ask the privacy contact for the schedule applicable to your deployment, including messages, incidents, audit records and backups.",
+            "Deactivation preserves relevant history while blocking sign-in and removing current assignments. The app's permanent-deletion workflow is restricted where referenced operational history exists. Eligible profile deletion removes the profile and its active photo/contact records, while administrative evidence can retain a former account name or other necessary references.",
+            "The app's deletion controls do not replace a legal erasure, restriction or objection request. Those requests must be reviewed separately, including which records must be retained and why. Protected backup copies require appropriate handling; a live-record deletion does not promise immediate removal from every backup."
+          ]
+        },
+        {
+          "title": "10. Safeguards",
+          "text": [
+            "The application uses authenticated access, role/assignment checks, credential protection and restrictions intended to reduce unauthorized access. Operational deployments require an appropriately protected hosting environment and secure transport. A loopback local preview is not a statement that every production control or backup procedure has been independently verified.",
+            "No system is risk-free. The operator is responsible for proportionate organizational, physical and technical safeguards, provider oversight and incident handling. Affected people and the National Privacy Commission will be notified of a breach where applicable law requires notification."
+          ]
+        },
+        {
+          "title": "11. Your rights and how to make a request",
+          "text": [
+            "Subject to applicable law and its lawful limitations, you may request information about processing, access to your personal data, correction, objection, erasure or blocking, and portability where applicable. You may also seek available remedies for a privacy violation and complain to the National Privacy Commission.",
+            "Use the privacy contact identified at the top of this notice. State the right or concern involved and enough information to locate the relevant account or records. We may reasonably verify identity and authority before disclosing or changing information; do not send a password, verification code or device token.",
+            "Requests will be handled under applicable legal requirements without unnecessary delay. If a request cannot be granted in full, the response should explain the reason and available next steps. Operational CSV/JSON downloads are useful records but are not necessarily a complete response to a personal-data access or portability request."
+          ]
+        },
+        {
+          "title": "12. Research, children and changes to purpose",
+          "text": [
+            "Using SOLAIR does not automatically enroll you in research. Any identifiable-data research must have a separately explained purpose, appropriate lawful basis and necessary safeguards or participant information/consent. Operational exports must not be publicly posted with driver identities, photos or precise location histories without a valid basis.",
+            "The service is intended for authorized drivers and TODA personnel and is not designed as a children's service. Any permitted research or activity involving minors requires the additional information, permissions and safeguards applicable to that activity."
+          ]
+        },
+        {
+          "title": "13. Updates and contact",
+          "text": [
+            "The published version and effective date identify this notice. Material changes to purposes, recipients, providers or other important processing information must be communicated to affected users through an appropriate channel. Consent will be sought again where required; merely reading an updated notice does not supply consent for every new purpose.",
+            "Privacy contact: the privacy contact identified at the top of this page. For assignment questions, contact your TODA administrator. You may use Report a problem to flag a privacy concern for routing, but it is not an emergency channel and does not limit your right to approach the National Privacy Commission."
+          ]
+        }
+      ],
+      "review": [
+        "Identify the responsible operating organization / personal information controller.",
+        "Provide its official contact email, or confirm the approved in-app TODA contact route.",
+        "Set the publication/effective date after those details are confirmed."
+      ]
+    }
+  }
+}

@@ -1,7 +1,9 @@
 import { DatabaseSync } from "node:sqlite";
 import { Pool, type PoolClient } from "pg";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync } from "node:fs";
+import {coreMigrations,supabaseMigrations,readMigration} from "./migrations";
 export class Store {
+  private sqliteTransactions:Promise<void>=Promise.resolve();
   private sqlite?: DatabaseSync;
   private pg?: Pool;
   private client?: PoolClient;
@@ -56,30 +58,28 @@ export class Store {
         client.release();
       }
     }
-    this.sqlite!.exec("BEGIN IMMEDIATE");
+    const previous=this.sqliteTransactions;
+    let release!:()=>void;
+    this.sqliteTransactions=new Promise<void>(resolve=>{release=resolve;});
+    await previous;
+    let begun=false;
     try {
+      this.sqlite!.exec("BEGIN IMMEDIATE");begun=true;
       const r = await fn(this);
       this.sqlite!.exec("COMMIT");
       return r;
     } catch (e) {
-      this.sqlite!.exec("ROLLBACK");
+      if(begun)this.sqlite!.exec("ROLLBACK");
       throw e;
-    }
+    } finally {release();}
   }
   async migrate() {
-    const sql = readFileSync(
-      new URL("../backend/migrations/001_core.sql", import.meta.url),
-      "utf8",
-    );
-    if (this.pg) await this.pg.query(sql);
-    else this.sqlite!.exec(sql);
-    const cpe = readFileSync(new URL("../backend/migrations/003_cpe.sql", import.meta.url), "utf8");
-    if (this.pg) {
-      await this.pg.query(cpe);
-      await this.pg.query("ALTER TABLE cpe_samples ENABLE ROW LEVEL SECURITY");
-    } else this.sqlite!.exec(cpe);
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/002_supabase.sql',import.meta.url),'utf8'));
-    if(this.pg && process.env.SOLAIR_AUTH_PROVIDER==='supabase') await this.pg.query(readFileSync(new URL('../backend/migrations/004_cpe_supabase.sql',import.meta.url),'utf8'));
+    for(const name of coreMigrations){
+      const sql=readMigration(name);
+      if(this.pg)await this.pg.query(sql);else this.sqlite!.exec(sql);
+    }
+    if(this.pg)await this.pg.query('ALTER TABLE cpe_samples ENABLE ROW LEVEL SECURITY; ALTER TABLE battery_references ENABLE ROW LEVEL SECURITY; ALTER TABLE research_records ENABLE ROW LEVEL SECURITY; ALTER TABLE research_forecast_outcomes ENABLE ROW LEVEL SECURITY');
+    if(this.pg&&process.env.SOLAIR_AUTH_PROVIDER==='supabase')for(const name of supabaseMigrations)await this.pg.query(readMigration(name));
   }
   async close() {
     if (this.pg) await this.pg.end();

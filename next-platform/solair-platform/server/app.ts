@@ -9,29 +9,42 @@ import rateLimit from "express-rate-limit";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { Store } from "./db";
+import {databaseReady} from "./readiness";
+import {profilePhotoRoutes} from './profile-photos';
 import { hash, token, passwordHash, verifyPassword, type User } from "./auth";
 import type {IdentityProvider} from './identity';
+import { GpsTracking } from './gps-tracking';
+import {CpeControls,CpeControlError} from './cpe-control';
+import type { LteDestination } from './lte-destination';
+import { registerResearch } from './research';
+import {AccountActionError,withAccountAdministration,requireActiveAccount} from './account-lifecycle';
+import { notifications } from './notifications';
+import { operationalRoutes } from './operational-routes';
+import { operational, recordIncident } from './operations';
 import {
   telemetrySchema,
-  power,
+  sourcePower,
   integrateWh,
   freshness,
 } from "../packages/telemetry-contract";
 type AuthRequest = Request & { user: User };
 const now = () => new Date().toISOString();
-export function createApp(db: Store, production = false, identity: IdentityProvider | null = null) {
+export function createApp(db: Store, production = false, identity: IdentityProvider | null = null, options: { lteDestination?: () => Promise<LteDestination> } = {}) {
   const app = express();
+  const gpsTracking = new GpsTracking(db);
+  const controls = new CpeControls(db);
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
   app.use(
     helmet({
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
       contentSecurityPolicy: production
         ? {
             directives: {
               defaultSrc: ["'self'"],
               scriptSrc: ["'self'"],
               styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org"],
+              imgSrc: ["'self'", "data:", "https://tile.openstreetmap.org"],
               connectSrc: ["'self'"],
               workerSrc: ["'self'"],
             },
@@ -39,6 +52,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         : false,
     }),
   );
+  app.use("/api/profile-photo", express.json({ limit: "4mb" }));
   app.use("/api/vehicle-image", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "96kb" }));
   app.use(cookieParser());
@@ -56,13 +70,15 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     next();
   });
   const clients = new Map<Response, User>();
+  const streamSessions = new Map<Response, string>();
+  const revokeAccountStreams=(id:string)=>{for(const [stream,user] of clients)if(user.id===id){clients.delete(stream);streamSessions.delete(stream);stream.end();}};
   const notify = (org: string) => {
     for (const [res, u] of clients)
       if (u.org_id === org) res.write("event: update\ndata: {}\n\n");
   };
   const auth = async (req: Request, res: Response, next: NextFunction) => {
     const [u] = await db.query(
-      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?",
+      "SELECT p.id,p.org_id,p.email,p.name,p.role,p.notifications,o.name AS organization_name FROM sessions s JOIN profiles p ON p.id=s.user_id JOIN organizations o ON o.id=p.org_id WHERE s.token_hash=? AND s.expires_at>? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=p.id AND (a.active=0 OR a.deletion_pending=1))",
       [hash(req.cookies.session || ""), now()],
     );
     if (!u) return res.status(401).json({ error: "Sign in required" });
@@ -79,7 +95,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     req.query.mode === "demo" ? "demo" : "hardware";
   const vehicle = async (u: User, id: string) => {
     const [v] = await db.query(
-      "SELECT v.*,a.driver_id,p.name AS driver_name,d.id AS device_id FROM vehicles v LEFT JOIN assignments a ON a.vehicle_id=v.id LEFT JOIN profiles p ON p.id=a.driver_id LEFT JOIN devices d ON d.vehicle_id=v.id WHERE v.id=? AND v.org_id=?",
+      "SELECT v.*,a.driver_id,p.name AS driver_name,r.display_name AS driver_display_name,d.id AS device_id FROM vehicles v LEFT JOIN assignments a ON a.vehicle_id=v.id LEFT JOIN profiles p ON p.id=a.driver_id LEFT JOIN profile_registration r ON r.user_id=p.id LEFT JOIN devices d ON d.vehicle_id=v.id WHERE v.id=? AND v.org_id=?",
       [id, u.org_id],
     );
     return v && (u.role !== "driver" || v.driver_id === u.id) ? v : null;
@@ -93,21 +109,30 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       target,
       now(),
     ]);
-  app.get("/api/health", (_req, res) =>
-    res.json({
-      status: "ok",
+  app.use('/api', (req,res,next)=>{
+    if(operational() && req.query.mode==='demo')return res.status(403).json({error:'Demonstration data is unavailable in the operational environment'});
+    next();
+  });
+  operationalRoutes(app,db,auth,identity,notify,revokeAccountStreams);
+  app.get("/api/health", async (_req, res) => {
+    const ready = await databaseReady(db);
+    res.status(ready ? 200 : 503).json({
+      status: ready ? "ok" : "unavailable",
+      database_status: ready ? "reachable" : "unavailable",
+      server_time: now(),
       environment: production
         ? process.env.DATABASE_URL
           ? "production PostgreSQL"
           : "local production preview"
         : "local development",
+      operational: operational(),
       database: process.env.DATABASE_URL ? "PostgreSQL" : "SQLite",
       push_configured: false,
       auth_provider:identity?.name||'local',
       realtime_provider:process.env.SOLAIR_REALTIME_PROVIDER||'local',
       realtime_status:app.locals.realtimeStatus||'local',
-    }),
-  );
+    });
+  });
   app.post(
     "/api/login",
     rateLimit({ windowMs: 60000, limit: 10 }),
@@ -115,14 +140,17 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const b = z
         .object({ email: z.email(), password: z.string().max(200) })
         .parse(req.body);
-      const [u] = await db.query("SELECT * FROM profiles WHERE email=?", [
-        b.email.toLowerCase(),
-      ]);
-      const identityId = u ? identity ? await identity.authenticate(b.email.toLowerCase(),b.password) : verifyPassword(b.password,u.password_hash) ? u.id : null : null;
+      const provedId=identity?await identity.authenticate(b.email.toLowerCase(),b.password):null;
+      const [u] = identity?await db.query('SELECT * FROM profiles WHERE id=?',[provedId||'']):await db.query("SELECT * FROM profiles WHERE email=?", [b.email.toLowerCase()]);
+      const identityId = identity?provedId:u&&verifyPassword(b.password,u.password_hash)?u.id:null;
       if (!u || identityId !== u.id)
         return res
           .status(401)
           .json({ error: "Email or password is incorrect" });
+      if(operational()&&(!identity?.emailVerified||!await identity.emailVerified(u.id)))return res.status(403).json({error:'Verify email ownership before operational access'});
+      const [inactive]=await db.query('SELECT user_id FROM account_states WHERE user_id=? AND (active=0 OR deletion_pending=1)',[u.id]);
+      if(inactive)return res.status(403).json({error:'This account is deactivated or pending deletion. Contact your administrator.'});
+      if(identity&&u.email!==b.email.toLowerCase())await db.run('UPDATE profiles SET email=? WHERE id=?',[b.email.toLowerCase(),u.id]);
       const t = token();
       await db.run("INSERT INTO sessions VALUES (?,?,?)", [
         hash(t),
@@ -140,12 +168,27 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       res.json({ ok: true });
     },
   );
-  app.post("/api/logout", auth, async (req, res) => {
+  app.post("/api/logout", async (req, res) => {
+    const sessionHash = hash(req.cookies.session || "");
     await db.run("DELETE FROM sessions WHERE token_hash=?", [
-      hash(req.cookies.session),
+      sessionHash,
     ]);
-    res.clearCookie("session");
+    for (const [stream, key] of streamSessions) if (key === sessionHash) {
+      streamSessions.delete(stream); clients.delete(stream); stream.end();
+    }
+    res.clearCookie("session", { path: "/", httpOnly: true, sameSite: "strict", secure: production });
     res.json({ ok: true });
+  });
+  app.post("/api/problem-reports", auth, rateLimit({ windowMs: 60000, limit: 10 }), async (req, res) => {
+    const u = (req as AuthRequest).user;
+    const report = z.object({
+      summary: z.string().trim().min(5).max(120), details: z.string().trim().min(10).max(4000),
+      page: z.string().max(100), mode: z.enum(["demo", "hardware"]), vehicle_id: z.string().max(40).nullable(),
+    }).strict().parse(req.body);
+    if (report.vehicle_id && !(await vehicle(u, report.vehicle_id))) return res.status(403).json({ error: "Vehicle access denied" });
+    const id = randomUUID();
+    await audit(u, "problem_report", JSON.stringify({ id, ...report }));
+    res.status(201).json({ id, status: "received" });
   });
   app.post('/api/password/reset-request',rateLimit({windowMs:60000,limit:10}),async(req,res)=>{
     if(!identity?.requestRecovery)return res.status(503).json({error:'Password recovery requires configured Supabase authentication'});
@@ -158,20 +201,42 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     const id=await identity.recoverPassword(b.access_token,b.refresh_token,b.password);
     await db.run('DELETE FROM sessions WHERE user_id=?',[id]);res.json({ok:true});
   });
-  app.get("/api/me", auth, (req, res) => res.json((req as AuthRequest).user));
+  app.get("/api/me", auth, async (req, res) => {
+    const u=(req as AuthRequest).user;
+    const pending=await db.query("SELECT id FROM audit_logs WHERE user_id=? AND target=? AND action='notification_intro_pending' AND NOT EXISTS (SELECT 1 FROM audit_logs done WHERE done.user_id=? AND done.target=? AND done.action='notification_intro_completed') LIMIT 1",[u.id,u.id,u.id,u.id]);
+    const [photo]=await db.query('SELECT updated_at FROM profile_photos WHERE user_id=?',[u.id]);
+    res.json({...u,notification_intro_pending:pending.length>0,avatar_url:photo?'/api/profile-photo?v='+encodeURIComponent(photo.updated_at):null});
+  });
+  profilePhotoRoutes(app,db,auth);
+  app.post("/api/notifications/onboarding",auth,async(req,res)=>{
+    const u=(req as AuthRequest).user;
+    const choice=z.object({enable:z.boolean()}).strict().parse(req.body);
+    await db.transaction(async tx=>{
+      const pending=await tx.query("SELECT id FROM audit_logs WHERE user_id=? AND target=? AND action='notification_intro_pending' AND NOT EXISTS (SELECT 1 FROM audit_logs done WHERE done.user_id=? AND done.target=? AND done.action='notification_intro_completed') LIMIT 1",[u.id,u.id,u.id,u.id]);
+      if(!pending.length)return;
+      if(choice.enable)await tx.run('UPDATE profiles SET notifications=1 WHERE id=?',[u.id]);
+      await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),u.org_id,u.id,'notification_intro_completed',u.id,now()]);
+    });
+    res.json({ok:true});
+  });
   app.get("/api/events", auth, (req, res) => {
     const u = (req as AuthRequest).user;
     res.set({ "Content-Type": "text/event-stream", Connection: "keep-alive" });
     res.flushHeaders();
     clients.set(res, u);
+    streamSessions.set(res, hash(req.cookies.session || ""));
     res.write("event: ready\ndata: {}\n\n");
     const heartbeat = setInterval(() => res.write(": heartbeat\n\n"), 20000);
     const expiry = setTimeout(() => res.end(), 8 * 3600000);
     req.on("close", () => {
       clients.delete(res);
+      streamSessions.delete(res);
       clearInterval(heartbeat);
       clearTimeout(expiry);
     });
+  });
+  app.get("/api/notifications", auth, async (req, res) => {
+    res.json(await notifications(db, (req as AuthRequest).user, mode(req)));
   });
   app.get("/api/fleet", auth, async (req, res) => {
     const u = (req as AuthRequest).user;
@@ -184,13 +249,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const v = await vehicle(u, id);
       if (!v) continue;
       const [t] = await db.query(
-        "SELECT * FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) ORDER BY received_at DESC LIMIT 1",
+        "SELECT * FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) AND id NOT IN (SELECT telemetry_id FROM archived_frames) ORDER BY received_at DESC LIMIT 1",
         [v.device_id, mode(req)],
       );
-      const [gps] = await db.query(
-        "SELECT * FROM gps_records WHERE device_id=? AND mode=? ORDER BY measured_at DESC LIMIT 1",
-        [v.device_id, mode(req)],
-      );
+      const gps = await gpsTracking.latest(v.device_id, mode(req));
       const [e] = await db.query(
         "SELECT SUM(CASE WHEN source='solar' THEN increment_wh ELSE NULL END) AS solar_wh,SUM(CASE WHEN source='wind' THEN increment_wh ELSE NULL END) AS wind_wh FROM energy_measurements WHERE device_id=? AND mode=? AND power_w IS NOT NULL",
         [v.device_id, mode(req)],
@@ -205,6 +267,9 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
             }
           : null,
         status: freshness(t?.received_at || null),
+        measurement_time_quality: t ? (JSON.parse(t.payload).device_timestamp ? 'device_utc' : 'receipt_only') : 'unavailable',
+        measurement_age_ms: t && JSON.parse(t.payload).device_timestamp ? Math.max(0,Date.now()-Date.parse(JSON.parse(t.payload).device_timestamp)) : null,
+        gps_age_ms: gps ? Math.max(0,Date.now()-Date.parse(gps.measured_at)) : null,
         gps: gps || null,
         solar_wh: e.solar_wh,
         wind_wh: e.wind_wh,
@@ -249,6 +314,13 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
     const v=await vehicle((req as AuthRequest).user,String(req.params.id));
     if(!v)return res.status(403).json({error:'Vehicle access denied'});
     res.json(await db.query("SELECT action,created_at FROM audit_logs WHERE org_id=? AND target=? AND action LIKE 'device_ingest_rejected:%' ORDER BY created_at DESC LIMIT 10",[(req as AuthRequest).user.org_id,v.device_id]));
+  });
+  app.get("/api/cpe-uplink/:id",auth,role('engineer','admin'),async(req,res)=>{
+    const v=await vehicle((req as AuthRequest).user,String(req.params.id));
+    if(!v)return res.status(403).json({error:'Vehicle access denied'});
+    if(!options.lteDestination)return res.status(503).json({error:'LTE destination is not configured'});
+    try {res.json(await options.lteDestination());}
+    catch {res.status(503).json({error:'LTE destination is unavailable; repair the backend address before syncing the device'});}
   });
   app.get("/api/alerts", auth, async (req, res) => {
     const u = (req as AuthRequest).user;
@@ -331,11 +403,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         now(),
       ],
     );
+    const [saved] = await db.query("SELECT org_id,vehicle_id,driver_id,mode,type,notes,status,created_at FROM help_requests WHERE id=?", [b.id]);
+    if (!saved || saved.org_id !== u.org_id || saved.driver_id !== u.id || saved.vehicle_id !== b.vehicle_id || saved.mode !== mode(req) || saved.type !== b.type || saved.notes !== b.notes)
+      return res.status(409).json({error: "This request identifier is already used for a different request"});
     await audit(u, "help_submitted", b.id);
     notify(u.org_id);
     res
       .status(201)
-      .json({ id: b.id, status: "pending", server_received_at: now() });
+      .json({ id: b.id, status: saved.status, server_received_at: saved.created_at });
   });
   app.patch(
     "/api/help/:id",
@@ -431,29 +506,34 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
   });
   app.get("/api/users", auth, role("operator", "admin"), async (req, res) =>
     res.json(
-      await db.query("SELECT id,name,email,role FROM profiles WHERE org_id=?", [
+      await db.query("SELECT id,name,email,role FROM profiles WHERE org_id=? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=profiles.id AND (a.active=0 OR a.deletion_pending=1))", [
         (req as AuthRequest).user.org_id,
       ]),
     ),
   );
-  app.post("/api/assign", auth, role("operator", "admin"), async (req, res) => {
-    const u = (req as AuthRequest).user;
-    const b = z
-      .object({ vehicle_id: z.string(), driver_id: z.string() })
-      .parse(req.body);
-    const [d] = await db.query(
-      "SELECT id FROM profiles WHERE id=? AND org_id=? AND role='driver'",
-      [b.driver_id, u.org_id],
-    );
-    if (!d || !(await vehicle(u, b.vehicle_id)))
-      return res.status(403).json({ error: "Invalid organization assignment" });
-    await db.run(
-      "INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id",
-      [b.vehicle_id, b.driver_id],
-    );
-    await audit(u, "vehicle_assigned", b.vehicle_id);
-    notify(u.org_id);
-    res.json({ ok: true });
+  app.post("/api/assign",auth,role("operator", "admin"),async(req,res)=>{
+    const u=(req as AuthRequest).user;
+    const b=z.object({vehicle_id:z.string(),driver_id:z.string(),operator_id:z.string().optional()}).parse(req.body);
+    const [d]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role='driver'",[b.driver_id,u.org_id]);
+    if(!d||!await vehicle(u,b.vehicle_id))return res.status(403).json({error:'Invalid organization assignment'});
+    if(u.role!=="admin"&&b.operator_id)return res.status(403).json({error:"Only administrators may change the responsible operator"});
+    let operator:any=null;
+    if(b.operator_id){
+      [operator]=await db.query("SELECT id,name FROM profiles WHERE id=? AND org_id=? AND role IN ('operator','admin')",[b.operator_id,u.org_id]);
+      if(!operator)return res.status(403).json({error:'Choose an authorized operator in this TODA'});
+    }
+    await withAccountAdministration(db,async tx=>{
+      const actor=await requireActiveAccount(tx,u.id),driver=await requireActiveAccount(tx,b.driver_id);
+      if(!['operator','admin'].includes(actor.role)||actor.org_id!==u.org_id||driver.role!=='driver'||driver.org_id!==u.org_id)throw new AccountActionError(409,'Account access changed. Refresh before assigning the vehicle.');
+      if(operator){const current=await requireActiveAccount(tx,operator.id);if(!['operator','admin'].includes(current.role)||current.org_id!==u.org_id)throw new AccountActionError(409,'Operator access changed. Refresh before assigning the vehicle.');}
+      await tx.run('INSERT INTO assignments VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET driver_id=excluded.driver_id',[b.vehicle_id,b.driver_id]);
+      if(operator){
+        await tx.run('INSERT INTO vehicle_operators VALUES (?,?) ON CONFLICT(vehicle_id) DO UPDATE SET operator_id=excluded.operator_id',[b.vehicle_id,operator.id]);
+        await tx.run('UPDATE device_operation SET commissioned=0 WHERE device_id IN (SELECT id FROM devices WHERE vehicle_id=?) AND (operator_id IS NULL OR operator_id<>?)',[b.vehicle_id,operator.id]);
+      }
+      const id=randomUUID();await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[id,u.org_id,u.id,'vehicle_assigned',b.vehicle_id,now()]);
+      await tx.run('INSERT INTO activity_details VALUES (?,?)',[id,`Assigned ${d.name} to ${b.vehicle_id}${operator?'; responsible operator: '+operator.name:'. Operator assignment unchanged.'}`]);
+    });notify(u.org_id);res.json({ok:true});
   });
   app.post("/api/invite", auth, role("operator", "admin"), async (req, res) => {
     const u = (req as AuthRequest).user;
@@ -500,8 +580,10 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         const registered=await db.transaction(async tx=>{
           const [i]=await tx.query('UPDATE invitations SET used=1 WHERE token_hash=? AND used=0 AND expires_at>? RETURNING *',[hash(b.token),now()]);
           if(!i)return false;
-          createdId=identity?await identity.createUser(i.email,b.password):randomUUID();
+          if(operational()&&!identity?.registerApplicant)throw new Error('Operational signup requires verified email registration');
+          createdId=identity?(operational()?await identity.registerApplicant!(i.email,b.password):await identity.createUser(i.email,b.password)):randomUUID();
           await tx.run('INSERT INTO profiles(id,org_id,email,name,role,password_hash) VALUES (?,?,?,?,?,?)',[createdId,i.org_id,i.email,b.name,i.role,identity?'supabase-managed':passwordHash(b.password)]);
+          await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),i.org_id,createdId,'account_registered',createdId,now()]);
           return true;
         });
         if(!registered)return res.status(400).json({error:'Invitation invalid or expired'});
@@ -527,12 +609,14 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         .object({
           id: z.string().regex(/^[A-Za-z0-9-]{1,40}$/),
           name: z.string().min(1).max(80),
+          brand:z.enum(["BEMAC","NWOW"]).default("BEMAC"),
         })
         .parse(req.body);
-      await db.run("INSERT INTO vehicles(id,org_id,name) VALUES (?,?,?)", [
+      await db.run("INSERT INTO vehicles(id,org_id,name,model) VALUES (?,?,?,?)", [
         b.id,
         u.org_id,
         b.name,
+        b.brand==='NWOW'?'NWOW':'BEMAC 68VM Passenger',
       ]);
       await audit(u, "vehicle_created", b.id);
       notify(u.org_id);
@@ -558,18 +642,22 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       if (
         !p ||
         u.id === p.id ||
+        p.role === 'admin' ||
         (u.role === "operator" && (p.role !== "driver" || b.role !== "driver"))
       )
         return res
           .status(403)
           .json({ error: "Account update is not permitted" });
-      await db.run("UPDATE profiles SET name=?,role=? WHERE id=?", [
-        b.name,
-        b.role,
-        p.id,
-      ]);
-      await db.run("DELETE FROM sessions WHERE user_id=?", [p.id]);
-      await audit(u, "account_updated", p.id);
+      await withAccountAdministration(db,async tx=>{
+        const actor=await requireActiveAccount(tx,u.id),person=await requireActiveAccount(tx,p.id);
+        if(!['operator','admin'].includes(actor.role)||actor.org_id!==u.org_id||person.role==='admin'||person.org_id!==u.org_id||(actor.role==='operator'&&(person.role!=='driver'||b.role!=='driver')))throw new AccountActionError(403,'Account update is not permitted');
+        await tx.run('UPDATE profiles SET name=?,role=? WHERE id=?',[b.name,b.role,p.id]);
+        if(b.role!=='driver')await tx.run('DELETE FROM assignments WHERE driver_id=?',[p.id]);
+        if(!['operator','admin'].includes(b.role)){await tx.run('DELETE FROM vehicle_operators WHERE operator_id=?',[p.id]);await tx.run('UPDATE device_operation SET commissioned=0,operator_id=NULL WHERE operator_id=?',[p.id]);}
+        await tx.run('DELETE FROM sessions WHERE user_id=?',[p.id]);
+        await tx.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),u.org_id,u.id,'account_updated',p.id,now()]);
+      });
+      revokeAccountStreams(p.id);notify(u.org_id);
       res.json({ ok: true });
     },
   );
@@ -709,6 +797,8 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       const b = z
         .object({
           session_id: z.uuid(),
+          device_id: z.string().optional(),
+          mode: z.enum(["hardware","demo"]).optional(),
           test: z.string().min(1).max(100),
           result: z.enum(["PASS", "FAIL", "BLOCKED", "NOT TESTED"]),
           measurements: z.string().max(2000),
@@ -721,7 +811,9 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         "SELECT * FROM bench_sessions WHERE id=? AND engineer_id=?",
         [b.session_id, u.id],
       );
-      if (!s) return res.status(403).json({ error: "Session access denied" });
+      if(operational()&&(!b.device_id||!b.mode))return res.status(400).json({error:'Expected device and source are required in operational evidence'});
+      const [sessionDevice]=s?await db.query('SELECT vehicle_id FROM devices WHERE id=?',[s.device_id]):[];
+      if (!s || !sessionDevice || !await vehicle(u,sessionDevice.vehicle_id) || s.closed_at || (b.device_id && b.device_id!==s.device_id) || (b.mode && b.mode!==s.mode)) return res.status(403).json({ error: "Session/device/source context mismatch" });
       await db.run("INSERT INTO bench_results VALUES (?,?,?,?,?,?,?,?,?)", [
         randomUUID(),
         b.session_id,
@@ -806,11 +898,29 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
       );
     },
   );
+  app.get('/api/cpe-control/:id',auth,role('engineer','admin'),async(req,res)=>{
+    const v=await vehicle((req as AuthRequest).user,z.string().parse(req.params.id));
+    if(!v?.device_id)return res.status(403).json({error:'Device access denied'});
+    if(mode(req)!=='hardware')return res.status(400).json({error:'Select REAL HARDWARE'});
+    res.json(await controls.status(v.device_id));
+  });
+  app.post('/api/cpe-control/:id',auth,role('engineer','admin'),rateLimit({windowMs:60000,limit:20}),async(req,res)=>{
+    const u=(req as AuthRequest).user,v=await vehicle(u,z.string().parse(req.params.id));
+    if(!v?.device_id)return res.status(403).json({error:'Device access denied'});
+    if(mode(req)!=='hardware')return res.status(400).json({error:'Select REAL HARDWARE'});
+    const b=z.object({command:z.enum(['arm','disarm','siren_test']),request_id:z.string().uuid()}).strict().parse(req.body);
+    const result=await controls.enqueue(v.device_id,u.id,b.command,b.request_id);
+    await audit(u,'remote_'+b.command,v.device_id);notify(u.org_id);
+    res.status(202).json({...result,message:'Queued; wait for device acceptance and observed output'});
+  });
   let ingestChain = Promise.resolve();
   app.post(
     "/api/ingest",
     rateLimit({ windowMs: 60000, limit: 300 }),
     async (req, res) => {
+      // Reachability probes must receive authentication refusal before schema errors.
+      if (req.headers["x-bench-transport"] !== "usb" && !req.headers.authorization?.startsWith("Bearer "))
+        return res.status(401).json({ error: "Device authentication failed" });
       const parsed = telemetrySchema.safeParse(req.body);
       if (!parsed.success) {
         // Record only authenticated device errors, never raw payloads/tokens or spoofed device identities.
@@ -837,7 +947,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         return res.status(401).json({ error: "Device authentication failed" });
       if (req.headers["x-bench-transport"] === "usb") {
         const [u] = await db.query(
-          "SELECT p.* FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?",
+          "SELECT p.* FROM sessions s JOIN profiles p ON p.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND NOT EXISTS(SELECT 1 FROM account_states a WHERE a.user_id=p.id AND (a.active=0 OR a.deletion_pending=1))",
           [hash(req.cookies.session || ""), now()],
         );
         if (
@@ -864,32 +974,39 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
           const prior=JSON.parse(duplicate[0].payload);
           // USB and Wi-Fi may forward the same acquisition frame; transport alone may differ.
           if(JSON.stringify({...telemetrySchema.parse(prior),transport:t.transport})!==JSON.stringify(t)) {
-            res.status(409).json({error:"Conflicting payload for stored identity"}); return;
+            await db.run('INSERT INTO audit_logs VALUES (?,?,?,?,?,?)',[randomUUID(),d.org_id,null,'device_ingest_rejected: conflicting payload for stored identity',t.device_id,now()]);
+            res.status(409).json({error:"Conflicting payload for stored identity",code:"payload_identity_conflict"}); return;
           }
-          res.json({ accepted: true, duplicate: true });
+          res.json({ remote_command:await controls.exchange(t), accepted: true, duplicate: true, ack:{persisted:true,device_id:t.device_id,boot_id:t.boot_id,sequence:t.sequence} });
           return;
         }
         const [last] = await db.query(
           "SELECT sequence FROM telemetry WHERE device_id=? AND mode=? AND boot_id=? ORDER BY sequence DESC LIMIT 1",
           [t.device_id, t.source_type, t.boot_id],
         );
-        if (last && t.sequence < last.sequence && !t.cpe?.historical) {
-          res.status(409).json({ error: "Replayed sequence rejected" });
+        // Current CPE replay requires explicit historical provenance. Legacy v1
+        // recovered events are archived and never promoted to live samples.
+        const legacyRecoveredEvent = t.schema_version===1 && !!t.event_id && !!t.event_type;
+        if (last && t.sequence < last.sequence && !t.cpe?.historical && !legacyRecoveredEvent) {
+          await db.run("INSERT INTO audit_logs VALUES (?,?,?,?,?,?)",[randomUUID(),d.org_id,null,"device_ingest_rejected: stale sequence",t.device_id,now()]);
+          res.status(409).json({ error: "Replayed sequence rejected", code:"stale_sequence" });
           return;
         }
         if (
-          t.device_timestamp &&
-          Date.parse(t.device_timestamp) > Date.now() + 60000
+          (t.device_timestamp && Date.parse(t.device_timestamp) > Date.now() + 60000) ||
+          (t.event_timestamp && Date.parse(t.event_timestamp) > Date.now() + 60000)
         ) {
-          res.status(400).json({ error: "Future timestamp rejected" });
+          await db.run("INSERT INTO audit_logs VALUES (?,?,?,?,?,?)",[randomUUID(),d.org_id,null,"device_ingest_rejected: future timestamp",t.device_id,now()]);
+          res.status(400).json({ error: "Future timestamp rejected", code:"future_timestamp", server_time:now() });
           return;
         }
+        const historical=!!t.cpe?.historical || !!(last && t.sequence<last.sequence && legacyRecoveredEvent);
         const received = now(),
           at = t.device_timestamp || received,
           id = randomUUID();
         await db.transaction(async (tx) => {
           const [prev] = await tx.query(
-            "SELECT measured_at,payload FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) ORDER BY received_at DESC LIMIT 1",
+            "SELECT measured_at,payload FROM telemetry WHERE device_id=? AND mode=? AND id NOT IN (SELECT telemetry_id FROM cpe_samples WHERE historical=1) AND id NOT IN (SELECT telemetry_id FROM archived_frames) ORDER BY received_at DESC LIMIT 1",
             [t.device_id, t.source_type],
           );
           await tx.run("INSERT INTO telemetry VALUES (?,?,?,?,?,?,?,?)", [
@@ -902,22 +1019,20 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
             at,
             JSON.stringify(t),
           ]);
+          if(historical) await tx.run('INSERT INTO archived_frames VALUES (?,?)',[id,'Delayed/recovered event; not a live sample']);
           if(t.cpe) {
             const c=t.cpe;
             await tx.run("INSERT INTO cpe_samples VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",[id,t.device_id,t.source_type,c.load_mode,received,t.device_timestamp,c.pzem.voltage_v,c.pzem.current_a,c.pzem.power_w,c.pzem.energy_wh,c.acs.current_a,c.lte.registered?1:0,c.alarm.commanded?1:0,JSON.stringify(c),c.historical?1:0]);
           }
           for (const source of ["solar", "wind"] as const) {
-            if(t.cpe?.historical)continue;
-            const p = power(t[`${source}_voltage_v`], t[`${source}_current_a`]);
+            if(historical)continue;
+            const p = sourcePower(t, source);
             const pt = prev ? JSON.parse(prev.payload) : null;
             const wh = integrateWh(
-              pt
+              pt && pt.boot_id === t.boot_id
                 ? {
                     at: prev.measured_at,
-                    power: power(
-                      pt[`${source}_voltage_v`],
-                      pt[`${source}_current_a`],
-                    ),
+                    power: sourcePower(pt, source),
                   }
                 : null,
               { at, power: p },
@@ -927,7 +1042,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
               [randomUUID(), id, t.device_id, t.source_type, source, p, wh, at],
             );
           }
-          if (t.gps_fix && !t.cpe?.historical)
+          if (t.gps_fix && !historical)
             await tx.run("INSERT INTO gps_records VALUES (?,?,?,?,?,?,?)", [
               randomUUID(),
               id,
@@ -945,13 +1060,13 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
                 t.device_id,
                 t.source_type,
                 t.event_type,
-                at,
+                t.event_timestamp!==undefined?(t.event_timestamp||received):at,
                 null,
               ],
             );
           const previousHealth = prev ? JSON.parse(prev.payload).sensor_health : {};
           for (const [sensor, status] of Object.entries(t.sensor_health)) {
-            if(t.cpe?.historical)continue;
+            if(historical)continue;
             if (status !== "fault" || previousHealth[sensor] === "fault") continue;
             await tx.run("INSERT INTO security_events VALUES (?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING", [
               `${t.device_id}:${t.boot_id}:${t.sequence}:fault:${sensor}`,
@@ -960,6 +1075,7 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
               at, null,
             ]);
           }
+          await recordIncident(tx,t,d,received,req.headers['x-bench-transport']==='usb');
           await tx.run("UPDATE devices SET firmware_version=? WHERE id=?", [
             t.firmware_version,
             t.device_id,
@@ -968,19 +1084,26 @@ export function createApp(db: Store, production = false, identity: IdentityProvi
         notify(d.org_id);
         res
           .status(201)
-          .json({ accepted: true, id, backend_received_at: received });
+          .json({ remote_command:await controls.exchange(t), accepted: true, id, backend_received_at: received, ack:{persisted:true,device_id:t.device_id,boot_id:t.boot_id,sequence:t.sequence} });
       };
       const job = ingestChain.then(execute);
       ingestChain = job.catch(() => {});
       await job;
     },
   );
+  registerResearch(app,db,{auth,write:role('engineer','admin'),vehicle,notify,audit});
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "Endpoint not found" }),
   );
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    if(err instanceof CpeControlError)return res.status(err.status).json({error:err.message});
+    if(err instanceof AccountActionError)return res.status(err.status).json({error:err.message});
     if (err instanceof z.ZodError || err instanceof SyntaxError)
       return res.status(400).json({ error: "Invalid request" });
+    if (err.expose === true && [400, 413, 415].includes(err.status)) {
+      const message = err.status === 413 ? "Request is too large" : err.status === 415 ? "Unsupported request encoding" : "Invalid request";
+      return res.status(err.status).json({ error: message });
+    }
     console.error(err.message);
     res.status(500).json({ error: "Server could not complete this action" });
   });

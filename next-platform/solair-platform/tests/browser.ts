@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 const base = process.env.TEST_URL || "http://127.0.0.1:3000";
 mkdirSync("docs/screenshots", { recursive: true });
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.SOLAIR_TEST_CHROMIUM ? { executablePath: process.env.SOLAIR_TEST_CHROMIUM } : {}) });
 const errors: string[] = [];
 const results: string[] = [];
 const operator = await browser.newContext({

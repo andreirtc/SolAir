@@ -1,5 +1,14 @@
 # SOLAIR platform
 
+**November 2026 source snapshot:** this folder contains the combined updated frontend, current backend, SOC/TTE and SOP 4 evidence support, quality-gated CPE/GPS telemetry and opt-in LTE command-response implementation. The dated continuation below is historical; read [current validation](docs/CPE_VALIDATION.md) first. Reported command execution is separate from physical output acceptance. SOC/TTE remains unavailable without an explicit reference and validated continuous current. A source checkout does not include the team's private configurations or working database.
+
+For a Linux or cloud checkout, use Node24 and run from this directory:
+
+```bash
+npm ci
+npm run dev
+```
+
 **Current CPE continuation (11 October 2026):** this is the authoritative centralized application. All-module v2 integration extends this app; the older `cpe/figma-app` is historical reference. Start with [CPE wiring/power guide](docs/CPE_BREADBOARD_WIRING_AND_TEST_GUIDE.md), [firmware targets and exact Windows commands](firmware/README.md), [consolidated physical acceptance](docs/COMPLETE_CPE_BENCH_AND_APP_ACCEPTANCE.md) and [current validation/limits](docs/CPE_VALIDATION.md). Existing BEMAC design, roles, databases and identity are retained. New firmware is `firmware/solair-cpe/solair_cpe.ino`; unknown electrical interfaces stay disabled until commissioning.
 
 Fresh implementation in `C:\Users\Anyang\Videos\SolAir\solair-platform`. No previous SOLAIR source, configuration or firmware was reused. The master instruction is implemented as an integrated application; outstanding hardware and hosting verification is explicitly documented.

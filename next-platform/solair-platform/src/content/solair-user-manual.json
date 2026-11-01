@@ -1,0 +1,317 @@
+{
+  "title": "SOLAIR user manual",
+  "subtitle": "A practical guide for drivers and TODA users",
+  "version": "1.0",
+  "updated": "25 October 2026",
+  "introduction": "Use SOLAIR to review your assigned e-trike, recorded location, energy readings, alerts and assistance requests. This guide follows the current app menus. Available controls depend on your account role and assignments.",
+  "sections": [
+    {
+      "id": "getting-started",
+      "title": "Get started and sign in",
+      "summary": "Create your account, sign in and confirm the workspace you are using.",
+      "steps": [
+        {
+          "title": "Open SOLAIR",
+          "text": "On a phone, select Get started on the welcome screen. On a laptop, use the sign-in page. You can keep using the app in a supported browser."
+        },
+        {
+          "title": "Create an account if needed",
+          "text": "Choose Sign up. Enter your account details, requested role, vehicle type where shown, matching passwords and Philippine mobile number. Follow any email-confirmation instructions before signing in."
+        },
+        {
+          "title": "Sign in",
+          "text": "Enter your email and password. Account creation does not automatically assign an existing vehicle or grant operator permissions."
+        },
+        {
+          "title": "Choose notification badges",
+          "text": "New accounts see a one-time introduction. Get notified enables in-app notifications; Later keeps the current preference. You can change it in Settings."
+        },
+        {
+          "title": "Review your workspace",
+          "text": "Check the TODA name and selected vehicle. If assignments are incomplete, use Review setup or open Registration. Ask your TODA administrator to link the correct account, vehicle and responsible operator."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Hardware and demonstration modes",
+          "text": "Real hardware uses reported device records. Demonstration data is simulated. Check the mode label before interpreting a reading or exporting a file."
+        },
+        {
+          "title": "Refresh and sign out",
+          "text": "Refresh keeps the current page. Use Log out in the hamburger menu or account menu when finished on a shared device."
+        }
+      ]
+    },
+    {
+      "id": "home-registration",
+      "title": "Home and Registration",
+      "summary": "Find your assigned vehicle and understand the main dashboard cards.",
+      "steps": [
+        {
+          "title": "Review My vehicle / Home",
+          "text": "The assigned-vehicle card shows your model and TODA. Energy at a glance contains battery voltage/current, solar harvested energy, wind harvested energy and solar power."
+        },
+        {
+          "title": "Read vehicle status",
+          "text": "Device connection, Battery, Location and Security report different conditions. A recent device connection does not mean every sensor reading is current."
+        },
+        {
+          "title": "Use quick actions",
+          "text": "Find my vehicle opens Location, Check my alerts opens Alerts, and Ask my TODA for help opens the assistance area."
+        },
+        {
+          "title": "Open Registration",
+          "text": "Open the hamburger menu and choose Registration, directly above Help. The same details are available through Settings > My registration and assignments."
+        },
+        {
+          "title": "Review and update your details",
+          "text": "Check your TODA, vehicle ID/model and responsible operator. You may update your declared vehicle type and GPS/map display name, then choose Save registration details. Assignment changes require an administrator."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Unknown values",
+          "text": "A dash, No data, Not available or State unknown means a usable reading is unavailable. Treat old or uncalibrated readings according to their label."
+        },
+        {
+          "title": "Battery information",
+          "text": "Voltage is not a remaining-battery percentage or driving range. Battery current is signed: positive indicates charging and negative indicates discharging when correctly calibrated."
+        }
+      ]
+    },
+    {
+      "id": "location-history",
+      "title": "Location and recorded journeys",
+      "summary": "Use reported GPS positions, the recorded track and detected stops.",
+      "steps": [
+        {
+          "title": "Open Location",
+          "text": "Use the Location bottom tab or hamburger item. A vehicle marker needs valid reported GPS coordinates. Manila, Malabon or Metro Manila can appear as a reference when there is no valid fix."
+        },
+        {
+          "title": "Review the selected vehicle",
+          "text": "Use its marker or the vehicle selector where available. Open selected vehicle shows its details. Refresh requests updated records."
+        },
+        {
+          "title": "View a recorded track",
+          "text": "When GPS history exists, use Show recorded track and Fit track. The blue path represents recorded sections; endpoint markers identify the beginning and latest recorded point."
+        },
+        {
+          "title": "Review Location History",
+          "text": "Choose a minimum stop duration of 1, 2, 5 or 10 minutes. A possible stop requires at least three valid reports within 60 m of the first fix for the selected duration. Select a stop to focus it on the map."
+        },
+        {
+          "title": "Check time and distance",
+          "text": "First and last recorded times use Asia/Manila (UTC+8). Distances between stops sum valid recorded GPS segments and are estimates. Return to vehicle location clears the historical-stop focus."
+        }
+      ],
+      "notes": [
+        {
+          "title": "A city reference is not a vehicle position",
+          "text": "No valid GPS positions means a device fix is still needed. A last known position may be old."
+        },
+        {
+          "title": "Addresses and track gaps",
+          "text": "Street addresses currently show Address unavailable until address lookup is connected. Missing fixes, gaps over five minutes and implausible jumps break the track; the app does not invent a connecting route."
+        }
+      ]
+    },
+    {
+      "id": "energy",
+      "title": "Energy readings and line graphs",
+      "summary": "Read battery, solar and wind measurements with their units and data quality.",
+      "steps": [
+        {
+          "title": "Open Energy",
+          "text": "Select Energy. Use the Solar and Wind links to move to their sections. The illustrations identify energy sources; they do not confirm installed hardware or commissioning."
+        },
+        {
+          "title": "Read solar measurements",
+          "text": "Solar cards show PV input voltage (V), PV input current (A), PV power (W) and controller output (V / A). Recorded solar harvest is shown in watt-hours (Wh)."
+        },
+        {
+          "title": "Read wind measurements",
+          "text": "Wind cards show output voltage (V), output current (A), power (W) and energy yield (Wh). A Not commissioned label remains until commissioning has been established."
+        },
+        {
+          "title": "Use the line graphs",
+          "text": "Graphs appear when valid timestamped readings are available. Home includes four energy trends and a battery-voltage trend in vehicle status. Energy shows the individual electrical channels."
+        },
+        {
+          "title": "Interpret gaps and totals",
+          "text": "Graphs use up to 24 samples. Missing values and gaps over 30 seconds are not joined. One sample is a point, not a trend. Wh charts describe energy in the displayed sample window; card totals can cover a longer recorded period."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Calibration and old readings",
+          "text": "Uncalibrated hardware electrical values are withheld. Old reading, Time unknown and Calibration needed describe the available evidence; they are not fresh measurements."
+        },
+        {
+          "title": "Mobile and laptop layouts",
+          "text": "On mobile, value cards can rise over the illustration while scrolling. Laptop images stay above their cards. Both layouts show the same recorded data."
+        }
+      ]
+    },
+    {
+      "id": "alerts-notifications",
+      "title": "Alerts and Notifications",
+      "summary": "Review reported security activity and manage in-app notification badges.",
+      "steps": [
+        {
+          "title": "Open Alerts",
+          "text": "Choose Alerts to review reported security events for the selected vehicle and data mode. Device and sensor freshness affect whether a state can be interpreted."
+        },
+        {
+          "title": "Review recorded handling",
+          "text": "Authorized TODA personnel can acknowledge incidents and record follow-up where their role permits. Drivers can review available handling details."
+        },
+        {
+          "title": "Open Notifications",
+          "text": "Use the Notifications bottom tab. Choose a category to filter activity, open an update to view its related page, or use Mark all read."
+        },
+        {
+          "title": "Manage notification preferences",
+          "text": "Open the notification settings icon or Settings > Notifications. Save the in-app badge preference. Recorded activity remains accessible when badges are off."
+        },
+        {
+          "title": "Find earlier records",
+          "text": "Use View history & reports from Notifications, or History & Reports in the hamburger menu, to review available saved data."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Reading does not acknowledge an incident",
+          "text": "Marking a notification as read changes its read marker. It does not acknowledge or resolve a security incident."
+        },
+        {
+          "title": "In-app updates, push and SMS",
+          "text": "In-app badge preferences do not enable browser push. SMS contact, verification and sending configuration are managed separately; saving a preference is not proof of message delivery."
+        }
+      ]
+    },
+    {
+      "id": "help-assistance",
+      "title": "Help and assistance requests",
+      "summary": "Find a quick answer, read this manual or request help from your TODA.",
+      "steps": [
+        {
+          "title": "Search the help center",
+          "text": "Open Help from the hamburger menu. Type a topic in Search help, then expand an FAQ question to read its answer. Clear the search to show all topics."
+        },
+        {
+          "title": "Open or save this manual",
+          "text": "Select User manual. Read the guide in the popup, use its section links, or choose Download PDF to save a copy. Use the close button or Escape to return to Help."
+        },
+        {
+          "title": "Prepare an assistance request",
+          "text": "On the assistance page, choose an assistance type and describe what happened and how your operator can reach you. The request concerns the selected assigned vehicle."
+        },
+        {
+          "title": "Send and verify receipt",
+          "text": "Select Send help request once. Server received means the server accepted it and operator acknowledgment is still pending. QUEUED / UNSENT means server receipt has not been confirmed."
+        },
+        {
+          "title": "Check Request activity",
+          "text": "Review request status and recorded operator follow-up. A pending request is not an acknowledgment. If offline requests remain queued, reconnect and use Retry delivery."
+        },
+        {
+          "title": "Use the right follow-up",
+          "text": "Use Send a message for the existing TODA conversation where you have an assigned vehicle. Report a problem records an app issue for your administrator; do not include passwords or device tokens."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Assistance delivery",
+          "text": "SOLAIR requests go through the configured TODA workflow. The app does not confirm that outside emergency services have been contacted."
+        },
+        {
+          "title": "Keyboard use",
+          "text": "Tab and Shift+Tab move between controls. Enter or Space activates buttons. Escape closes the manual popup and supported menus."
+        }
+      ]
+    },
+    {
+      "id": "settings-profile",
+      "title": "Settings and your profile",
+      "summary": "Use individual settings pages for your account, photo and preferences.",
+      "steps": [
+        {
+          "title": "Open Settings",
+          "text": "Select Settings to see your profile summary and grouped Account details, General and Support options. Each detail page has Back to settings."
+        },
+        {
+          "title": "Edit your account name",
+          "text": "Choose Edit profile or Account profile, update Name and choose Save profile. Email is read-only here; use Contact & SMS preferences for a verified email change."
+        },
+        {
+          "title": "Add a profile photo",
+          "text": "Choose profile photo, select a .png or readable .img file up to 3 MB, check the preview and choose Save photo. Replace it by choosing another file, or use Remove photo to restore your initials."
+        },
+        {
+          "title": "Manage contact preferences",
+          "text": "Open Contact & SMS preferences to update your mobile number or optional SMS consent. Changing a number removes its verification. Verification controls depend on the configured service."
+        },
+        {
+          "title": "Choose an appearance",
+          "text": "Open Light / Dark mode and choose Light, Dark or System. System follows your device. Your selection persists after refresh."
+        },
+        {
+          "title": "Review support and policies",
+          "text": "Settings includes Help and support, Report a problem, Terms of Service and Privacy Policy. Policy pages are marked as drafts for review."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Your photo stays with your account",
+          "text": "A saved photo appears in Settings, the account menu and sidebar. Initials remain when no photo is saved."
+        },
+        {
+          "title": "Review assignments separately",
+          "text": "My registration and assignments is an individual page. A profile edit or photo upload does not change your TODA, vehicle assignment or role."
+        }
+      ]
+    },
+    {
+      "id": "reports-troubleshooting",
+      "title": "Reports and quick troubleshooting",
+      "summary": "Export available records and check common no-data situations.",
+      "steps": [
+        {
+          "title": "Open History & Reports",
+          "text": "Use the hamburger menu. The Research evidence card offers research CSV, CPE readings CSV and, in hardware mode, incident evidence CSV. Bench exports are role-dependent."
+        },
+        {
+          "title": "Review the archive",
+          "text": "The telemetry archive provides available saved rows and JSON export. Always check the selected vehicle and data mode before downloading."
+        },
+        {
+          "title": "Understand export limits",
+          "text": "Telemetry and CPE exports include up to the newest 5,000 rows; incident exports include up to the newest 200 records with available handling and delivery information. Unknown times remain blank."
+        },
+        {
+          "title": "If readings or a graph are empty",
+          "text": "Check the assigned vehicle, hardware/demo label, device contact and calibration status. Empty charts are expected when usable history is missing. Use the shown retry control if a history request fails."
+        },
+        {
+          "title": "If a location or request is missing",
+          "text": "A GPS reference map needs a valid device fix before it can show the vehicle. For requests, check whether the state says server received or QUEUED / UNSENT, then check for operator acknowledgment."
+        },
+        {
+          "title": "If access is incomplete",
+          "text": "Open Account setup and Registration. Ask the TODA administrator to confirm membership, the assigned vehicle, responsible operator and any requested operator role. Refresh after the change is confirmed."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Saved evidence has limits",
+          "text": "Exporting a file does not establish physical acceptance, calibration or successful message delivery. Use the source and quality labels included with the records."
+        },
+        {
+          "title": "Keep your account secure",
+          "text": "Do not include passwords, device tokens or private credentials in messages or bug reports. Sign out when using a shared device."
+        }
+      ]
+    }
+  ]
+}

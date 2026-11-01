@@ -4,15 +4,28 @@ export async function api(
   body?: unknown,
   headers: Record<string, string> = {},
 ) {
-  const res = await fetch("/api" + path, {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+  let res:Response;
+  try{res = await fetch("/api" + path, {
     method,
+    signal: controller.signal,
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", ...headers },
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  });}catch{
+    throw Object.assign(new Error(controller.signal.aborted?'SOLAIR took too long to respond. Check your connection and try again.':navigator.onLine?'SOLAIR could not be reached. Try again in a moment. If this continues, contact your TODA.':"You're offline. Reconnect and try again."),{status:0});
+  }
+  if(!res.headers.get('content-type')?.includes('application/json')){
+    throw Object.assign(new Error('SOLAIR is temporarily unavailable. Please try again in a moment.'),{status:res.status});
+  }
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Request failed");
+  if (!res.ok) throw Object.assign(new Error(data.error || "Request failed"), {status:res.status});
   return data;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 export const stamp = (at?: string | null) =>
   at

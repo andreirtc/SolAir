@@ -1,0 +1,30 @@
+import {useEffect,useState,useId} from 'react';
+import {api,stamp} from './api';
+import type {Profile} from './types';
+
+function IncidentCard({item,canHandle,reload}:{item:any;canHandle:boolean;reload:()=>Promise<void>}) {
+  const noteId=useId();
+  const [note,setNote]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  async function update(action:string){if(busy)return;const submittedNote=note;setBusy(true);setError('');try{await api('/incidents/'+encodeURIComponent(item.id)+'/'+action,'POST',action==='ack'?{}:{note:submittedNote});await reload();setNote(current=>current===submittedNote?'':current);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  const location=JSON.parse(item.location_json),hasLocation=Number.isFinite(location.latitude)&&Number.isFinite(location.longitude)&&Math.abs(location.latitude)<=90&&Math.abs(location.longitude)<=180;
+  const deliveryNames:Record<string,string>={accepted:'Provider accepted · delivery not confirmed',delivered:'Delivered · provider confirmed',unknown:'Outcome unknown · do not blindly resend',simulated:'Dry run · no text sent',queued:'Queued',failed:'Failed',suppressed:'Not sent'};
+  return <article className="incident-record"><div className="panel-heading"><h4>{JSON.parse(item.causes_json).join(', ')||'Cause unavailable'}</h4><span className="badge">{item.status}</span></div>
+    <small>Incident {item.alarm_id} · Device {item.device_id}</small><p>{item.delayed?'Delayed report · ':''}{item.occurred_at?'Device event: '+stamp(item.occurred_at):'Event time unknown'} · Received {stamp(item.received_at)}</p>
+    <p>{hasLocation?<a target="_blank" rel="noopener noreferrer" href={`https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=16/${location.latitude}/${location.longitude}`}>View last-known location</a>:'GPS unavailable'}{hasLocation?` · Recorded ${stamp(location.measured_at)}; freshness at alarm time is unconfirmed.`:''}</p>
+    <p>{item.alarm_reported?'Alarm activation reported':'Activation awaiting earlier frame'} · Siren sound unconfirmed</p>
+    {!item.deliveries.length?<small>No eligible SMS delivery was queued. Check the environment, device readiness and verified contacts.</small>:<ul>{item.deliveries.map((job:any)=><li key={job.id}><strong>{deliveryNames[job.status]||job.status}</strong> · {job.attempts} attempt(s) · {job.reason}<details><summary>Delivery history</summary>{job.history?.length?job.history.map((h:any,i:number)=><p key={i}>{stamp(h.created_at)} · {deliveryNames[h.status]||h.status} · {h.detail}</p>):<p>No provider attempt recorded.</p>}</details></li>)}</ul>}
+    {!!item.ack_at&&<p>Acknowledged {stamp(item.ack_at)}</p>}{!!item.resolved_at&&<p>Resolved {stamp(item.resolved_at)}</p>}
+    {!!item.updates?.length&&<details open><summary>Handling history</summary>{item.updates.map((h:any)=><div className="incident-note" key={h.id}><strong>{h.action} · {h.actor}</strong><small>{stamp(h.created_at)}</small>{h.note&&<p>{h.note}</p>}</div>)}</details>}
+    {canHandle&&item.status==='open'&&<button disabled={busy} onClick={()=>void update('ack')}>Acknowledge incident</button>}
+    {canHandle&&item.status==='acknowledged'&&<form onSubmit={e=>{e.preventDefault();void update('notes');}}><label htmlFor={noteId}>Incident note</label><textarea id={noteId} disabled={busy} required minLength={10} maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} placeholder="Record what was checked and what action was taken."/><small>Notes are shared with authorized users, including the assigned driver. Avoid private contact details.</small><div className="button-row"><button disabled={busy}>Save incident note</button><button type="button" disabled={busy||note.trim().length<10} onClick={()=>void update('resolve')}>Resolve with this note</button></div></form>}
+    {error&&<p role="alert">{error}</p>}
+  </article>;
+}
+
+export default function IncidentHistory({vehicleId,user,refreshKey,mode}:{vehicleId:string;user:Profile;refreshKey:number;mode:string}) {
+  const [items,setItems]=useState<any[]>([]),[error,setError]=useState(''),[filter,setFilter]=useState('all'),[loading,setLoading]=useState(true);
+  async function reload(){const rows=await api('/incidents/'+encodeURIComponent(vehicleId)+'?mode=hardware');setItems(rows);setError('');}
+  useEffect(()=>{let active=true;setError('');setLoading(true);if(mode==='hardware')void api('/incidents/'+encodeURIComponent(vehicleId)+'?mode=hardware').then(rows=>{if(active)setItems(rows);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[vehicleId,refreshKey,mode]);
+  if(mode==='demo')return <section className="panel"><h3>Alarm notifications</h3><p>Demonstration only. No real SMS will be sent.</p></section>;
+  return <section className="panel incident-history"><div className="panel-heading"><h3>Alarm incidents and SMS delivery</h3><a className="button" href={'/api/incidents/'+encodeURIComponent(vehicleId)+'?mode=hardware&format=csv'}>Export incident CSV</a></div><p className="subtle">Newest 200 incidents. Reported alarm state does not confirm physical siren sound. Delivery does not confirm that a person read the message.</p><button onClick={()=>void reload().catch(e=>setError(e.message))}>Refresh incidents</button><label>Incident status<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All incidents</option><option value="open">Open</option><option value="acknowledged">Acknowledged</option><option value="resolved">Resolved</option></select></label>{error&&<p role="alert">{error}</p>}{loading&&!error&&!items.length&&<p>Loading incidents…</p>}{!loading&&!error&&!items.length&&<p>No recorded alarm incidents. Legacy events remain in the security timeline.</p>}{!loading&&!!items.length&&!items.some(i=>filter==='all'||i.status===filter)&&<p>No incidents match this status.</p>}{items.filter(i=>filter==='all'||i.status===filter).map(item=><IncidentCard key={item.id} item={item} canHandle={['operator','engineer','admin'].includes(user.role)} reload={reload}/>)}</section>;
+}
